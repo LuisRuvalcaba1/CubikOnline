@@ -20,7 +20,7 @@ export const createTimer = async (req, res) => {
   
   export const getTimers = async (req, res) => {
     try {
-      const timers = await TimerModel.find();
+      const timers = await TimerModel.find({ user: req.user.id });
       res.status(200).json(timers);
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -41,10 +41,10 @@ export const createTimer = async (req, res) => {
   
   export const updateTimerById = async (req, res) => {
     try {
-      const { time, user, scramble, session } = req.body;
+      const { time, scramble, session } = req.body;
       const updatedTimer = await TimerModel.findByIdAndUpdate(
         req.params.id,
-        { time, user, scramble, session },
+        { time, scramble, session },
         { new: true }
       );
       if (!updatedTimer) {
