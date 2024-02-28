@@ -1,0 +1,108 @@
+.container {
+    display: flex;
+    margin-top: 1200px;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .content {
+    max-width: 850px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid black;
+    border-radius: 15px; /* Ajusta el margen superior según sea necesario */
+    background-color: #606060;
+
+}
+  
+  .title {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+    margin-top: 50px;
+  }
+  
+  .description {
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.5;
+    color: white; /* Color de texto */
+    padding: 20px; /* Espaciado interno */
+    border-radius: 5px; /* Bordes redondeados */
+    display: block;
+    width: 80%; /* Ancho del contenedor */
+    margin: 0 auto; /* Centrar horizontalmente */
+    margin-top: 10px;
+  }
+
+  .description .description{
+    display: block;
+    margin-top: 10px;
+    margin-left: 5px;
+  }
+  
+  .description p {
+    margin: 0; /* Eliminar el margen predeterminado de los párrafos */
+  }
+  
+  .description2 {
+    font-family: Arial, sans-serif;
+    display: block;
+    margin-top: 10px;
+    font-size: 18px;
+    text-decoration: none; /* Eliminar subrayado de enlaces */
+    color: white; /* Color de enlaces */
+  }
+
+  .description2 a{
+    font-family: Arial, sans-serif;
+    display: block;
+    margin-top: 10px;
+    font-size: 18px;
+    text-decoration: none; /* Eliminar subrayado de enlaces */
+    color: white; /* Color de enlaces */
+  }
+
+ .Notacion{
+    max-width: 50%;
+    padding: 20px;
+  }
+
+  .explicacion{
+    background-color: black;
+    width: 300px;
+    height: 50px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 7px;
+  }
+
+  .Partes{
+    border-radius: 20px;
+    max-width: 50%;
+  }
+
+  .Capas{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 40%;
+    margin-left: 100px;
+  }
+
+  .fila{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 80%;
+  }
+
+  .fila2{
+    display: flex;
+    
+  }
