@@ -8,7 +8,7 @@ function LoginPage(){
     const navigation = useNavigate();  
     const onSubmit = handleSubmit((data)=> {
         signin(data);
-        
+
     });
     useEffect(()=> {
         if(isAuthenticated) navigation('/profile');

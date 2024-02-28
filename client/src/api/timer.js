@@ -1,10 +1,8 @@
 import axios from "./axios.js";
 
-export const timerRequest = async (newTimer) => {
-    try {
-        const response = await axios.post(`/timerul`, newTimer);
-        return response;
-    } catch (error) {
-        console.error('Error creating timer:', error);
-    }
-}
+export const timerRequest = timer => axios.post(`/timerul`, timer)
+
+export const getTimersRequest = () => axios.get(`/timerul`)
+export const getTimerByIdRequest = id => axios.get(`/timerul/${id}`)
+
+export const deleteTimerByIdRequest = id => axios.delete(`/timerul/${id}`)

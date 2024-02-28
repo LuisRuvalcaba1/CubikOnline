@@ -2,21 +2,16 @@ import TimerModel from "../models/timer.model.js";
 
 export const createTimer = async (req, res) => {
     try {
-      const { time, user, scramble, session } = req.body;
+      const { time, scramble, session } = req.body;
       const newTimer = new TimerModel({
         time,
         scramble,
         session,
+        user: req.user.id,
       });
       
       const savedTimer = await newTimer.save();
-      res.status(201).json({
-        _id : savedTimer._id,
-        time: savedTimer.time,
-        scramble: savedTimer.scramble,
-        session: savedTimer.session,
-      });
-
+      res.json(savedTimer);
       console.log(savedTimer);
     } catch (error) {
       res.status(500).json({ message: error.message });

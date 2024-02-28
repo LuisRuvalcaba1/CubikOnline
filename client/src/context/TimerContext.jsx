@@ -1,6 +1,6 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext  } from "react";
 export const AuthTimerContext = createContext();
-import { timerRequest } from "../api/auth";
+import { timerRequest } from "../api/timer";
 
 //import axios from 'axios';
 
@@ -13,29 +13,9 @@ export const useAuthTimer = () =>{
 }
 
 export const TimerProvider = ({children}) => {
-    const [time, setTime] = useState('');
-    const [scramble, setScramble] = useState('');
-    const [session, setSession] = useState('');
-
-    // function checkUser(){
-    //     try {
-    //         const response = verifyTokenRequest();
-
-    //         console.log(response);
-    //         setUser(response.data);
-    //     } catch (error) {
-    //         console.error('Error checking user:', error);
-    //     }
-    // }
-    const createNewTimer = async (time, scramble, session) => {
-        try {            
-            const newTimer = {
-                time,
-                scramble,
-                session
-            }
-            console.log(newTimer);
-            const response = await timerRequest(newTimer);
+    const createNewTimer = async (timer) => {
+        try {        
+            const response = await timerRequest(timer);
             console.log(response);
         } catch (error) {
             console.error('Error creating timer:', error);
@@ -43,10 +23,7 @@ export const TimerProvider = ({children}) => {
     }   
 
     const value = {
-        time,
-        scramble,
-        session,
-        createNewTimer
+        createNewTimer,
     }
 
     return (

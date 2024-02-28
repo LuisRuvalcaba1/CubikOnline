@@ -6,12 +6,6 @@ const timerSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
-    user:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-        trim: true,
-    },
     scramble:{
         type: String,
         required: true,
@@ -21,6 +15,11 @@ const timerSchema = new mongoose.Schema({
         type: Number,
         required: true,
         trim: true,
+    },
+    user:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref : 'User',
+        required: true
     }
 });
 

@@ -2,8 +2,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import RegisterPage from "./pages/RegisterPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import { AuthProvider } from "./context/AuthContext";
-import TaskPage from "./pages/TaskPage.jsx";
-import TaskFormPage from "./pages/TaskFormPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
@@ -30,9 +28,6 @@ function App(){
            
           <Route element={<ProtectedRoute/>}>
             <Route path="/timerul" element={<TimerUserLoged/>}/>
-            <Route path="/tasks" element={<TaskPage/>} />
-            <Route path="/add-task" element={<TaskFormPage/>} />
-            <Route path="/tasks/:id" element={<TaskFormPage/>} />
             <Route path="/profile" element={<ProfilePage/>} />
           </Route>
         </Routes>

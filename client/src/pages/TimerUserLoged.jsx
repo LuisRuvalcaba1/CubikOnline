@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuthTimer } from "../context/TimerContext";
+//import { validateToken } from "../../../src/middlewares/validateToken.js";
 import "./Timer.css";
 
 function TimerUserLoged() {
@@ -12,7 +13,7 @@ function TimerUserLoged() {
   const [scramble, setScramble] = useState("");
   const [tiemposGuardados, setTiemposGuardados] = useState([]);
   const [showSidebar, setShowSidebar] = useState(false);
-
+  const [session, setSession] = useState(1);
   useEffect(() => {
     generarNuevoScramble();
     const tiemposGuardadosLocal = JSON.parse(localStorage.getItem("tiempos"));
@@ -59,7 +60,6 @@ function TimerUserLoged() {
         if (!activo) {
           setTiempoInicial(performance.now()); // Al activar, establecer tiempo inicial
         } else {
-          
           registrarTiempo(); // Al desactivar, registrar tiempo
           generarNuevoScramble(); // Generar un nuevo scramble al detener el cronómetro
         }
@@ -121,19 +121,20 @@ function TimerUserLoged() {
         scramble: scramble,
       };
 
-      const tiempoTotal = `${tiempoMinutos}:${tiempoSegundos}.${tiempoMilisegundos}`;
+      const time = `${tiempoMinutos}:${tiempoSegundos}.${tiempoMilisegundos}`;
       // Actualizar los tiempos guardados y el almacenamiento local
       setTiemposGuardados((prevTiempos) => [nuevoTiempo, ...prevTiempos]);
       localStorage.setItem(
         "tiempos",
         JSON.stringify([...tiemposGuardados, nuevoTiempo])
       );
-
-      createNewTimer(
-        tiempoTotal,
+      
+      const values = {
+        time,
         scramble,
-        1,
-      );
+        session,
+      };
+      createNewTimer(values);
       // Reiniciar el tiempo inicial
       setTiempoInicial(null);
     }
