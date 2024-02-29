@@ -3,7 +3,7 @@ import { useAuthTimer } from "../context/TimerContext";
 import "./Timer.css";
 
 function TimerUserLoged() {
-  const { user, createNewTimer, getTimers } = useAuthTimer();
+  const { createNewTimer, getTimers, timer } = useAuthTimer();
   const [milisegundos, setMilisegundos] = useState(0);
   const [segundos, setSegundos] = useState(0);
   const [minutos, setMinutos] = useState(0);
@@ -17,17 +17,30 @@ function TimerUserLoged() {
   useEffect(() => {
     const fetchTimers = async () => {
       try {
-        const timers = await getTimers();
-        setTiemposGuardados(timers);
+        const response = await getTimers();
+        setTiemposGuardados(response.data);
       } catch (error) {
-        console.error('Error fetching timers:', error.message);
+        console.error('Error fetching timers:', error);
       }
     };
+
     fetchTimers();
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     generarNuevoScramble();
+    const tiemposGuardadosLocal = JSON.parse(localStorage.getItem("tiempos"));
+    if (tiemposGuardadosLocal) {
+      setTiemposGuardados(tiemposGuardadosLocal);
+    }
+
+    // Agregar un event listener para el evento beforeunload
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      // Remover el event listener al desmontar el componente
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
   }, []);
 
   useEffect(() => {
@@ -122,19 +135,31 @@ function TimerUserLoged() {
       };
 
       const time = `${tiempoMinutos}:${tiempoSegundos}.${tiempoMilisegundos}`;
-      // Actualizar los tiempos guardados
-      setTiemposGuardados((prevTiempos) => [nuevoTiempo, ...prevTiempos]);
+      // Actualizar los tiempos guardados y el almacenamiento local
+      setTiemposGuardados((prevTiempos) => [...prevTiempos,nuevoTiempo]);
+      localStorage.setItem(
+        "tiempos",
+        JSON.stringify([...tiemposGuardados, nuevoTiempo])
+      );
       
       const values = {
         time,
         scramble,
-        session
+        session,
       };
       createNewTimer(values);
-      getTimers(); // Obtener los tiempos actualizados desde el servidor
+      getTimers();
       // Reiniciar el tiempo inicial
       setTiempoInicial(null);
+      //Recargar la pagina cuando se guarde el tiempo
+      window.location;
     }
+  }
+
+  // Función para manejar el evento beforeunload
+  function handleBeforeUnload() {
+    // Limpiar el almacenamiento local al descargar la página
+    localStorage.removeItem("tiempos");
   }
 
   return (
@@ -147,17 +172,21 @@ function TimerUserLoged() {
       </button>
       <div className={`sidebar ${showSidebar ? "show" : ""}`}>
         <h2>Tiempos Guardados</h2>
+        <h2>Session</h2>
+        <input
+          type="number"
+          value={session}
+          onChange={(e) => setSession(e.target.value)}
+        />
         <ul>
-          {user ? (
-            <p>loading...</p>
-          ) : (
-            tiemposGuardados.map((tiempo, index) => (
-              <li key={index}>
-                {tiempo.tiempo} - {tiempo.scramble}
-              </li>
-            ))
-          )}
-        </ul>
+        {tiemposGuardados.map((timers) => (
+          <li key={timers._id}>
+
+            <p>Tiempo: {timers.time}</p>
+            <p>Scramble: {timers.scramble}</p>
+          </li>
+        ))}
+      </ul>
       </div>
       {!activo && <p className="scramble">{scramble}</p>}
       <div className="cronometro">
