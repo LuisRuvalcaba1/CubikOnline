@@ -20,16 +20,17 @@ export const createTimer = async (req, res) => {
   
   export const getTimers = async (req, res) => {
     try {
-      const timers = await TimerModel.find();
-      res.status(200).json(timers);
+        const timers = await TimerModel.find({ user: req.user.id }).populate('user');
+        res.status(200).json(timers);
+
     } catch (error) {
-      res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
-  };
+};
   
   export const getTimerById = async (req, res) => {
     try {
-      const timer = await TimerModel.findById(req.user.id);
+      const timer = await TimerModel.findById(req.params.id);
       if (!timer) {
         return res.status(404).json({ message: "Timer not found" });
       }

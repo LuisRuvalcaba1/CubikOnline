@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from "react";
 export const AuthTimerContext = createContext();
-import { timerRequest, getTimerByIdRequest} from "../api/timer";
+import { timerRequest, getTimersRequest} from "../api/timer";
 
 //import axios from 'axios';
 
@@ -13,7 +13,18 @@ export const useAuthTimer = () =>{
 }
 
 export const TimerProvider = ({children}) => {
-    const [timer, setTimer] = useState([]);
+  const [timers, setTimers] = useState([]);
+
+    const getTimersContext = async () => {
+      try {
+        const response = await getTimersRequest();
+        console.log(response)
+        return response; // Devuelve la respuesta completa
+      } catch (error) {
+        throw new Error(`Error fetching timers: ${error.message}`);
+      }
+    };
+
     const createNewTimer = async (timer) => {
         try {        
             const response = await timerRequest(timer);
@@ -23,19 +34,10 @@ export const TimerProvider = ({children}) => {
         }
     }   
 
-    const getTimers = async (timer) => {
-        try {
-          const response = await getTimerByIdRequest(timer);
-          return response; // Devuelve la respuesta completa
-        } catch (error) {
-          throw new Error(`Error fetching timers: ${error.message}`);
-        }
-      };
-
     const value = {
-        timer,
         createNewTimer,
-        getTimers
+        getTimersContext,
+        timers
     }
 
     return (

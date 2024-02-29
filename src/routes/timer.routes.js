@@ -6,7 +6,7 @@ import { createTimerSchema } from '../schemas/timer.schema.js';
 
 const router = Router();
 
-router.get('/timerul/', authRequired, getTimers);
+router.get('/timerul', authRequired, getTimers);
 router.get('/timerul/:id', authRequired, getTimerById);
 router.post('/timerul', authRequired, validateSchema(createTimerSchema), createTimer);
 router.delete('/timerul/:id', authRequired, deleteTimerById);
