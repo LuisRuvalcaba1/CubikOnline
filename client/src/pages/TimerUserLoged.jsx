@@ -158,7 +158,7 @@ function TimerUserLoged() {
         <ul>
           {tiemposGuardados.map((timer, index) => (
             <li key={index}>
-              <p>Tiempo: {timer.tiempo}</p>
+              <p>Tiempo: {timer.time}</p>
               <p>Scramble: {timer.scramble}</p>
             </li>
           ))}
