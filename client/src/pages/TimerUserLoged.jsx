@@ -3,7 +3,7 @@ import { useAuthTimer } from "../context/TimerContext";
 import "./Timer.css";
 
 function TimerUserLoged() {
-  const { createNewTimer, getTimersContext, timers } = useAuthTimer();
+  const { createNewTimer, getTimersContext } = useAuthTimer();
   const [milisegundos, setMilisegundos] = useState(0);
   const [segundos, setSegundos] = useState(0);
   const [minutos, setMinutos] = useState(0);
