@@ -13,7 +13,6 @@ export const useAuthTimer = () =>{
 }
 
 export const TimerProvider = ({children}) => {
-  const [timers, setTimers] = useState([]);
 
     const getTimersContext = async () => {
       try {
@@ -37,7 +36,6 @@ export const TimerProvider = ({children}) => {
     const value = {
         createNewTimer,
         getTimersContext,
-        timers
     }
 
     return (

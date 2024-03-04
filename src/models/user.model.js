@@ -31,6 +31,17 @@ const userSchema = new mongoose.Schema({
         type: Array,
         required: false,
     },
+    points:
+    {
+        type: Number,
+        required: false,
+    },
+    role: 
+    {
+        type: String,
+        required: true,
+        default: 'user'
+    }
 
 },{timestamps: true})
 

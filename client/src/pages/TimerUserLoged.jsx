@@ -15,11 +15,13 @@ function TimerUserLoged() {
   const [session, setSession] = useState(1);
 
   useEffect(() => {
-    getTimersContext().then((response) => {
-      setTiemposGuardados(response.data);
-    }).catch(error => {
-      console.error('Error fetching timers:', error);
-    });
+    getTimersContext()
+      .then((response) => {
+        setTiemposGuardados(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching timers:", error);
+      });
   }, []);
 
   useEffect(() => {
@@ -121,7 +123,7 @@ function TimerUserLoged() {
         if (Array.isArray(prevTiempos)) {
           return [nuevoTiempo, ...prevTiempos];
         } else {
-          console.error('prevTiempos no es un array:', prevTiempos);
+          console.error("prevTiempos no es un array:", prevTiempos);
           // Devuelve un valor predeterminado o maneja este caso según sea necesario
           return [];
         }
@@ -133,15 +135,19 @@ function TimerUserLoged() {
         session,
       };
 
-      createNewTimer(values).then(() => {
-        getTimersContext().then((response) => {
-          setTiemposGuardados(response.data);
-        }).catch(error => {
-          console.error('Error fetching timers:', error);
+      createNewTimer(values)
+        .then(() => {
+          getTimersContext()
+            .then((response) => {
+              setTiemposGuardados(response.data);
+            })
+            .catch((error) => {
+              console.error("Error fetching timers:", error);
+            });
+        })
+        .catch((error) => {
+          console.error("Error creating timer:", error);
         });
-      }).catch(error => {
-        console.error('Error creating timer:', error);
-      });
     }
   }
 
@@ -155,13 +161,40 @@ function TimerUserLoged() {
       </button>
       <div className={`sidebar ${showSidebar ? "show" : ""}`}>
         <h2>Tiempos Guardados</h2>
+        <div>
+          <a>Session</a>
+          <div>
+            <button onClick={() => setSession(session - 1)}>-</button>
+            <input
+              type="number"
+              value={session}
+              onChange={(e) => {
+                const val = Math.floor(e.target.value);
+                if (isNaN(val)) {
+                  return;
+                }
+                setSession(val);
+              }}
+              style={{
+                fontSize: "20px", // Aumenta el tamaño de la fuente
+                color: "black", // Cambia el color del texto
+                fontWeight: "bold", // Hace que el texto sea negrita
+                backgroundColor: "white", // Cambia el color de fondo
+                padding: "10px", // Añade espacio alrededor del texto
+              }}
+            />
+            <button onClick={() => setSession(session + 1)}>+</button>
+          </div>
+        </div>
         <ul>
-          {tiemposGuardados.map((timer, index) => (
-            <li key={index}>
-              <p>Tiempo: {timer.time}</p>
-              <p>Scramble: {timer.scramble}</p>
-            </li>
-          ))}
+          {tiemposGuardados
+            .filter((timer) => timer.session === session)
+            .map((timer, index) => (
+              <li key={index}>
+                <p>Tiempo: {timer.time}</p>
+                <p>Scramble: {timer.scramble}</p>
+              </li>
+            ))}
         </ul>
       </div>
       {!activo && <p className="scramble">{scramble}</p>}

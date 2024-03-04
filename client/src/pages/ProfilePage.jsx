@@ -13,7 +13,8 @@ function ProfilePage(){
           <p>Nombre: {user.username}</p>
           <p>Torneos: {user.torneos}</p>
           <p>Confrontaciones: {user.confrontaciones}</p>
-        
+          <p>Puntos: {user.points}</p>
+          <button onClick={() => set(user.points + 1)}>Sumar Puntos</button>
         </div>
       ) : (
         <p>No se ha iniciado sesión.</p>
