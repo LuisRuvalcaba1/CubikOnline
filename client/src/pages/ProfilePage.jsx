@@ -1,6 +1,4 @@
-import { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { set } from 'mongoose';
 
 
 function ProfilePage(){
@@ -14,7 +12,7 @@ function ProfilePage(){
           <p>Torneos: {user.torneos}</p>
           <p>Confrontaciones: {user.confrontaciones}</p>
           <p>Puntos: {user.points}</p>
-          <button onClick={() => set(user.points + 1)}>Sumar Puntos</button>
+          {/* <button onClick={() => setPoints(points+1)}>Sumar Puntos</button> */}
         </div>
       ) : (
         <p>No se ha iniciado sesión.</p>

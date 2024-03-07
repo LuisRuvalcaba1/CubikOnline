@@ -161,6 +161,14 @@ function TimerUserLoged() {
       </button>
       <div className={`sidebar ${showSidebar ? "show" : ""}`}>
         <h2>Tiempos Guardados</h2>
+        {/* <div>
+          <p>Mejor tiempo:</p>
+          <p>
+            {tiemposGuardados.filter(
+              (timer) => timer.session === session
+            ).filter((timer) => timer.time !== "DNF")}
+          </p>
+        </div> */}
         <div>
           <a>Session</a>
           <div>
@@ -176,11 +184,11 @@ function TimerUserLoged() {
                 setSession(val);
               }}
               style={{
-                fontSize: "20px", // Aumenta el tamaño de la fuente
-                color: "black", // Cambia el color del texto
-                fontWeight: "bold", // Hace que el texto sea negrita
-                backgroundColor: "white", // Cambia el color de fondo
-                padding: "10px", // Añade espacio alrededor del texto
+                fontSize: "20px",
+                color: "black",
+                fontWeight: "bold",
+                backgroundColor: "white",
+                padding: "10px",
               }}
             />
             <button onClick={() => setSession(session + 1)}>+</button>

@@ -18,4 +18,5 @@ app.use(cookieParser());
 app.use('/api', authRoutes);
 app.use('/api', timerRoutes);
 
+
 export default app;

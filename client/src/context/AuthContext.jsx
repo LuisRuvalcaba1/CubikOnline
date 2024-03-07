@@ -3,6 +3,7 @@ import {
   registerRequest,
   loginRequest,
   verifyTokenRequest,
+  updatePasswordRequest,
 } from "../api/auth.js";
 import Cookies from "js-cookie";
 
@@ -21,6 +22,13 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [errors, setErrors] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const handleSubmit = (callback) => {
+    return async (e) => {
+      e.preventDefault();
+      await callback(e);
+    };
+  };
 
   const signup = async (user) => {
     try {
@@ -50,12 +58,6 @@ export const AuthProvider = ({ children }) => {
 
       setErrors([error.response.data.message]);
     }
-    /*
-        Cuenta prueba login
-        username: Luis1
-        email: luis@gmail.com
-        password: 123456
-        */
   };
 
   useEffect(() => {
@@ -97,11 +99,24 @@ export const AuthProvider = ({ children }) => {
     checkLogin();
   }, []);
 
+  const updatePassword = async (email, newPassword) => {
+    try {
+      const res = await updatePasswordRequest(email, newPassword);
+      console.log(res.data);
+      return res.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
         signup,
         signin,
+        updatePassword,
+        handleSubmit,
         loading,
         user,
         isAuthenticated,

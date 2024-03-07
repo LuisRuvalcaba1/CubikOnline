@@ -23,11 +23,6 @@ function RegisterPage(){
                 <div className='bg-red-500 p-2 text-white' key={i}>
                     {error}
                 </div>))
-                // registerErrors.map((error, i) =>(
-                //     <div className='bg-red-500 p-2 text-white' key={i}>
-                //         {error}
-                //     </div>
-                // ))
             }
             <form onSubmit={onSubmit}>
                 <input type="text" {... register('username', {required:true})} 
