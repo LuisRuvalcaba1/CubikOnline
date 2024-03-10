@@ -100,13 +100,13 @@ function TimerUserLoged() {
     if (tiempoInicial) {
       const tiempoFinal = performance.now();
       const tiempoTranscurrido = tiempoFinal - tiempoInicial;
-      const tiempoMilisegundos = Math.floor(tiempoTranscurrido % 1000);
+      const tiempoMilisegundos = Math.floor(tiempoTranscurrido % 1000) - 3;
       const tiempoSegundos = Math.floor((tiempoTranscurrido / 1000) % 60);
       const tiempoMinutos = Math.floor((tiempoTranscurrido / (1000 * 60)) % 60);
 
       const nuevoTiempo = {
         tiempo: `${tiempoMinutos < 10 ? `0${tiempoMinutos}` : tiempoMinutos}:${
-          tiempoSegundos < 10 ? `0${tiempoSegundos}` : segundos
+          tiempoSegundos < 10 ? `0${tiempoSegundos}` : tiempoSegundos
         }:${
           tiempoMilisegundos < 10
             ? `00${tiempoMilisegundos}`
@@ -117,7 +117,11 @@ function TimerUserLoged() {
         scramble: scramble,
       };
 
-      const time = `${tiempoMinutos}:${tiempoSegundos}.${tiempoMilisegundos}`;
+      const time = `${tiempoMinutos}:${
+        tiempoSegundos < 10 ? "0" : ""
+      }${tiempoSegundos}.${
+        tiempoMilisegundos < 10 ? "00" : tiempoMilisegundos < 100 ? "0" : ""
+      }${tiempoMilisegundos}`;
 
       setTiemposGuardados((prevTiempos) => {
         if (Array.isArray(prevTiempos)) {
@@ -151,6 +155,37 @@ function TimerUserLoged() {
     }
   }
 
+  function getBestTime(tiempos, session) {
+    const tiemposSesion = tiempos.filter((timer) => timer.session === session);
+    if (tiemposSesion.length === 0) return "N/A";
+
+    const tiemposEnMilisegundos = tiemposSesion.map((timer) =>
+      convertToMillisecondsFromString(timer.time)
+    );
+    const mejorTiempo = Math.min(...tiemposEnMilisegundos);
+
+    return convertToTimeFormat(mejorTiempo);
+  }
+
+  function convertToMillisecondsFromString(tiempoString) {
+    const tiempoParts = tiempoString.split(":");
+    const minutos = parseInt(tiempoParts[0], 10);
+    const segundos = parseInt(tiempoParts[1].split(".")[0], 10);
+    const milisegundos = parseInt(tiempoParts[1].split(".")[1], 10);
+    return minutos * 60000 + segundos * 1000 + milisegundos;
+  }
+
+  function convertToTimeFormat(milliseconds) {
+    const minutos = Math.floor(milliseconds / 60000);
+    const segundos = Math.floor((milliseconds % 60000) / 1000);
+    const milisegundos = Math.floor(milliseconds % 1000);
+    return `${minutos < 10 ? "0" : ""}${minutos}:${
+      segundos < 10 ? "0" : ""
+    }${segundos}:${
+      milisegundos < 10 ? "00" : milisegundos < 100 ? "0" : ""
+    }${milisegundos}`;
+  }
+
   return (
     <div className="">
       <button
@@ -161,14 +196,20 @@ function TimerUserLoged() {
       </button>
       <div className={`sidebar ${showSidebar ? "show" : ""}`}>
         <h2>Tiempos Guardados</h2>
-        {/* <div>
-          <p>Mejor tiempo:</p>
-          <p>
-            {tiemposGuardados.filter(
-              (timer) => timer.session === session
-            ).filter((timer) => timer.time !== "DNF")}
-          </p>
-        </div> */}
+        {/*Visualizacion del mejor tiempo en la session*/}
+        <div>
+          <div>
+            <h3>Mejor Tiempo</h3>
+            <ul>
+              {tiemposGuardados && tiemposGuardados.length > 0 && (
+                <li>
+                  <p>Tiempo: {getBestTime(tiemposGuardados, session)}</p>
+                  {/* <p>Scramble: {scramble}</p> */}
+                </li>
+              )}
+            </ul>
+          </div>
+        </div>
         <div>
           <a>Session</a>
           <div>

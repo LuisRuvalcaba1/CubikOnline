@@ -3,13 +3,9 @@ import { useForm } from "react-hook-form";
 function Account() {
   const { updatePassword } = useAuth();
   const { register, handleSubmit } = useForm();
-  // useEffect(() => {
-  //   setNewPassword(params.newPassword);
-  //   setEmail(params.email);
-  // }, [params.email, params.newPassword]);
-
 
   const onSubmit = handleSubmit((data)=> {
+    console.log(data);
     updatePassword(data);
 });
 

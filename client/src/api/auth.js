@@ -8,3 +8,4 @@ export const verifyTokenRequest = () => axios.get(`/verify`)
 
 export const updatePasswordRequest = (email, newPassword) => axios.put(`/account/password/`, email, newPassword)
 
+export const updateUserRequest = (email, points) => axios.put(`/profile/`, email ,points);
