@@ -51,6 +51,7 @@ export const login = async (req, res) => {
       _id: userFound._id,
       username: userFound.username,
       email: userFound.email,
+      points: userFound.points,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -72,6 +73,7 @@ export const profile = async (req, res) => {
     _id: userFound._id,
     username: userFound.username,
     email: userFound.email,
+    points: userFound.points,
   });
   res.send("profile");
 };
@@ -140,6 +142,26 @@ export const updateUserPassword = async (req, res) => {
     await userFound.save();
     res.json({ message: "Password updated" });
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getUsers = async (req, res) => {
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
+  }
+  catch (error) {
     res.status(500).json({ message: error.message });
   }
 };

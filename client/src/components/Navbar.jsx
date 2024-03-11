@@ -2,9 +2,9 @@ import { Link } from "react-router-dom";
 import './Navbar.css';
 import { useAuth } from "../context/AuthContext";
 export const Navbar = () => {
-    // const refreshPage = () => {
-    //     window.reload().location();
-    // }  
+    const refreshPage = () => {
+        window.reload().location();
+    }  
 
     const {isAuthenticated} = useAuth();
     const logout = () => {
@@ -28,16 +28,16 @@ export const Navbar = () => {
             :(
             <>
                 <li>
-                    <Link to="/login" replace >Login</Link> 
+                    <Link to="/login" replace onClick={refreshPage}>Login</Link> 
                 </li>
                 <li>
-                    <Link to="/register" replace >Register</Link>
+                    <Link to="/register" replace onClick={refreshPage}>Register</Link>
                 </li>
                 <li>
-                    <Link to="/learn" replace >Learn</Link>
+                    <Link to="/learn" replace onClick={refreshPage}>Learn</Link>
                 </li>
                 <li>
-                    <Link to="/timer" replace>Timer</Link>
+                    <Link to="/timer" replace onClick={refreshPage}>Timer</Link>
                 </li>
             </>
             

@@ -27,6 +27,7 @@ function App() {
             <Route path="/metodop" element={<MetodoP />}></Route>
             <Route path="/timer" element={<Timer />}></Route>
 
+
             <Route element={<ProtectedRoute />}>
               <Route path="/timerul" element={<TimerUserLoged />} />
               <Route path="/profile" element={<ProfilePage />} />

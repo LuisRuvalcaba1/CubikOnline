@@ -4,7 +4,8 @@ import {
   loginRequest,
   verifyTokenRequest,
   updatePasswordRequest,
-  updateUserRequest
+  updateUserRequest,
+  getUsersRequest,
 } from "../api/auth.js";
 import Cookies from "js-cookie";
 
@@ -115,6 +116,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const getUsersTable = async () => {
+    try {
+      const res = await getUsersRequest();
+      console.log(res.data);
+      return res.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -122,6 +134,7 @@ export const AuthProvider = ({ children }) => {
         signin,
         updatePassword,
         updateUserPoints,
+        getUsersTable,
         loading,
         user,
         isAuthenticated,

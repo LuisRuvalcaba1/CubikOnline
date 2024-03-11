@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext } from "react";
 export const AuthTimerContext = createContext();
 import { timerRequest, getTimersRequest} from "../api/timer";
 
