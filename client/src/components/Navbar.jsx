@@ -1,16 +1,23 @@
 import { Link } from "react-router-dom";
 import './Navbar.css';
 import { useAuth } from "../context/AuthContext";
+import { useForm } from "react-hook-form";
 export const Navbar = () => {
     const refreshPage = () => {
         window.reload().location();
     }  
 
-    const {isAuthenticated} = useAuth();
-    const logout = () => {
-        localStorage.removeItem('token');
-        window.location.reload();
-    }
+    const {user, logout, statusChangeAuth , isAuthenticated} = useAuth();
+    const {handleSubmit} = useForm();
+    
+    const onSubmit = handleSubmit((data) => {
+        data.email = user.email;
+        data.status = "inactive";
+        
+        statusChangeAuth(data);
+        logout();
+    });
+
     return (
     <nav>
         <Link to="/" className="title" replace>CubikOnline</Link>
@@ -22,7 +29,7 @@ export const Navbar = () => {
                         <li><Link to= "/learn" replace >Learn</Link></li>
                         <li><Link to= "/timerul" replace >Timer</Link></li>
                         <li><Link to="/account/password" replace>Password</Link></li>
-                        <li><Link to= "/" replace onClick={logout}>Logout</Link></li>
+                        <li><Link to= "/" replace onClick={onSubmit}>Logout</Link></li>
                     </>
                 )
             :(

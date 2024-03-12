@@ -15,26 +15,35 @@ function HomePage() {
       fetchUsers();
     }, [getUsersTable]);
 
-  return (
-    <div>
-      <h1>Home Page</h1>
-      {users.length > 0 ? (
-        <div>
-            {users.map((user) => (
-                <table key={user}>
-                    <tr>
-                        <td>{user.username}</td>
-                        <td>{user.email}</td>
-                        <td>{user.points}</td>
-                    </tr>
-                </table>
-            ))}
-        </div>
-      ) : (
-        <p>Loading...</p>
-      )}
-    </div>
-  );
+   return (
+      <div>
+        <h1>Home Page</h1>
+        {users.length > 0 ? (
+          <div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Rango</th>
+                  <th>Points</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((user) => (
+                  <tr key={user.username}>
+                    <td>{user.username}</td>
+                    <td>{user.rank}</td>
+                    <td>{user.points}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p>Loading...</p>
+        )}
+      </div>
+    );
 }
 
 export default HomePage;

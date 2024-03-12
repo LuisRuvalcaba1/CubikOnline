@@ -6,6 +6,7 @@ import {
   updatePasswordRequest,
   updateUserRequest,
   getUsersRequest,
+  statusChangeRequest,
 } from "../api/auth.js";
 import Cookies from "js-cookie";
 
@@ -116,9 +117,31 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const logout = async () => {
+    try {
+      Cookies.remove("token");
+      setUser(null);
+      setIsAuthenticated(false);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
+
   const getUsersTable = async () => {
     try {
       const res = await getUsersRequest();
+      console.log(res.data);
+      return res.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
+
+  const statusChangeAuth = async (email, status) => {
+    try {
+      const res = await statusChangeRequest(email, status);
       console.log(res.data);
       return res.data;
     } catch (error) {
@@ -135,6 +158,8 @@ export const AuthProvider = ({ children }) => {
         updatePassword,
         updateUserPoints,
         getUsersTable,
+        statusChangeAuth,
+        logout,
         loading,
         user,
         isAuthenticated,

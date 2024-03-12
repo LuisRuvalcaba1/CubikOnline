@@ -41,6 +41,17 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         default: 'user'
+    },
+    status: 
+    {
+        type: String,
+        required: true,
+        default: 'active'
+    },
+    rank:
+    {
+        type: Number,
+        required: true,
     }
 
 },{timestamps: true})

@@ -4,13 +4,17 @@ import {Link, useNavigate} from 'react-router-dom';
 import { useEffect } from 'react';
 function LoginPage(){
     const {register, handleSubmit, formState:{errors} } = useForm();
-    const {signin, isAuthenticated, errors: signinErrors} = useAuth();
+    const {signin, statusChangeAuth, isAuthenticated, errors: signinErrors} = useAuth();
     const navigation = useNavigate();  
     const onSubmit = handleSubmit((data)=> {
+        data.status = "active";
+        statusChangeAuth(data);
         signin(data);
     });
     useEffect(()=> {
-        if(isAuthenticated) navigation('/profile');
+        if(isAuthenticated) {
+            navigation('/profile')
+        }
     }, [isAuthenticated, navigation]);
     
     return(
