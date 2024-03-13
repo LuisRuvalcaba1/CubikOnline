@@ -30,6 +30,7 @@ export const Navbar = () => {
                         <li><Link to= "/timerul" replace >Timer</Link></li>
                         <li><Link to="/account/password" replace>Password</Link></li>
                         <li><Link to= "/" replace onClick={onSubmit}>Logout</Link></li>
+                        <li><Link to="/store" replace>Store</Link></li>
                     </>
                 )
             :(
@@ -45,6 +46,9 @@ export const Navbar = () => {
                 </li>
                 <li>
                     <Link to="/timer" replace onClick={refreshPage}>Timer</Link>
+                </li>
+                <li>
+                    <Link to="/product" replace>Producto</Link>
                 </li>
             </>
             

@@ -6,6 +6,7 @@ function LoginPage(){
     const {register, handleSubmit, formState:{errors} } = useForm();
     const {signin, statusChangeAuth, isAuthenticated, errors: signinErrors} = useAuth();
     const navigation = useNavigate();  
+    
     const onSubmit = handleSubmit((data)=> {
         data.status = "active";
         statusChangeAuth(data);
