@@ -1,6 +1,7 @@
 import { createContext,useContext } from "react";
 import {
     createStoreRequest,
+    getStoresRequest
 } from "../api/store.js";
 
 export const StoreContext = createContext();
@@ -25,8 +26,18 @@ export const StoreProvider = ({ children }) => {
         }
     }
 
+    const getStores = async () => {
+        try {
+            const res = await getStoresRequest();
+            return res.data;
+        } catch (error) {
+            console.log(error.response);
+        }
+    }
+
     const value = {
         createNewStore,
+        getStores
     };
 
     return (

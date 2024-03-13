@@ -10,3 +10,4 @@ export const updateProductRequest = (id, product) => axios.put(`/product/`, id, 
 
 export const deleteProductRequest = id => axios.delete(`/product/`,id)
 
+export const getProductsOnStoreRequest = () => axios.get(`/store`)

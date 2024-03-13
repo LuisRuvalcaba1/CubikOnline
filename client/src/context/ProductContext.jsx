@@ -4,7 +4,8 @@ import {
     getProductsRequest,
     getProductRequest,
     updateProductRequest,
-    deleteProductRequest
+    deleteProductRequest,
+    getProductsOnStoreRequest
 } from "../api/product.js";
 
 export const ProductContext = createContext();
@@ -49,6 +50,16 @@ export const ProductProvider = ({ children }) => {
         }
     }
 
+    const getProductsOnStore = async () => {
+        try {
+            const res = await getProductsOnStoreRequest();
+            console.log(res.data);
+            return res.data;
+        } catch (error) {
+            console.log(error.response);
+        }
+    }
+
     const updateProduct = async (id, product) => {
         try {
             const res = await updateProductRequest(id, product);
@@ -73,6 +84,7 @@ export const ProductProvider = ({ children }) => {
         createNewProduct,
         getProduct,
         getProducts,
+        getProductsOnStore,
         updateProduct,
         deleteProduct,
     };

@@ -1,6 +1,6 @@
 import axios from "../api/axios";
 
-export const createStoreRequest = store => axios.post(`/store`, store)
+export const createStoreRequest = (user, product) => axios.post(`/store`, user, product)
 
 export const getStoresRequest = () => axios.get(`/store`)
 

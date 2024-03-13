@@ -13,6 +13,7 @@ import { Navbar } from "./components/Navbar.jsx";
 import { TimerProvider } from "./context/TimerContext.jsx";
 import { ProductProvider } from "./context/ProductContext.jsx";
 import Account from "./pages/Account.jsx";
+import { StoreProvider } from "./context/StoreContext.jsx";
 import Store from "./pages/Store.jsx";
 import ProductPage from "./pages/ProductPage.jsx";
 
@@ -21,25 +22,27 @@ function App() {
     <AuthProvider>
       <TimerProvider>
         <ProductProvider>
-          <BrowserRouter>
-            <Navbar/>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/learn" element={<AprendizajePage />}></Route>
-              <Route path="/metodop" element={<MetodoP />}></Route>
-              <Route path="/timer" element={<Timer />}></Route>
-              <Route path="/product" element={<ProductPage />} />
+          <StoreProvider>
+            <BrowserRouter>
+              <Navbar/>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/learn" element={<AprendizajePage />}></Route>
+                <Route path="/metodop" element={<MetodoP />}></Route>
+                <Route path="/timer" element={<Timer />}></Route>
+                <Route path="/product" element={<ProductPage />} />
 
-              <Route element={<ProtectedRoute />}>
+                <Route element={<ProtectedRoute />}>
                 <Route path="/store" element={<Store />} />
-                <Route path="/timerul" element={<TimerUserLoged />} />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/account/password" element={<Account />} />
-              </Route>
-            </Routes>
-          </BrowserRouter>
+                  <Route path="/timerul" element={<TimerUserLoged />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/account/password" element={<Account />} />
+                </Route>
+              </Routes>
+            </BrowserRouter>
+          </StoreProvider>
         </ProductProvider>
       </TimerProvider>
     </AuthProvider>

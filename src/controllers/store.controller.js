@@ -1,12 +1,12 @@
+import { request } from "express";
 import Store from "../models/store.model.js";
 
 export const createStore = async (req, res) => {
     try {
-        const { product, price } = req.body;
+        const { product, user } = req.body;
         const newStore = new Store({
         product,
-        price,
-        user: req.user.id,
+        user,
         });
         const savedStore = await newStore.save();
         res.json(savedStore);
@@ -26,7 +26,7 @@ export const getStores = async (req, res) => {
     }
 }
 
-export const getStoreById = async (req, res) => {
+export const getStore = async (req, res) => {
     try {
         const store = await Store.findById(req.params.id);
         if (!store) {
@@ -38,7 +38,7 @@ export const getStoreById = async (req, res) => {
     }
 }
 
-export const updateStoreById = async (req, res) => {
+export const updateStore = async (req, res) => {
     try {
         const { product, price } = req.body;
         const updatedStore = await Store.findByIdAndUpdate(
@@ -55,7 +55,7 @@ export const updateStoreById = async (req, res) => {
     }
 }
 
-export const deleteStoreById = async (req, res) => {
+export const deleteStore = async (req, res) => {
     try {
         const store = await Store.findByIdAndDelete(req.params.id);
         if (!store) {
