@@ -1,1 +1,3 @@
-export const TOKEN_SECRET = 'some secret Token'
+import {config} from 'dotenv'
+config()
+export const DB = process.env.DB
