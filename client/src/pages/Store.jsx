@@ -4,35 +4,35 @@ import { useProductAuth } from '../context/ProductContext.jsx';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
-
 function Store() {
-    const { createNewStore, getStores } = useStore();
+    const { createNewStore, getUserStores } = useStore();
     const { register, handleSubmit } = useForm();
     const { user } = useAuth();
     const { getProductsOnStore } = useProductAuth();
     const [products, setProducts] = useState([]);
-    const [boughtProducts, setBoughtProducts] = useState([]);
+    const [stores, setStores] = useState([]);
 
     useEffect(() => {
-        const fetchStores = async () => {
-            const stores = await getStores();
-            setBoughtProducts(stores);
+        const fetchStoresAndProducts = async () => {
+            const userStores = await getUserStores();
+            setStores(userStores);
         };
-        fetchStores();
-    }, [getStores]);
 
-    const onSubmit = handleSubmit((data) => {
-        createNewStore(data);
-    })
+        fetchStoresAndProducts();
+    }, []);
 
     useEffect(() => {
         const fetchProducts = async () => {
             const products = await getProductsOnStore();
             setProducts(products);
-            console.log(products);
         };
+
         fetchProducts();
     }, [getProductsOnStore]);
+
+    const onSubmit = handleSubmit((data) => {
+        createNewStore(data);
+    })
 
     return (
         <div>
@@ -40,8 +40,8 @@ function Store() {
             <div>
                 <h2>Products</h2>
                 <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    {products.map((product) => (
-                        <div key={product.name} style={{ marginRight: '60px' }}>
+                    {products.map(product => (
+                        <div key={product._id} style={{ marginRight: '60px' }}>
                             <h3>{product.name}</h3>
                             <p>{product.price}</p>
                             <form onSubmit={onSubmit}>
@@ -58,10 +58,9 @@ function Store() {
                                 <button type='submit'>Buy</button>
                             </form>
                         </div>
-
                     ))}
-
                 </div>
+                
             </div>
         </div>
     )

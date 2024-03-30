@@ -1,7 +1,6 @@
 import {Router} from 'express';
 import {createStore, getStores, getStore, updateStore, deleteStore} from '../controllers/store.controller.js';
 import {authRequired} from '../middlewares/validateToken.js';
-import { validateSchema } from '../middlewares/validator.middleware.js';
 const router = Router();
 router.post('/store', authRequired, createStore);
 router.get('/store', authRequired, getStores);

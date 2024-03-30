@@ -3,8 +3,6 @@ import {
     createProductRequest,
     getProductsRequest,
     getProductRequest,
-    updateProductRequest,
-    deleteProductRequest,
     getProductsOnStoreRequest
 } from "../api/product.js";
 
@@ -44,7 +42,7 @@ export const ProductProvider = ({ children }) => {
         try {
             const res = await getProductsRequest();
             console.log(res.data);
-
+            return res.data;
         } catch (error) {
             console.log(error.response);
         }
@@ -60,33 +58,12 @@ export const ProductProvider = ({ children }) => {
         }
     }
 
-    const updateProduct = async (id, product) => {
-        try {
-            const res = await updateProductRequest(id, product);
-            console.log(res.data);
-
-        } catch (error) {
-            console.log(error.response);
-        }
-    }
-
-    const deleteProduct = async (id) => {
-        try {
-            const res = await deleteProductRequest(id);
-            console.log(res.data);
-
-        } catch (error) {
-            console.log(error.response);
-        }
-    }
 
     const value = {
         createNewProduct,
         getProduct,
         getProducts,
         getProductsOnStore,
-        updateProduct,
-        deleteProduct,
     };
 
     return (

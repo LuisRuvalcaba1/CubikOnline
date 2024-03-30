@@ -18,9 +18,8 @@ export const createStore = async (req, res) => {
 
 export const getStores = async (req, res) => {
     try {
-        const stores = await Store.find({ user: req.user.id }).populate('user');
+        const stores = await Store.find({ user: req.user.id}).populate('user');
         res.status(200).json(stores);
-
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

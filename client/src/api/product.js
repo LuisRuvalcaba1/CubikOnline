@@ -2,7 +2,7 @@ import axios from "../api/axios";
 
 export const createProductRequest = product => axios.post(`/product`, product)
 
-export const getProductsRequest = () => axios.get(`/product`)
+export const getProductsRequest = () => axios.get(`/store`)
 
 export const getProductRequest = id => axios.get(`/product/`, id)
 

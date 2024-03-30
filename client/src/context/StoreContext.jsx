@@ -26,9 +26,10 @@ export const StoreProvider = ({ children }) => {
         }
     }
 
-    const getStores = async () => {
+    const getUserStores = async () => {
         try {
             const res = await getStoresRequest();
+            console.log(res.data);
             return res.data;
         } catch (error) {
             console.log(error.response);
@@ -37,7 +38,7 @@ export const StoreProvider = ({ children }) => {
 
     const value = {
         createNewStore,
-        getStores
+        getUserStores
     };
 
     return (

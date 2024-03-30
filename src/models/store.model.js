@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const storeSchema = new mongoose.Schema({
+
     product:{
         type: mongoose.Schema.Types.ObjectId,
         ref : 'Product',
@@ -11,7 +12,6 @@ const storeSchema = new mongoose.Schema({
         ref : 'User',
         required: true
     },
-
 });
 
 export default mongoose.model("Store", storeSchema)
