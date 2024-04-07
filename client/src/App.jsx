@@ -17,7 +17,7 @@ import { StoreProvider } from "./context/StoreContext.jsx";
 import Store from "./pages/Store.jsx";
 import ProductPage from "./pages/ProductPage.jsx";
 import Camara from "./pages/CamaraPage.jsx";
-import Socket from "./pages/Socket.jsx";
+import TimerPvP from "./pages/TimerPvP.jsx";
 
 function App() {
   return (
@@ -36,13 +36,14 @@ function App() {
                 <Route path="/timer" element={<Timer />}></Route>
                 <Route path="/product" element={<ProductPage />} />
                 <Route path="/camara" element={<Camara />} />
-                <Route path="/socket" element={<Socket />} />
+                
 
                 <Route element={<ProtectedRoute />}>
                   <Route path="/store" element={<Store />}/>
                   <Route path="/timerul" element={<TimerUserLoged />} />
                   <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/account/password" element={<Account />} />
+                  <Route path="/timerpvp" element={<TimerPvP />} />
                 </Route>
               </Routes>
             </BrowserRouter>

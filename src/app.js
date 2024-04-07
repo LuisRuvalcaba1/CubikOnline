@@ -6,6 +6,7 @@ import authRoutes from './routes/auth.routes.js'
 import timerRoutes from './routes/timer.routes.js'
 import productRoutes from './routes/product.routes.js'
 import storeRoutes from './routes/store.routes.js'
+import timerPvPRoutes from './routes/timerpvp.routes.js'
 import cookieParser from "cookie-parser";
 const app = express();
 
@@ -21,6 +22,6 @@ app.use('/api', authRoutes);
 app.use('/api', timerRoutes);
 app.use('/api', productRoutes);
 app.use('/api', storeRoutes);
-
+app.use('/api', timerPvPRoutes);
 
 export default app;

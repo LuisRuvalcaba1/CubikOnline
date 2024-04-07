@@ -27,10 +27,12 @@ export const Navbar = () => {
                     <>
                         <li><Link to= "/profile" replace >Profile</Link></li>
                         <li><Link to= "/learn" replace >Learn</Link></li>
+                        <li><Link to="/timerpvp" replace>PVP</Link></li>
                         <li><Link to= "/timerul" replace >Timer</Link></li>
                         <li><Link to="/account/password" replace>Password</Link></li>
                         <li><Link to= "/" replace onClick={onSubmit}>Logout</Link></li>
                         <li><Link to="/store" replace>Store</Link></li>
+                        
                     </>
                 )
             :(

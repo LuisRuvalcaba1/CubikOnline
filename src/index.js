@@ -1,18 +1,26 @@
-import app from "./app.js";
-import { connectDB } from './db.js';
-import { Server as SocketServer } from 'socket.io';
 import http from 'http';
-import sockets from './sockets.js';
+import app from './app.js';
+import { connectDB } from './db.js';
+import { Server as WebSocketServer } from 'socket.io';
+
 
 connectDB();
 
 const server = http.createServer(app);
-const io = new SocketServer(server); // Aquí usamos el mismo servidor HTTP para WebSocket
+const httpServer = server.listen(4000);
+const io = new WebSocketServer(httpServer, {
+    cors: {
+        origin: 'http://localhost:5173'
+    }
+});
+io.on('connection', (socket) => {
+    console.log(`User connected: ${socket.id}`);
 
-const PORT = process.env.PORT || 4000;
-
-server.listen(PORT, () => {
-    console.log(`Servidor WebSocket en el puerto ${PORT}`);
+    socket.on('message', (data) => {
+        socket.broadcast.emit("received", data)
+    });
 });
 
-sockets(io);
+
+console.log('Server on port 4000');
+

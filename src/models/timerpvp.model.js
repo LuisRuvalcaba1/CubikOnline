@@ -11,11 +11,6 @@ const timepvpSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
-    looser:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref : 'User',
-        required: true
-    },
     winner:{
         type: mongoose.Schema.Types.ObjectId,
         ref : 'User',
