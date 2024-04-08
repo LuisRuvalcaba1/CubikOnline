@@ -19,7 +19,7 @@ let matchedPairs = []; // Lista de pares emparejados
 
 io.on('connection', (socket) => {
     console.log(`User connected: ${socket.id}`);
-
+    
     // Agregar nuevo cliente a la lista de clientes esperando
     waitingClients.push(socket);
 
@@ -30,14 +30,18 @@ io.on('connection', (socket) => {
         matchedPairs.push(pair);
         user1.emit('paired', user2.id);
         user2.emit('paired', user1.id);
+        
+        // Generar el scramble y enviarlo a ambos clientes emparejados
+        const scramble = generarNuevoScramble();
+        user1.emit('scramble', scramble);
+        user2.emit('scramble', scramble);
     }
 
     // Manejar el evento de desconexión
     socket.on('disconnect', () => {
         console.log(`User disconnected: ${socket.id}`);
-        // Eliminar al cliente desconectado de la lista de clientes esperando
+        // Eliminar al cliente desconectado de la lista de clientes esperando o de los pares emparejados
         waitingClients = waitingClients.filter(client => client.id !== socket.id);
-        // Si el cliente desconectado estaba emparejado, eliminar el par emparejado
         matchedPairs = matchedPairs.filter(pair => pair.user1.id !== socket.id && pair.user2.id !== socket.id);
     });
 
@@ -51,6 +55,32 @@ io.on('connection', (socket) => {
         }
     });
 });
+
+function generarNuevoScramble() {
+    const movimientos = ["R", "L", "U", "D", "F", "B"];
+    const modificadores = ["", "'", "2"];
+
+    let nuevoScramble = "";
+    let ultimoMovimiento = "";
+
+    for (let i = 0; i < 20; i++) {
+        let movimientoAleatorio =
+            movimientos[Math.floor(Math.random() * movimientos.length)];
+        let modificadorAleatorio =
+            modificadores[Math.floor(Math.random() * modificadores.length)];
+
+        while (movimientoAleatorio === ultimoMovimiento) {
+            movimientoAleatorio =
+                movimientos[Math.floor(Math.random() * movimientos.length)];
+        }
+
+        nuevoScramble += movimientoAleatorio + modificadorAleatorio + " ";
+        ultimoMovimiento = movimientoAleatorio;
+    }
+
+    return nuevoScramble.trim();
+}
+
 
 console.log('Server on port 4000');
 

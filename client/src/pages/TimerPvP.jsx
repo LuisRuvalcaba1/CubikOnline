@@ -14,11 +14,21 @@ function TimerPvP() {
   const [tiempoInicial, setTiempoInicial] = useState(null);
   const [scramble, setScramble] = useState("");
   const [tiemposGuardados, setTiemposGuardados] = useState([]);
-  const [showSidebar, setShowSidebar] = useState(false);
-  const [session, setSession] = useState(1);
+  const [isPaired, setIsPaired] = useState(false);
 
   useEffect(() => {
-    generarNuevoScramble();
+    socket.on('paired', () => {
+      setIsPaired(true);
+    });
+
+    socket.on('scramble', (scramble) => {
+      setScramble(scramble);
+    });
+
+    return () => {
+      socket.off('paired');
+      socket.off('scramble');
+    }
   }, []);
   
   useEffect(() => {
@@ -52,7 +62,6 @@ function TimerPvP() {
           setTiempoInicial(performance.now());
         } else {
           registrarTiempo();
-          generarNuevoScramble();
         }
       }
     }
@@ -64,33 +73,8 @@ function TimerPvP() {
     };
   }, [activo]);
 
-  function generarNuevoScramble() {
-    const movimientos = ["R", "L", "U", "D", "F", "B"];
-    const modificadores = ["", "'", "2"];
-
-    let nuevoScramble = "";
-    let ultimoMovimiento = "";
-
-    for (let i = 0; i < 20; i++) {
-      let movimientoAleatorio =
-        movimientos[Math.floor(Math.random() * movimientos.length)];
-      let modificadorAleatorio =
-        modificadores[Math.floor(Math.random() * modificadores.length)];
-
-      while (movimientoAleatorio === ultimoMovimiento) {
-        movimientoAleatorio =
-          movimientos[Math.floor(Math.random() * movimientos.length)];
-      }
-
-      nuevoScramble += movimientoAleatorio + modificadorAleatorio + " ";
-      ultimoMovimiento = movimientoAleatorio;
-    }
-
-    setScramble(nuevoScramble.trim());
-  }
-
   function registrarTiempo() {
-    if (tiempoInicial) {
+    if (tiempoInicial && isPaired) { // Solo enviamos el tiempo si estamos emparejados
       const tiempoFinal = performance.now();
       const tiempoTranscurrido = tiempoFinal - tiempoInicial;
       const tiempoMilisegundos = Math.floor(tiempoTranscurrido % 1000) - 3;
