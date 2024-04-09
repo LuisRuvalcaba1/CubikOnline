@@ -10,6 +10,7 @@ import {
 } from "../api/auth.js";
 import Cookies from "js-cookie";
 
+
 export const AuthContext = createContext();
 
 export const useAuth = () => {

@@ -19,7 +19,7 @@ let matchedPairs = []; // Lista de pares emparejados
 
 io.on('connection', (socket) => {
     console.log(`User connected: ${socket.id}`);
-    
+
     // Agregar nuevo cliente a la lista de clientes esperando
     waitingClients.push(socket);
 
@@ -30,11 +30,12 @@ io.on('connection', (socket) => {
         matchedPairs.push(pair);
         user1.emit('paired', user2.id);
         user2.emit('paired', user1.id);
-        
+
         // Generar el scramble y enviarlo a ambos clientes emparejados
         const scramble = generarNuevoScramble();
         user1.emit('scramble', scramble);
         user2.emit('scramble', scramble);
+        console.log(scramble)
     }
 
     // Manejar el evento de desconexión
@@ -47,11 +48,34 @@ io.on('connection', (socket) => {
 
     // Manejar el evento de mensaje
     socket.on('message', (data) => {
-        // Reenviar el mensaje al otro usuario emparejado
+        console.log(`Message from ${socket.id}: ${data}`);
+    
+        // Buscar el par al que pertenece el cliente que envió el mensaje
         const pair = matchedPairs.find(pair => pair.user1.id === socket.id || pair.user2.id === socket.id);
         if (pair) {
-            const receiver = pair.user1.id === socket.id ? pair.user2 : pair.user1;
-            receiver.emit('message', data);
+   
+            if (!pair.tiempos) {
+                pair.tiempos = [];
+            }
+            pair.tiempos.push(JSON.parse(data));
+    
+            if (pair.tiempos.length === 2) {
+                const tiempoUsuario1 = pair.tiempos[0].tiempo;
+                const tiempoUsuario2 = pair.tiempos[1].tiempo;
+    
+                if (tiempoUsuario1 < tiempoUsuario2) {
+                    console.log('Ganador:', pair.user1.id);
+                    console.log('Perdedor:', pair.user2.id);
+                } else if (tiempoUsuario1 > tiempoUsuario2) {
+                    console.log('Ganador:', pair.user2.id);
+                    console.log('Perdedor:', pair.user1.id);
+                } else {
+                    console.log('Empate');
+                }
+    
+                // Reiniciar el juego
+                pair.tiempos = [];
+            }
         }
     });
 });
@@ -83,4 +107,3 @@ function generarNuevoScramble() {
 
 
 console.log('Server on port 4000');
-

@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import "./Timer.css";
-import { useForm } from 'react-hook-form';
 import io from 'socket.io-client';
-const socket = io('http://localhost:4000');
 import { useAuth } from "../context/AuthContext";
 
 function TimerPvP() {
@@ -13,10 +11,13 @@ function TimerPvP() {
   const [activo, setActivo] = useState(false);
   const [tiempoInicial, setTiempoInicial] = useState(null);
   const [scramble, setScramble] = useState("");
-  const [tiemposGuardados, setTiemposGuardados] = useState([]);
   const [isPaired, setIsPaired] = useState(false);
+  const [socket, setSocket] = useState(''); // Estado para almacenar el socket
 
   useEffect(() => {
+    const socket = io('http://localhost:4000');
+    setSocket(socket);
+
     socket.on('paired', () => {
       setIsPaired(true);
     });
@@ -25,12 +26,15 @@ function TimerPvP() {
       setScramble(scramble);
     });
 
+    socket.on('message', (tiempoSocket) => {
+      console.log(tiempoSocket)
+    });
+    // Limpia el socket cuando el componente se desmonte
     return () => {
-      socket.off('paired');
-      socket.off('scramble');
-    }
+      socket.disconnect();
+    };
   }, []);
-  
+
   useEffect(() => {
     let interval;
     if (activo) {
@@ -54,6 +58,25 @@ function TimerPvP() {
     return () => clearInterval(interval);
   }, [activo, tiempoInicial]);
 
+  function registrarTiempo() {
+    if (tiempoInicial && isPaired) { // Solo enviamos el tiempo si estamos emparejados
+      const tiempoFinal = performance.now();
+      const tiempoTranscurrido = tiempoFinal - tiempoInicial;
+      const tiempoMilisegundos = Math.floor(tiempoTranscurrido % 1000) - 3;
+      const tiempoSegundos = Math.floor((tiempoTranscurrido / 1000) % 60);
+      const tiempoMinutos = Math.floor((tiempoTranscurrido / (1000 * 60)) % 60);
+
+      const time = `${tiempoMinutos}:${tiempoSegundos < 10 ? "0" : ""
+        }${tiempoSegundos}.${tiempoMilisegundos < 10 ? "00" : tiempoMilisegundos < 100 ? "0" : ""
+        }${tiempoMilisegundos}`;
+
+      if (socket) {
+        socket.emit('message', JSON.stringify({ usuario: user._id, tiempo: time }));
+        console.log('Enviado:', time);
+      }
+    }
+  }
+
   useEffect(() => {
     function handleKeyPress(event) {
       if (event.keyCode === 32) {
@@ -71,66 +94,25 @@ function TimerPvP() {
     return () => {
       window.removeEventListener("keydown", handleKeyPress);
     };
-  }, [activo]);
-
-  function registrarTiempo() {
-    if (tiempoInicial && isPaired) { // Solo enviamos el tiempo si estamos emparejados
-      const tiempoFinal = performance.now();
-      const tiempoTranscurrido = tiempoFinal - tiempoInicial;
-      const tiempoMilisegundos = Math.floor(tiempoTranscurrido % 1000) - 3;
-      const tiempoSegundos = Math.floor((tiempoTranscurrido / 1000) % 60);
-      const tiempoMinutos = Math.floor((tiempoTranscurrido / (1000 * 60)) % 60);
-
-      const nuevoTiempo = {
-        tiempo: `${tiempoMinutos < 10 ? `0${tiempoMinutos}` : tiempoMinutos}:${
-          tiempoSegundos < 10 ? `0${tiempoSegundos}` : tiempoSegundos
-        }:${
-          tiempoMilisegundos < 10
-            ? `00${tiempoMilisegundos}`
-            : tiempoMilisegundos < 100
-            ? `0${tiempoMilisegundos}`
-            : tiempoMilisegundos
-        }`,
-        scramble: scramble,
-      };
-
-
-      const time = `${tiempoMinutos}:${
-        tiempoSegundos < 10 ? "0" : ""
-      }${tiempoSegundos}.${
-        tiempoMilisegundos < 10 ? "00" : tiempoMilisegundos < 100 ? "0" : ""
-      }${tiempoMilisegundos}`;
-
-      setTiemposGuardados((prevTiempos) => {
-        if (Array.isArray(prevTiempos)) {
-          return [nuevoTiempo, ...prevTiempos];
-        } else {
-          console.error("prevTiempos no es un array:", prevTiempos);
-          // Devuelve un valor predeterminado o maneja este caso según sea necesario
-          return [];
-        }
-      });
-      socket.emit('message', JSON.stringify({ usuario: user._id, tiempo: time }));
-      console.log(user._id , time);
-    }
-  }
+  }, [activo, socket]); // Agrega 'socket' como dependencia para que el efecto se ejecute cada vez que 'socket' cambie
 
   return (
-      <div className="timer__scramble">
-        <p>{scramble}</p>
-      
-      <div className="cronometro">
+    <div className="timer__scramble">
+      {isPaired ? <><h1>Emparejado</h1><p>{scramble}</p><div className="cronometro">
         <p>
           {minutos < 10 ? `0${minutos}` : minutos} :{" "}
           {segundos < 10 ? `0${segundos}` : segundos} :{" "}
           {milisegundos < 10
             ? `00${milisegundos}`
             : milisegundos < 100
-            ? `0${milisegundos}`
-            : milisegundos}
+              ? `0${milisegundos}`
+              : milisegundos}
         </p>
-      </div>
-      </div>
+      </div></>
+      
+      : <h1>Esperando emparejamiento...</h1>}
+      
+    </div>
   );
 }
 
