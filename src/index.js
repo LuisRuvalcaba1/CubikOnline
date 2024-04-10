@@ -18,18 +18,22 @@ let waitingClients = []; // Lista de clientes esperando ser emparejados
 let matchedPairs = []; // Lista de pares emparejados
 
 io.on('connection', (socket) => {
-    console.log(`User connected: ${socket.id}`);
+    socket.on('user', (user) => {
+        socket.userId = user;
+        socket.emit('user', user);
+    })
 
     // Agregar nuevo cliente a la lista de clientes esperando
     waitingClients.push(socket);
+    console.log(`User connected: ${socket.userId}`);
 
     // Emparejar a los usuarios si hay al menos dos esperando
     if (waitingClients.length >= 2) {
         const [user1, user2] = waitingClients.splice(0, 2); // Tomar los primeros dos clientes
         const pair = { user1, user2 };
         matchedPairs.push(pair);
-        user1.emit('paired', user2.id);
-        user2.emit('paired', user1.id);
+        user1.emit('paired', user2.userId);
+        user2.emit('paired', user1.userId);
 
         // Generar el scramble y enviarlo a ambos clientes emparejados
         const scramble = generarNuevoScramble();
@@ -40,43 +44,42 @@ io.on('connection', (socket) => {
 
     // Manejar el evento de desconexión
     socket.on('disconnect', () => {
-        console.log(`User disconnected: ${socket.id}`);
+        console.log(`User disconnected: ${socket.userId}`);
         // Eliminar al cliente desconectado de la lista de clientes esperando o de los pares emparejados
-        waitingClients = waitingClients.filter(client => client.id !== socket.id);
-        matchedPairs = matchedPairs.filter(pair => pair.user1.id !== socket.id && pair.user2.id !== socket.id);
+        waitingClients = waitingClients.filter(client => client.userId !== socket.userId);
+        matchedPairs = matchedPairs.filter(pair => pair.user1.userId !== socket.userId && pair.user2.userId !== socket.userId);
     });
 
-    // Manejar el evento de mensaje
     socket.on('message', (data) => {
-        console.log(`Message from ${socket.id}: ${data}`);
-    
-        // Buscar el par al que pertenece el cliente que envió el mensaje
-        const pair = matchedPairs.find(pair => pair.user1.id === socket.id || pair.user2.id === socket.id);
-        if (pair) {
-   
-            if (!pair.tiempos) {
-                pair.tiempos = [];
-            }
-            pair.tiempos.push(JSON.parse(data));
-    
-            if (pair.tiempos.length === 2) {
-                const tiempoUsuario1 = pair.tiempos[0].tiempo;
-                const tiempoUsuario2 = pair.tiempos[1].tiempo;
-    
-                if (tiempoUsuario1 < tiempoUsuario2) {
-                    console.log('Ganador:', pair.user1.id);
-                    console.log('Perdedor:', pair.user2.id);
-                } else if (tiempoUsuario1 > tiempoUsuario2) {
-                    console.log('Ganador:', pair.user2.id);
-                    console.log('Perdedor:', pair.user1.id);
-                } else {
-                    console.log('Empate');
-                }
-    
-                // Reiniciar el juego
-                pair.tiempos = [];
-            }
+        console.log(data);
+        const message = JSON.parse(data);
+        console.log("Tiempo: ", message.time);
+
+        const pair = matchedPairs.find(pair => pair.user1.userId === socket.userId || pair.user2.userId === socket.userId);
+        if (!pair) {
+            console.error('Pair not found');
+            return;
         }
+
+        // Guardar el tiempo del usuario en el par
+        if (pair.user1.userId === socket.userId) {
+            pair.user1.tiempo = message.time;
+        } else {
+            pair.user2.tiempo = message.time;
+        }
+
+        // Si ambos usuarios han enviado sus tiempos, ordenar los tiempos y determinar al ganador
+        if (pair.user1.tiempo && pair.user2.tiempo) {
+            const tiempos = [pair.user1.tiempo, pair.user2.tiempo];
+            tiempos.sort();
+
+            const ganador = pair.user1.tiempo === tiempos[0] ? pair.user1 : pair.user2;
+            const perdedor = pair.user1.tiempo === tiempos[0] ? pair.user2 : pair.user1;
+            ganador.emit('resultado', { ganador: true, tiempo: ganador.tiempo });
+            perdedor.emit('resultado', { ganador: false, tiempo: perdedor.tiempo });
+            console.log(`Winner: ${ganador.userId}`);
+        }
+
     });
 });
 
@@ -104,6 +107,7 @@ function generarNuevoScramble() {
 
     return nuevoScramble.trim();
 }
+
 
 
 console.log('Server on port 4000');

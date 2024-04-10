@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import "./Timer.css";
 import io from 'socket.io-client';
 import { useAuth } from "../context/AuthContext";
+//import Camara from "../components/Camara";
 
 function TimerPvP() {
   const { user } = useAuth();
+  const [usuario, setUsuario] = useState('');
   const [milisegundos, setMilisegundos] = useState(0);
   const [segundos, setSegundos] = useState(0);
   const [minutos, setMinutos] = useState(0);
@@ -13,10 +15,16 @@ function TimerPvP() {
   const [scramble, setScramble] = useState("");
   const [isPaired, setIsPaired] = useState(false);
   const [socket, setSocket] = useState(''); // Estado para almacenar el socket
+  const [resultado, setResultado] = useState(null);
 
   useEffect(() => {
     const socket = io('http://localhost:4000');
     setSocket(socket);
+
+    socket.emit('user', JSON.stringify({ id: user._id }))
+    socket.on('user', (user) => {
+      setUsuario(user)
+    })
 
     socket.on('paired', () => {
       setIsPaired(true);
@@ -29,11 +37,26 @@ function TimerPvP() {
     socket.on('message', (tiempoSocket) => {
       console.log(tiempoSocket)
     });
-    // Limpia el socket cuando el componente se desmonte
+
+    socket.on('resultado', (data) => {
+      setResultado(data.ganador);
+    });
+
     return () => {
       socket.disconnect();
     };
   }, []);
+
+  function mostrarResultado() {
+    if (resultado !== null) {
+        if (resultado) {
+            return <p>¡Felicidades! Ganaste el duelo.</p>;
+        } else {
+            return <p>Lo siento, perdiste el duelo.</p>;
+        }
+    }
+    return null;
+}
 
   useEffect(() => {
     let interval;
@@ -59,21 +82,23 @@ function TimerPvP() {
   }, [activo, tiempoInicial]);
 
   function registrarTiempo() {
-    if (tiempoInicial && isPaired) { // Solo enviamos el tiempo si estamos emparejados
+    if (tiempoInicial && isPaired) {
       const tiempoFinal = performance.now();
       const tiempoTranscurrido = tiempoFinal - tiempoInicial;
-      const tiempoMilisegundos = Math.floor(tiempoTranscurrido % 1000) - 3;
+      const tiempoMilisegundos = Math.floor(tiempoTranscurrido % 1000);
       const tiempoSegundos = Math.floor((tiempoTranscurrido / 1000) % 60);
       const tiempoMinutos = Math.floor((tiempoTranscurrido / (1000 * 60)) % 60);
+  
+      const time = `${tiempoMinutos}:${tiempoSegundos < 10 ? "0" : ""}${tiempoSegundos}:${
+        tiempoMilisegundos < 10 ? "00" : tiempoMilisegundos < 100 ? "0" : ""
+      }${tiempoMilisegundos}`;
 
-      const time = `${tiempoMinutos}:${tiempoSegundos < 10 ? "0" : ""
-        }${tiempoSegundos}.${tiempoMilisegundos < 10 ? "00" : tiempoMilisegundos < 100 ? "0" : ""
-        }${tiempoMilisegundos}`;
-
-      if (socket) {
-        socket.emit('message', JSON.stringify({ usuario: user._id, tiempo: time }));
-        console.log('Enviado:', time);
-      }
+        if (socket) {
+          const message = JSON.stringify({ time: time });
+          socket.emit('message', message);
+          console.log('Enviado:', message);
+        }
+      
     }
   }
 
@@ -98,20 +123,27 @@ function TimerPvP() {
 
   return (
     <div className="timer__scramble">
-      {isPaired ? <><h1>Emparejado</h1><p>{scramble}</p><div className="cronometro">
-        <p>
-          {minutos < 10 ? `0${minutos}` : minutos} :{" "}
-          {segundos < 10 ? `0${segundos}` : segundos} :{" "}
-          {milisegundos < 10
-            ? `00${milisegundos}`
-            : milisegundos < 100
-              ? `0${milisegundos}`
-              : milisegundos}
-        </p>
-      </div></>
-      
-      : <h1>Esperando emparejamiento...</h1>}
-      
+      {isPaired ? (
+        <>
+          <h1>Emparejado</h1>
+          <p>{scramble}</p>
+          <div className="cronometro">
+            <p>
+              {minutos < 10 ? `0${minutos}` : minutos} :{" "}
+              {segundos < 10 ? `0${segundos}` : segundos} :{" "}
+              {milisegundos < 10
+                ? `00${milisegundos}`
+                : milisegundos < 100
+                  ? `0${milisegundos}`
+                  : milisegundos}
+            </p>
+          </div>
+          {mostrarResultado()}
+        </>
+      ) : (
+        <h1>Esperando emparejamiento...</h1>
+      )}
+      {/* <Camara /> */}
     </div>
   );
 }
