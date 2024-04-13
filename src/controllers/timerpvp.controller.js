@@ -1,72 +1,47 @@
 import TimerPvP from '../models/timerpvp.model.js';
+import mongoose from 'mongoose';
 
 export const createTimerPvP = async (req, res) => {
-    try{
-        const {time, scramble, winner} = req.body;
-        const newTimerPvP = new TimerPvP({
-            time,
-            scramble,
-            winner,
-        });
-        const savedTimerPvP = await newTimerPvP.save();
-        res.json(savedTimerPvP);
-    }
-    catch (error){
-        res.status(500).json({message: error.message});
-    }
-}
+    try {
+        const { winner, loser } = req.body;
 
-export const getTimersPvP = async (req, res) => {
-    try{
-        const timers = await TimerPvP.find().populate('winner');
-        res.status(200).json(timers);
+        // Verifica que winner y loser sean ObjectId válidos
+        if (!mongoose.Types.ObjectId.isValid(winner) || !mongoose.Types.ObjectId.isValid(loser)) {
+            return res.status(400).json({ message: 'Winner o Loser no son ObjectId válidos' });
+        }
+
+        const timerpvp = await TimerPvP.create({ winner, loser });
+        res.status(201).json(timerpvp);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
     }
-    catch (error){
-        res.status(500).json({message: error.message});
-    }
-}
+};
 
 export const getTimerPvPById = async (req, res) => {
-    try{
-        const timer = await TimerPvP.findById(req.params.id);
-        if (!timer){
-            return res.status(404).json({message: "Timer not found"});
-        }
-        res.status(200).json(timer);
-    }
-    catch (error){
-        res.status(500).json({message: error.message});
+    try {
+        const timerpvp = await TimerPvP.findById(req.params.id);
+        res.status(200).json(timerpvp);
+    } catch (error) {
+        res.status(404).json({ message: error.message });
     }
 }
 
 export const updateTimerPvPById = async (req, res) => {
-    try{
-        const {time, scramble, winner} = req.body;
-        const updatedTimer = await TimerPvP.findByIdAndUpdate(
-            req.params.id,
-            {time, scramble, winner},
-            {new: true}
-        );
-        if (!updatedTimer){
-            return res.status(404).json({message: "Timer not found"});
-        }
-        res.status(200).json(updatedTimer);
+    try {
+        await TimerPvP.findByIdAndUpdate
+            (req.params.id, req.body);
+        res.status(204).json();
     }
-    catch (error){
-        res.status(500).json({message: error.message});
+    catch (error) {
+        res.status(404).json({ message: error.message });
     }
 }
 
 export const deleteTimerPvPById = async (req, res) => {
-    try{
-        const timer = await TimerPvP.findByIdAndDelete(req.params.id);
-        if (!timer){
-            return res.status(404).json({message: "Timer not found"});
-        }
-        res.status(200).json({message: "Timer deleted"});
-    }
-    catch (error){
-        res.status(500).json({message: error.message});
+    try {
+        await TimerPvP.findByIdAndDelete(req.params.id);
+        res.status(204).json();
+    } catch (error) {
+        res.status(404).json({ message: error.message });
     }
 }
-

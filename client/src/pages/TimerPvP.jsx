@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import "./Timer.css";
 import io from 'socket.io-client';
 import { useAuth } from "../context/AuthContext";
+import { useAuthTimerPvP } from '../context/TimerPvPContext';
 //import Camara from "../components/Camara";
 
 function TimerPvP() {
   const { user } = useAuth();
+  const { createTimerPvP } = useAuthTimerPvP();
   const [usuario, setUsuario] = useState('');
   const [milisegundos, setMilisegundos] = useState(0);
   const [segundos, setSegundos] = useState(0);
@@ -16,6 +18,8 @@ function TimerPvP() {
   const [isPaired, setIsPaired] = useState(false);
   const [socket, setSocket] = useState(''); // Estado para almacenar el socket
   const [resultado, setResultado] = useState(null);
+
+
 
   useEffect(() => {
     const socket = io('http://localhost:4000');
@@ -39,7 +43,13 @@ function TimerPvP() {
     });
 
     socket.on('resultado', (data) => {
+      console.log(data);
       setResultado(data.ganador);
+    
+      const winner = JSON.parse(data.winner);
+      const loser = JSON.parse(data.loser);
+    
+      createTimerPvP(winner, loser);
     });
 
     return () => {

@@ -21,16 +21,6 @@ const userSchema = new mongoose.Schema({
         trim: true,
         unique: true,
     },
-    torneos:
-    {
-        type: Array,
-        required: false,
-    },
-    confrontaciones:
-    {
-        type: Array,
-        required: false,
-    },
     points:
     {
         type: Number,

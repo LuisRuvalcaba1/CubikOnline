@@ -18,6 +18,7 @@ import Store from "./pages/Store.jsx";
 import ProductPage from "./pages/ProductPage.jsx";
 import Camara from "./pages/CamaraPage.jsx";
 import TimerPvP from "./pages/TimerPvP.jsx";
+import { TimerPvPProvider } from "./context/TimerPvPContext.jsx";
 
 
 function App() {
@@ -26,7 +27,7 @@ function App() {
       <TimerProvider>
         <ProductProvider>
           <StoreProvider>
-  
+            <TimerPvPProvider>
               <BrowserRouter>
                 <Navbar />
                 <Routes>
@@ -45,13 +46,11 @@ function App() {
                     <Route path="/timerul" element={<TimerUserLoged />} />
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/account/password" element={<Account />} />
-
                     <Route path="/timerpvp" element={<TimerPvP />} />
-
                   </Route>
                 </Routes>
               </BrowserRouter>
-         
+            </TimerPvPProvider>
           </StoreProvider>
         </ProductProvider>
       </TimerProvider>

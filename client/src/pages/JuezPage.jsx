@@ -45,7 +45,6 @@ function JuezPage() {
         />
 
         
-
         <button type="submit">Start</button>
       </form>
     </div>
