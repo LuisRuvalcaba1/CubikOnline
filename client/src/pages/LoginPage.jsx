@@ -36,9 +36,11 @@ function LoginPage(){
                     className='w-full bg-zinc-700 text-white px-4 py-2 rounded-md'
                     placeholder='Email'/>
                     {errors.email && <p className='text-red-500'>Email is required</p>}
+                    <br />
                     <input type="password" {... register("password", {required:true})} 
                     className='w-full bg-zinc-700 text-white px-4 py-2 rounded-md'
                     placeholder='Password'/>
+                    <br />
                     {errors.password && <p className='text-red-500 bg-center'>Password is required</p>}
                     <button type="submit">Login</button>
 

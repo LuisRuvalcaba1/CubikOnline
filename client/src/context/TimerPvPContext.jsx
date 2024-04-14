@@ -24,7 +24,9 @@ export const TimerPvPProvider = ({ children }) => {
         winner: winner.id,
         loser: loser.id,
       });
-      setTimerPvPs([...timerPvPs, newTimerPvP]);
+      if (newTimerPvP.status === 201) {
+        setTimerPvPs([...timerPvPs, newTimerPvP.data]);
+      }
     } catch (error) {
       console.error("Error al crear TimerPvP:", error);
     }

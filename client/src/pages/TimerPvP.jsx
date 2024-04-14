@@ -19,8 +19,6 @@ function TimerPvP() {
   const [socket, setSocket] = useState(''); // Estado para almacenar el socket
   const [resultado, setResultado] = useState(null);
 
-
-
   useEffect(() => {
     const socket = io('http://localhost:4000');
     setSocket(socket);
@@ -46,10 +44,11 @@ function TimerPvP() {
       console.log(data);
       setResultado(data.ganador);
     
-      const winner = JSON.parse(data.winner);
-      const loser = JSON.parse(data.loser);
-    
-      createTimerPvP(winner, loser);
+      if (data.ganador) {
+        const winner = JSON.parse(data.winner);
+        const loser = JSON.parse(data.loser);
+        createTimerPvP(winner, loser);
+      }
     });
 
     return () => {

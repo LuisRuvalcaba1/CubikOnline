@@ -4,12 +4,9 @@ import mongoose from 'mongoose';
 export const createTimerPvP = async (req, res) => {
     try {
         const { winner, loser } = req.body;
-
-        // Verifica que winner y loser sean ObjectId válidos
         if (!mongoose.Types.ObjectId.isValid(winner) || !mongoose.Types.ObjectId.isValid(loser)) {
             return res.status(400).json({ message: 'Winner o Loser no son ObjectId válidos' });
         }
-
         const timerpvp = await TimerPvP.create({ winner, loser });
         res.status(201).json(timerpvp);
     } catch (error) {
