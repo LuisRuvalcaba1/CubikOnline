@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import "./Timer.css";
+import { Link,useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 import { useAuth } from "../context/AuthContext";
 import { useAuthTimerPvP } from '../context/TimerPvPContext';
 //import Camara from "../components/Camara";
 
 function TimerPvP() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { createTimerPvP } = useAuthTimerPvP();
   const [usuario, setUsuario] = useState('');
@@ -107,7 +109,6 @@ function TimerPvP() {
           socket.emit('message', message);
           console.log('Enviado:', message);
         }
-      
     }
   }
 

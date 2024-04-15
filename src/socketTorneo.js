@@ -22,6 +22,5 @@ export function tournamentSocket(httpServer){
         console.log(`User connected: ${socket.userId}`);
 
         
-
     })
 }

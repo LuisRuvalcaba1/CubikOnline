@@ -1,25 +1,30 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import RegisterPage from "./pages/RegisterPage.jsx";
-import LoginPage from "./pages/LoginPage.jsx";
-import { AuthProvider } from "./context/AuthContext";
-import ProfilePage from "./pages/ProfilePage.jsx";
-import HomePage from "./pages/HomePage.jsx";
-import ProtectedRoute from "./ProtectedRoute.jsx";
-import AprendizajePage from "./pages/AprendizajePage.jsx";
-import MetodoP from "./pages/MethotP.jsx";
-import Timer from "./pages/Timer.jsx";
-import TimerUserLoged from "./pages/TimerUserLoged.jsx";
-import { Navbar } from "./components/Navbar.jsx";
-import { TimerProvider } from "./context/TimerContext.jsx";
-import { ProductProvider } from "./context/ProductContext.jsx";
-import Account from "./pages/Account.jsx";
-import { StoreProvider } from "./context/StoreContext.jsx";
-import Store from "./pages/Store.jsx";
-import ProductPage from "./pages/ProductPage.jsx";
-import Camara from "./pages/CamaraPage.jsx";
-import TimerPvP from "./pages/TimerPvP.jsx";
-import { TimerPvPProvider } from "./context/TimerPvPContext.jsx";
-
+import { Routes, Route } from "react-router-dom";
+import {
+  AuthProvider,
+  TimerProvider,
+  ProductProvider,
+  StoreProvider,
+  TimerPvPProvider,
+  BrowserRouter,
+  Navbar,
+  HomePage,
+  LoginPage,
+  RegisterPage,
+  AprendizajePage,
+  MetodoP,
+  Timer,
+  ProductPage,
+  Camara,
+  Store,
+  TimerUserLoged,
+  ProfilePage,
+  Account,
+  TimerPvP,
+  Confirmation,
+  TorneoPage,
+  ProtectedRoute,
+  TorneoProvider,
+} from "./imports";
 
 function App() {
   return (
@@ -28,6 +33,7 @@ function App() {
         <ProductProvider>
           <StoreProvider>
             <TimerPvPProvider>
+              <TorneoProvider>
               <BrowserRouter>
                 <Navbar />
                 <Routes>
@@ -40,16 +46,18 @@ function App() {
                   <Route path="/product" element={<ProductPage />} />
                   <Route path="/camara" element={<Camara />} />
 
-
                   <Route element={<ProtectedRoute />}>
                     <Route path="/store" element={<Store />} />
                     <Route path="/timerul" element={<TimerUserLoged />} />
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/account/password" element={<Account />} />
                     <Route path="/timerpvp" element={<TimerPvP />} />
+                    <Route path="/confirmation" element={<Confirmation />} />
+                    <Route path="/torneo" element={<TorneoPage />} />
                   </Route>
                 </Routes>
               </BrowserRouter>
+              </TorneoProvider>
             </TimerPvPProvider>
           </StoreProvider>
         </ProductProvider>

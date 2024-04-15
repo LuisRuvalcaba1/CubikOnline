@@ -7,6 +7,7 @@ import {
   updateUserRequest,
   getUsersRequest,
   statusChangeRequest,
+  changeToJugdeRequest,
 } from "../api/auth.js";
 import Cookies from "js-cookie";
 
@@ -20,6 +21,7 @@ export const useAuth = () => {
   }
   return context;
 };
+
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -150,6 +152,17 @@ export const AuthProvider = ({ children }) => {
       throw error;
     }
   };
+  
+  const changeToJugde = async (email, role) => {
+    try {
+      const res = await changeToJugdeRequest(email, role);
+      console.log(res.data);
+      return res.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
 
   return (
     <AuthContext.Provider
@@ -160,6 +173,7 @@ export const AuthProvider = ({ children }) => {
         updateUserPoints,
         getUsersTable,
         statusChangeAuth,
+        changeToJugde,
         logout,
         loading,
         user,

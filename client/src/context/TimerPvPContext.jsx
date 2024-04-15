@@ -1,7 +1,6 @@
 import { createContext, useState, useContext } from "react";
-import { useAuth } from "./AuthContext";
 export const TimerPvPContext = createContext();
-import { timerPvPRequest as timerPvPRequestFunction } from "../api/timerpvp.js"; // Importa la función timerPvPRequest
+import { timerPvPRequest as timerPvPRequestFunction } from "../api/timerpvp.js";
 
 // Crea el contexto
 export const useAuthTimerPvP = () => {

@@ -14,8 +14,6 @@ export const register = async (req, res) => {
       username,
       email,
       password: passwordHash,
-      torneos: [],
-      confrontaciones: [],
       points: 0,
       role: "user",
       status: "active",
@@ -86,6 +84,17 @@ export const statusChange = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+export const changeToJugde = async (req, res) => {
+  const { email, role } = req.body;
+  try {
+    const userToChange = await User.findOne({ email});
+    if (!userToChange) return res.status(400).json({ message: "User not found" });
+    userToChange.role = role;
+    userToChange.save();
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 export const profile = async (req, res) => {
   const userFound = await User.findById(req.user.id);
@@ -98,7 +107,6 @@ export const profile = async (req, res) => {
     rank: userFound.rank,
     status: userFound.status,
   });
-  res.send("profile");
 };
 
 export const verifyToken = async (req, res) => {
