@@ -84,13 +84,15 @@ export const statusChange = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 export const changeToJugde = async (req, res) => {
   const { email, role } = req.body;
   try {
-    const userToChange = await User.findOne({ email});
+    const userToChange = await User.findOne({ email });
     if (!userToChange) return res.status(400).json({ message: "User not found" });
     userToChange.role = role;
-    userToChange.save();
+    await userToChange.save();
+    res.json(userToChange);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

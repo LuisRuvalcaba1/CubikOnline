@@ -153,9 +153,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
   
-  const changeToJugde = async (email, role) => {
+  const changeToJugde = async (userInfo) => {
     try {
-      const res = await changeToJugdeRequest(email, role);
+      const res = await changeToJugdeRequest(userInfo.email, userInfo.role);
       console.log(res.data);
       return res.data;
     } catch (error) {

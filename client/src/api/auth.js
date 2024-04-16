@@ -14,4 +14,4 @@ export const getUsersRequest = () => axios.get(`/`)
 
 export const statusChangeRequest = (email, status) => axios.put(`/`, email, status)
 
-export const changeToJugdeRequest = (email, role) => axios.put(`/torneo`, email, role)
+export const changeToJugdeRequest = (email, role) => axios.put(`/torneo`,{ email, role})

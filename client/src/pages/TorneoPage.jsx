@@ -4,18 +4,22 @@ import { useAuth } from "../context/AuthContext";
 import { useAuthTorneo } from "../context/TorneoContext";
 
 function TorneoPage() {
-  const { register } = useForm();
-  const { user, changeToJudge } = useAuth();
-  const {createTorneo} = useAuthTorneo();
+  const { register, handleSubmit } = useForm();
+  const { user, changeToJugde } = useAuth();
+  const { createTorneo } = useAuthTorneo();
 
-  const onSubmit = async (data) => {
-    data.role = "juez";
-    data.email = user.email;
-
+  const onSubmit = async (data, event) => {
+    event.preventDefault();
     try {
+      const userInfo = {
+        email: user.email,
+        role: "juez",
+      };
+  
       await Promise.all([
-        changeToJudge(data),
-        createTorneo(data)
+        console.log(data),
+        changeToJugde(userInfo), 
+        createTorneo(data), 
       ]);
       console.log("Torneo creado y rol de usuario cambiado a juez");
     } catch (error) {
@@ -24,47 +28,56 @@ function TorneoPage() {
   };
 
   return (
-    <div style={{ display: "grid", gridGap: "1cm", gridAutoRows: "min-content" }}>
+    <div
+      style={{ display: "grid", gridGap: "1cm", gridAutoRows: "min-content" }}
+    >
       <h1>Juez</h1>
-      <form onSubmit={onSubmit} style={{ display: "grid", gridGap: "1cm" }}>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        style={{ display: "grid", gridGap: "1cm" }}
+      >
         <h2>Configuración de Torneo</h2>
-        <label htmlFor="name">
+        <label htmlFor="nombre">
           <b>Nombre</b>
-          <input type="text" id="name" {...register("name", { required: true })} />
+          <input
+            type="text"
+            id="nombre"
+            {...register("nombre", { required: true })}
+          />
         </label>
 
-        <label htmlFor="participants">
+        <label htmlFor="qty_participantes">
           <b>Participantes</b>
           <input
             type="range"
             id="participants"
             min="5"
             max="12"
-            {...register("participants", { required: true })}
+            {...register("qty_participantes", { required: true })}
           />
         </label>
 
-        <label htmlFor="rank">
+        <label htmlFor="rango">
           <b>Rango</b>
           <input
             type="range"
-            id="rank"
+            id="rango"
             min="0"
             max="10"
-            {...register("rank", { required: true })}
+            {...register("rango", { required: true })}
           />
         </label>
 
-        <label htmlFor="prize">
+        <label htmlFor="premio">
           <b>Premio</b>
           <input
             type="number"
-            id="prize"
+            id="premio"
             min={0}
             max={100000}
             step={100}
             value={0}
-            {...register("prize", { required: true })}
+            {...register("premio", { required: true })}
           />
         </label>
 
