@@ -3,8 +3,8 @@ import mongoose from "mongoose";
 
 export const createTorneo = async (req, res) => {
     try {
-        const { nombre, qty_participantes, rango, premio } = req.body;
-        const torneo = await Torneo.create({ nombre, qty_participantes, rango, premio });
+        const { nombre, qty_participantes, rango, premio, juez } = req.body;
+        const torneo = await Torneo.create({ nombre, qty_participantes, rango, premio, juez});
         res.status(201).json(torneo);
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -13,7 +13,7 @@ export const createTorneo = async (req, res) => {
 
 export const getTorneoById = async (req, res) => {
     try {
-        const torneo = await Torneo.findById(req.params.id);
+        const torneo = await Torneo.findById({juez: req.user.id}).populate('juez');
         res.status(200).json(torneo);
     } catch (error) {
         res.status(404).json({ message: error.message });
@@ -33,7 +33,7 @@ export const updateTorneoById = async (req, res) => {
 
 export const deleteTorneoById = async (req, res) => {
     try {
-        await Torneo.findByIdAndDelete(req.params.id);
+        await Torneo.findByIdAndDelete({juez: req.user.id}).populate('juez');
         res.status(204).json();
     } catch (error) {
         res.status(404).json({ message: error.message });

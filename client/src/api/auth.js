@@ -12,6 +12,6 @@ export const updateUserRequest = (email, points) => axios.put(`/profile/`, email
 
 export const getUsersRequest = () => axios.get(`/`)
 
-export const statusChangeRequest = (email, status) => axios.put(`/`, email, status)
+export const statusChangeRequest = (email, status, role) => axios.put(`/`, email, status, role)
 
 export const changeToJugdeRequest = (email, role) => axios.put(`/torneo`,{ email, role})

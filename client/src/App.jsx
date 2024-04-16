@@ -24,6 +24,9 @@ import {
   TorneoPage,
   ProtectedRoute,
   TorneoProvider,
+  TorneoGetPage,
+  YourTournament,
+  WaitRoom,
 } from "./imports";
 
 function App() {
@@ -54,6 +57,9 @@ function App() {
                     <Route path="/timerpvp" element={<TimerPvP />} />
                     <Route path="/confirmation" element={<Confirmation />} />
                     <Route path="/torneo" element={<TorneoPage />} />
+                    <Route path="/torneoget" element={<TorneoGetPage />} />
+                    <Route path="/yourtournament" element={<YourTournament />} />
+                    <Route path="/waitroom" element={<WaitRoom />} />
                   </Route>
                 </Routes>
               </BrowserRouter>

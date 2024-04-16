@@ -15,9 +15,7 @@ function ProfilePage() {
       {user ? (
         <div>
           <p>Nombre: {user.username}</p>
-          <p>Torneos: {user.torneos}</p>
           <p>Rango: {user.rank}</p>
-          <p>Confrontaciones: {user.confrontaciones}</p>
           <p>Points: {user.points}</p>
           {/*Formulario para sumar puntos al usuario */}
           <form onSubmit={onSubmit}>

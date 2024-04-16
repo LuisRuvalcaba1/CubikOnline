@@ -73,11 +73,12 @@ export const logout = (req, res) => {
 };
 
 export const statusChange = async (req, res) => {
-  const { email, status } = req.body;
+  const { email, status, role } = req.body;
   try {
     const userFound = await User.findOne({ email });
     if (!userFound) return res.status(400).json({ message: "User not found" });
     userFound.status = status;
+    userFound.role = role;
     await userFound.save();
     res.json(userFound);
   } catch (error) {

@@ -17,6 +17,11 @@ const torneoSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    juez: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
 },{timestamps: true});
 
 export default mongoose.model('Torneo', torneoSchema)

@@ -9,6 +9,7 @@ function LoginPage(){
     
     const onSubmit = handleSubmit((data)=> {
         data.status = "active";
+        data.role = "user";
         statusChangeAuth(data);
         signin(data);
     });

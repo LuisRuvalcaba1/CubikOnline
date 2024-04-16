@@ -32,9 +32,9 @@ export const TorneoProvider = ({ children }) => {
         }
     };
 
-    const createTorneo = async (torneo) => {
+    const createTorneo = async (user, torneo) => {
         try {
-        const newTorneo = await createTorneoRequest(torneo);
+        const newTorneo = await createTorneoRequest(user, torneo);
         if (newTorneo.status === 201) {
             setTorneos([...torneos, newTorneo.data]);
         }

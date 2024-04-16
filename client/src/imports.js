@@ -22,6 +22,10 @@ import { TimerPvPProvider } from "./context/TimerPvPContext.jsx";
 import Confirmation from "./pages/Confirmation.jsx";
 import TorneoPage from "./pages/TorneoPage.jsx";
 import { TorneoProvider } from "./context/TorneoContext.jsx";
+import TorneoGetPage from "./pages/TorneoGetPage.jsx";
+import YourTournament from "./pages/YourTournament.jsx";
+import WaitRoom from "./pages/WaitRoom.jsx";
+
 export {
   BrowserRouter,
   Routes,
@@ -49,4 +53,7 @@ export {
   Confirmation,
   TorneoPage,
   TorneoProvider,
+  TorneoGetPage,
+  YourTournament,
+  WaitRoom,
 };

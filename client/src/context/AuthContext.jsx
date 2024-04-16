@@ -10,6 +10,7 @@ import {
   changeToJugdeRequest,
 } from "../api/auth.js";
 import Cookies from "js-cookie";
+import { set } from "mongoose";
 
 
 export const AuthContext = createContext();
@@ -26,6 +27,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isJuez, setIsJuez] = useState(false)
   const [errors, setErrors] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -125,6 +127,7 @@ export const AuthProvider = ({ children }) => {
       Cookies.remove("token");
       setUser(null);
       setIsAuthenticated(false);
+      setIsJuez(false)
     } catch (error) {
       console.log(error);
       throw error;
@@ -142,9 +145,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const statusChangeAuth = async (email, status) => {
+  const statusChangeAuth = async (email, status, role) => {
     try {
-      const res = await statusChangeRequest(email, status);
+      const res = await statusChangeRequest(email, status, role);
       console.log(res.data);
       return res.data;
     } catch (error) {
@@ -157,6 +160,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await changeToJugdeRequest(userInfo.email, userInfo.role);
       console.log(res.data);
+      setIsJuez(true)
       return res.data;
     } catch (error) {
       console.log(error);
@@ -178,6 +182,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         user,
         isAuthenticated,
+        isJuez,
         errors,
       }}
     >

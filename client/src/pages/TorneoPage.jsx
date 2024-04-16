@@ -1,12 +1,15 @@
 import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useAuthTorneo } from "../context/TorneoContext";
+import { useEffect } from "react";
+import {useNavigate} from 'react-router-dom';
+
 
 function TorneoPage() {
   const { register, handleSubmit } = useForm();
-  const { user, changeToJugde } = useAuth();
+  const { user, changeToJugde, isJuez} = useAuth();
   const { createTorneo } = useAuthTorneo();
+  const navigation = useNavigate();  
 
   const onSubmit = async (data, event) => {
     event.preventDefault();
@@ -15,7 +18,7 @@ function TorneoPage() {
         email: user.email,
         role: "juez",
       };
-  
+      data.juez = user._id;
       await Promise.all([
         console.log(data),
         changeToJugde(userInfo), 
@@ -26,6 +29,13 @@ function TorneoPage() {
       console.error("Error al crear el torneo y cambiar el rol:", error);
     }
   };
+
+  useEffect(()=> {
+    if(isJuez) {
+        navigation('/yourtournament')
+    }
+}, [isJuez, navigation]);
+
 
   return (
     <div
@@ -73,9 +83,6 @@ function TorneoPage() {
           <input
             type="number"
             id="premio"
-            min={0}
-            max={100000}
-            step={100}
             value={0}
             {...register("premio", { required: true })}
           />
