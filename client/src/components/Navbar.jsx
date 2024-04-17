@@ -28,6 +28,7 @@ export const Navbar = () => {
                         <>
                             <li><Link to="/" replace onClick={onSubmit}>Logout</Link></li>
                             <li><Link to="/yourtournament">Tu Torneo</Link></li>
+                            <li><Link to="/torneoget" replace>Torneos</Link></li>
                         </>
                     ) :   
                     isAuthenticated ? (
@@ -41,6 +42,7 @@ export const Navbar = () => {
                             <li><Link to="/timerul" replace >Timer</Link></li>
                             <li><Link to="/account/password" replace>Password</Link></li>
                             <li><Link to="/store" replace>Store</Link></li>
+                            <li><Link to="/torneoget" replace>Torneos</Link></li>
 
                         </>
                         
