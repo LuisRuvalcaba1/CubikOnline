@@ -1,5 +1,4 @@
 import Camara from "../components/Camara";
-import '@tensorflow/tfjs-backend-webgl';
 
 function CamaraPage() {
 

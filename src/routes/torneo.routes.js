@@ -4,9 +4,9 @@ import { createTorneo, getTorneos, getTorneoById, updateTorneoById, deleteTorneo
 
 const router = Router();
 router.post('/torneo', authRequired, createTorneo);
-router.get('/activeTorneos', authRequired, getTorneos);
+router.get('/torneoget', authRequired, getTorneos);
 router.get('/yourtournament', authRequired, getTorneoById);
-router.put('/mytorneo/:id', authRequired, updateTorneoById);
-router.delete('/mytorneo/:id', authRequired, deleteTorneoById);
+router.put('/yourtournament/:id', authRequired, updateTorneoById);
+router.delete('/yourtournament/:id', authRequired, deleteTorneoById);
 
 export default router;

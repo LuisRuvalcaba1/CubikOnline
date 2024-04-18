@@ -1,28 +1,58 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuthTorneo } from "../context/TorneoContext";
 import './Torneo.css';
 
 function YourTournament() {
-    const { torneos } = useAuthTorneo();
-
+    const { getTorneoById, deleteTorneo } = useAuthTorneo();
+    const [torneo, setTorneo] = useState([]);	
     useEffect(() => {
-        console.log(torneos);
-    }, [torneos]);
+        const fetchTorneo = async () => {
+            try {
+                const torneo = await getTorneoById();
+                setTorneo(torneo);
+                console.log(torneo);
+                
+            } catch (error) {
+                console.error("Error al obtener el torneo:", error);
+            }
+        };
+    
+        fetchTorneo();
+    }, [getTorneoById]);
 
   return (
     <div>
       <h1>Your Tournament</h1>
 
         <div>
-            {torneos.map((torneo) => (
-                <div key={torneo._id}>
-                    <h2>{torneo.nombre}</h2>
-                    <p>{torneo.qty_participantes}</p>
-                    <p>{torneo.rango}</p>
-                    <p>{torneo.premio}</p>
-                </div>
-            ))}
+          {torneo.length > 0 ? (
+            <div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Participantes</th>
+                    <th>Rango</th>
+                    <th>Premio</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {torneo.map((torneo) => (
+                    <><tr key={torneo._id}>
+                      <td>{torneo.nombre}</td>
+                      <td>{torneo.qty_participantes}</td>
+                      <td>{torneo.rango}</td>
+                      <td>{torneo.premio}</td>
+                    </tr><button onClick={() => deleteTorneo(torneo._id)}>Delete</button></>
 
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p>Loading...</p>
+          )
+          }
         </div>
     </div>
   );

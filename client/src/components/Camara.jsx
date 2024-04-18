@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import Webcam from 'react-webcam';
-import * as tf from '@tensorflow/tfjs';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
-import '@tensorflow/tfjs-backend-webgl';
+import * as tf from '@tensorflow/tfjs';
 
 class Camara extends Component {
     constructor(props) {

@@ -2,32 +2,55 @@ import { useAuthTorneo } from "../context/TorneoContext";
 import { useEffect, useState } from "react";
 
 function TorneoGetPage() {
-  const { getTorneo } = useAuthTorneo();
+  const { getTorneos } = useAuthTorneo();
   const [torneos, setTorneos] = useState([]);
 
   useEffect(() => {
     const fetchTorneos = async () => {
-      const torneos = await getTorneo();
-      setTorneos(torneos);
-      console.log(torneos);
+      try {
+        const torneosGet = await getTorneos();
+        setTorneos(torneosGet);
+        console.log(torneosGet);
+      } catch (error) {
+        // Manejo de errores, por ejemplo:
+        console.error('Error al obtener los torneos:', error);
+      }
     };
-
+  
     fetchTorneos();
-  }, [getTorneo]);
+  }, [getTorneos]);
 
   return (
     <div>
       <h1>Get Torneo</h1>
 
       <div>
-        {torneos.map((torneo) => (
-          <div key={torneo._id}>
-            <h2>{torneo.nombre}</h2>
-            <p>{torneo.qty_participantes}</p>
-            <p>{torneo.rango}</p>
-            <p>{torneo.premio}</p>
+        {torneos.length > 0 ? (
+          <div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Participantes</th>
+                  <th>Rango</th>
+                  <th>Premio</th>
+                </tr>
+              </thead>
+              <tbody>
+                {torneos.map((torneo) => (
+                  <tr key={torneo._id}>
+                    <td>{torneo.nombre}</td>
+                    <td>{torneo.qty_participantes}</td>
+                    <td>{torneo.rango}</td>
+                    <td>{torneo.premio}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        ))}
+        ) : (
+          <p>Loading...</p>
+        )}
       </div>
     </div>
   );

@@ -36,7 +36,6 @@ function TorneoPage() {
     }
 }, [isJuez, navigation]);
 
-
   return (
     <div
       style={{ display: "grid", gridGap: "1cm", gridAutoRows: "min-content" }}

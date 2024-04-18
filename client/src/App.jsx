@@ -14,7 +14,6 @@ import {
   MetodoP,
   Timer,
   ProductPage,
-  Camara,
   Store,
   TimerUserLoged,
   ProfilePage,
@@ -47,7 +46,6 @@ function App() {
                   <Route path="/metodop" element={<MetodoP />}></Route>
                   <Route path="/timer" element={<Timer />}></Route>
                   <Route path="/product" element={<ProductPage />} />
-                  <Route path="/camara" element={<Camara />} />
 
                   <Route element={<ProtectedRoute />}>
                     <Route path="/store" element={<Store />} />

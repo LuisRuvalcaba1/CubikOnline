@@ -16,7 +16,6 @@ import Account from "./pages/Account.jsx";
 import { StoreProvider } from "./context/StoreContext.jsx";
 import Store from "./pages/Store.jsx";
 import ProductPage from "./pages/ProductPage.jsx";
-import Camara from "./pages/CamaraPage.jsx";
 import TimerPvP from "./pages/TimerPvP.jsx";
 import { TimerPvPProvider } from "./context/TimerPvPContext.jsx";
 import Confirmation from "./pages/Confirmation.jsx";
@@ -47,7 +46,6 @@ export {
   StoreProvider,
   Store,
   ProductPage,
-  Camara,
   TimerPvP,
   TimerPvPProvider,
   Confirmation,

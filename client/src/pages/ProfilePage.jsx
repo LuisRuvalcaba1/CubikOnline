@@ -1,14 +1,17 @@
+import { useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useForm } from "react-hook-form";
+
 function ProfilePage() {
   const { register, handleSubmit } = useForm();
   const { user, updateUserPoints } = useAuth();
-
+  
   const onSubmit = handleSubmit((data) => {
     data.email = user.email;
     updateUserPoints(data);
 
   });
+
   return (
     <div>
       <h1 className="">Perfil</h1>

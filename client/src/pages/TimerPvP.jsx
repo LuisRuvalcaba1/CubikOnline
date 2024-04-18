@@ -153,7 +153,6 @@ function TimerPvP() {
       ) : (
         <h1>Esperando emparejamiento...</h1>
       )}
-      {/* <Camara /> */}
     </div>
   );
 }

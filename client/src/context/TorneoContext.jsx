@@ -12,20 +12,20 @@ export const useAuthTorneo = () => {
     return context;
     }
 export const TorneoProvider = ({ children }) => {
-    const [torneos, setTorneos] = useState([]);
+    const [torneos, setTorneos] = useState(null)
 
     const getTorneos = async () => {
         try {
-        const torneos = await getTorneosRequest();
-        setTorneos(torneos.data);
+        const res = await getTorneosRequest();
+        return res.data;
         } catch (error) {
         console.error("Error al obtener torneos:", error);
         }
     };
 
-    const getTorneoById = async (id) => {
+    const getTorneoById = async () => {
         try {
-        const torneo = await getTorneoByIdRequest(id);
+        const torneo = await getTorneoByIdRequest();
         return torneo.data;
         } catch (error) {
         console.error("Error al obtener torneo por id:", error);
@@ -35,37 +35,19 @@ export const TorneoProvider = ({ children }) => {
     const createTorneo = async (user, torneo) => {
         try {
         const newTorneo = await createTorneoRequest(user, torneo);
-        if (newTorneo.status === 201) {
-            setTorneos([...torneos, newTorneo.data]);
-        }
+        setTorneos(newTorneo.data)
+        console.log(newTorneo.data);
         } catch (error) {
         console.error("Error al crear torneo:", error);
         }
     };
 
-    const updateTorneoById = async (id, torneo) => {
+    const deleteTorneo = async (id) => {
         try {
-        const updatedTorneo = await updateTorneoByIdRequest(id, torneo);
-        if (updatedTorneo.status === 200) {
-            const updatedTorneos = torneos.map((torneo) =>
-            torneo.id === id ? updatedTorneo.data : torneo
-            );
-            setTorneos(updatedTorneos);
-        }
+        const res = await deleteTorneoByIdRequest(id);
+        console.log(res);
         } catch (error) {
-        console.error("Error al actualizar torneo por id:", error);
-        }
-    };
-
-    const deleteTorneoById = async (id) => {
-        try {
-        const deletedTorneo = await deleteTorneoByIdRequest(id);
-        if (deletedTorneo.status === 200) {
-            const filteredTorneos = torneos.filter((torneo) => torneo.id !== id);
-            setTorneos(filteredTorneos);
-        }
-        } catch (error) {
-        console.error("Error al eliminar torneo por id:", error);
+        console.error("Error al borrar torneo:", error);
         }
     };
 
@@ -74,8 +56,7 @@ export const TorneoProvider = ({ children }) => {
         getTorneos,
         getTorneoById,
         createTorneo,
-        updateTorneoById,
-        deleteTorneoById,
+        deleteTorneo,
     };
 
     return (
