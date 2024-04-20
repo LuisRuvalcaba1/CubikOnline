@@ -1,0 +1,31 @@
+.confirmation-container {
+    background-color: #333; /* Fondo más oscuro */
+    color: #fff; /* Color de texto blanco */
+    padding: 20px; /* Espaciado interno */
+    border-radius: 10px; /* Bordes redondeados */
+    width: 50%; /* Ancho del contenedor */
+    margin: auto; /* Centra el contenedor horizontalmente */
+    text-align: center; /* Centra el texto */
+    display: flex; /* Activa el modelo de diseño flexbox */
+    flex-direction: column; /* Alinea los elementos en una columna */
+    justify-content: center; /* Centra verticalmente */
+    margin-top: 300px; /* Espacio superior */
+  }
+
+  .confirmation-buttons {
+    display: flex;
+    justify-content: space-between; /* Distribuye los botones uniformemente */
+    margin-top: 20px; /* Espacio superior */
+  }
+  
+  .confirmation-button {
+    background-color: #ccc; /* Fondo gris */
+    padding: 10px 20px; /* Espaciado interno */
+    text-decoration: none; /* Elimina el subrayado del enlace */
+    color: #333; /* Color de texto gris oscuro */
+    border-radius: 5px; /* Bordes redondeados */
+  }
+  
+  .confirmation-button:hover {
+    background-color: #3A3A3A; /* Cambia el color de fondo al pasar el ratón */
+  }

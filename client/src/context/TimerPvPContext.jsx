@@ -16,6 +16,7 @@ export const useAuthTimerPvP = () => {
 // Crea el proveedor del contexto
 export const TimerPvPProvider = ({ children }) => {
   const [timerPvPs, setTimerPvPs] = useState([]);
+  const [resultadoTimerPvP, setResultadoTimerPvP] = useState(null);
 
   const createTimerPvP = async (winner, loser) => {
     try {
@@ -31,7 +32,13 @@ export const TimerPvPProvider = ({ children }) => {
     }
   };
 
+  const setResultadoCon = (resultado) => {
+    setResultadoTimerPvP(resultado);
+  };
+
   const contextValue = {
+    resultadoTimerPvP,
+    setResultadoCon,
     createTimerPvP,
   };
 

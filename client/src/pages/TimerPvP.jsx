@@ -4,7 +4,6 @@ import { Link,useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 import { useAuth } from "../context/AuthContext";
 import { useAuthTimerPvP } from '../context/TimerPvPContext';
-//import Camara from "../components/Camara";
 
 function TimerPvP() {
   const navigate = useNavigate();
@@ -20,9 +19,11 @@ function TimerPvP() {
   const [isPaired, setIsPaired] = useState(false);
   const [socket, setSocket] = useState(''); // Estado para almacenar el socket
   const [resultado, setResultado] = useState(null);
+  const { setResultadoCon } = useAuthTimerPvP();
+
 
   useEffect(() => {
-    const socket = io('http://localhost:4000');
+    const socket = io('http://localhost:4000/confrontation');
     setSocket(socket);
 
     socket.emit('user', JSON.stringify({ id: user._id }))
@@ -45,7 +46,8 @@ function TimerPvP() {
     socket.on('resultado', (data) => {
       console.log(data);
       setResultado(data.ganador);
-    
+      setResultadoCon(data.ganador);
+      navigate('/confirmation');
       if (data.ganador) {
         const winner = JSON.parse(data.winner);
         const loser = JSON.parse(data.loser);
@@ -57,17 +59,6 @@ function TimerPvP() {
       socket.disconnect();
     };
   }, []);
-
-  function mostrarResultado() {
-    if (resultado !== null) {
-        if (resultado) {
-            return <p>¡Felicidades! Ganaste el duelo.</p>;
-        } else {
-            return <p>Lo siento, perdiste el duelo.</p>;
-        }
-    }
-    return null;
-}
 
   useEffect(() => {
     let interval;
@@ -148,7 +139,6 @@ function TimerPvP() {
                   : milisegundos}
             </p>
           </div>
-          {mostrarResultado()}
         </>
       ) : (
         <h1>Esperando emparejamiento...</h1>
