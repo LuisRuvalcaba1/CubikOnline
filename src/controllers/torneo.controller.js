@@ -44,6 +44,15 @@ export const deleteTorneoById = async (req, res) => {
   }
 };
 
+export const deleteTorneoByJuez = async (req, res) => {
+  try {
+    await Torneo.deleteMany({ juez: req.user.id });
+    res.status(204).json();
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+};
+
 export const getTorneos = async (req, res) => {
   try {
     const torneos = await Torneo.find();

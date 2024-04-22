@@ -24,6 +24,7 @@ import { TorneoProvider } from "./context/TorneoContext.jsx";
 import TorneoGetPage from "./pages/TorneoGetPage.jsx";
 import YourTournament from "./pages/YourTournament.jsx";
 import WaitRoom from "./pages/WaitRoom.jsx";
+import Ronda from "./pages/Ronda.jsx";
 
 export {
   BrowserRouter,
@@ -54,4 +55,5 @@ export {
   TorneoGetPage,
   YourTournament,
   WaitRoom,
+  Ronda,
 };

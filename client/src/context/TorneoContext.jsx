@@ -1,6 +1,6 @@
 import { createContext, useState, useContext } from "react";
 const TorneoContext = createContext();
-import {createTorneoRequest, deleteTorneoByIdRequest, getTorneoByIdRequest, getTorneosRequest, updateTorneoByIdRequest} from "../api/torneo.js";
+import {createTorneoRequest, deleteTorneoByIdRequest, getTorneoByIdRequest, getTorneosRequest, deleteTorneoByJuezRequest} from "../api/torneo.js";
 
 export const useAuthTorneo = () => {
     const context = useContext(TorneoContext);
@@ -51,11 +51,21 @@ export const TorneoProvider = ({ children }) => {
         }
     };
 
+    const deleteTorneoByJuez = async () => {
+        try {
+        const res = await deleteTorneoByJuezRequest();
+        console.log(res);
+        } catch (error) {
+        console.error("Error al borrar torneo por juez:", error);
+        }
+    };
+
     const value = {
         torneos,
         getTorneos,
         getTorneoById,
         createTorneo,
+        deleteTorneoByJuez,
         deleteTorneo,
     };
 

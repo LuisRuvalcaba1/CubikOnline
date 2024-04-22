@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import './Navbar.css';
 import { useAuth } from "../context/AuthContext";
 import { useForm } from "react-hook-form";
+import { useAuthTorneo } from "../context/TorneoContext";
 export const Navbar = () => {
     const refreshPage = () => {
         window.reload().location();
@@ -9,12 +10,14 @@ export const Navbar = () => {
 
     const { user, logout, statusChangeAuth, isAuthenticated, isJuez } = useAuth();
     const { handleSubmit } = useForm();
+    const { deleteTorneoByJuez } = useAuthTorneo();
 
     const onSubmit = handleSubmit((data) => {
         data.email = user.email;
         data.status = "inactive";
         data.role = "user";
 
+        deleteTorneoByJuez(data._id)
         statusChangeAuth(data);
         logout();
     });

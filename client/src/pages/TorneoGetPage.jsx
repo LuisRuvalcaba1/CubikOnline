@@ -1,9 +1,13 @@
 import { useAuthTorneo } from "../context/TorneoContext";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function TorneoGetPage() {
+
+  const navigate = useNavigate();
   const { getTorneos } = useAuthTorneo();
   const [torneos, setTorneos] = useState([]);
+  const [torneoSeleccionado, setTorneoSeleccionado] = useState(null);
 
   useEffect(() => {
     const fetchTorneos = async () => {
@@ -19,6 +23,13 @@ function TorneoGetPage() {
   
     fetchTorneos();
   }, [getTorneos]);
+
+  //Crear una funcion que cuando un usuario le de click a Unirse lo redireccione a waitingroom
+  
+  const unirseTorneo = (torneo) => {
+    setTorneoSeleccionado(torneo);
+    navigate('/waitroom');
+  };
 
   return (
     <div>
@@ -43,11 +54,16 @@ function TorneoGetPage() {
                     <td>{torneo.qty_participantes}</td>
                     <td>{torneo.rango}</td>
                     <td>{torneo.premio}</td>
+                    <td>
+                      <button onClick={() => unirseTorneo(torneo)}>
+                        Unirse
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
+            </div>
         ) : (
           <p>Loading...</p>
         )}

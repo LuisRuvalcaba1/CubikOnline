@@ -1,32 +1,36 @@
-import { Routes, Route } from "react-router-dom";
 import {
-  AuthProvider,
-  TimerProvider,
-  ProductProvider,
-  StoreProvider,
-  TimerPvPProvider,
   BrowserRouter,
-  Navbar,
-  HomePage,
-  LoginPage,
+  Routes,
+  Route,
   RegisterPage,
+  LoginPage,
+  AuthProvider,
+  ProfilePage,
+  HomePage,
+  ProtectedRoute,
   AprendizajePage,
   MetodoP,
   Timer,
-  ProductPage,
-  Store,
   TimerUserLoged,
-  ProfilePage,
+  Navbar,
+  TimerProvider,
+  ProductProvider,
   Account,
+  StoreProvider,
+  Store,
+  ProductPage,
   TimerPvP,
+  TimerPvPProvider,
   Confirmation,
   TorneoPage,
-  ProtectedRoute,
   TorneoProvider,
   TorneoGetPage,
   YourTournament,
   WaitRoom,
-} from "./imports";
+  Ronda,
+} from "./imports.js";
+
+
 
 function App() {
   return (
@@ -58,6 +62,7 @@ function App() {
                     <Route path="/torneoget" element={<TorneoGetPage />} />
                     <Route path="/yourtournament" element={<YourTournament />} />
                     <Route path="/waitroom" element={<WaitRoom />} />
+                    <Route path="/ronda" element={<Ronda />} />
                   </Route>
                 </Routes>
               </BrowserRouter>
