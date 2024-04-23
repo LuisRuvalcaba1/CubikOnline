@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuthTorneo } from "../context/TorneoContext";
+import io from 'socket.io-client';
+
 import './Torneo.css';
 
 function YourTournament() {
@@ -20,6 +22,17 @@ function YourTournament() {
         fetchTorneo();
     }, [getTorneoById]);
 
+    useEffect(() => {
+      const socket = io('http://localhost:4000/join');
+      socket.emit('juez', JSON.stringify({ id: torneo.juez }));
+      // socket.on('n_participantes', (participantes) => {
+      //   setTorneo((prevTorneo) => ({ ...prevTorneo, participantes }));
+      // });
+      return () => {
+        socket.disconnect();
+      }
+    }
+    , [torneo]);
   return (
     <div>
       <h1>Your Tournament</h1>

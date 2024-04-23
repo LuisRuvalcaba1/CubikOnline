@@ -60,8 +60,8 @@ function TorneoPage() {
           <input
             type="range"
             id="participants"
-            min="5"
-            max="12"
+            min="4"
+            max="16"
             {...register("qty_participantes", { required: true })}
           />
         </label>
@@ -80,9 +80,8 @@ function TorneoPage() {
         <label htmlFor="premio">
           <b>Premio</b>
           <input
-            type="number"
+            type="text"
             id="premio"
-            value={0}
             {...register("premio", { required: true })}
           />
         </label>

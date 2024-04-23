@@ -14,6 +14,7 @@ export function handleConfrontationEvents(confrontationNS) {
       waitingClients.push(socket);
 
       console.log(`User connected: ${socket.userId}`);
+      console.log(waitingClients.length);
       // Emparejar a los usuarios si hay al menos dos esperando
       if (waitingClients.length >= 2) {
         const [user1, user2] = waitingClients.splice(0, 2); // Tomar los primeros dos clientes

@@ -1,13 +1,18 @@
 import { useAuthTorneo } from "../context/TorneoContext";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import io from 'socket.io-client';
+import { useAuth } from "../context/AuthContext";
+import { useForm } from "react-hook-form";
 
 function TorneoGetPage() {
-
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const {register, handleSubmit} = useForm();
   const { getTorneos } = useAuthTorneo();
   const [torneos, setTorneos] = useState([]);
   const [torneoSeleccionado, setTorneoSeleccionado] = useState(null);
+  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
     const fetchTorneos = async () => {
@@ -16,19 +21,18 @@ function TorneoGetPage() {
         setTorneos(torneosGet);
         console.log(torneosGet);
       } catch (error) {
-        // Manejo de errores, por ejemplo:
         console.error('Error al obtener los torneos:', error);
       }
     };
-  
+
     fetchTorneos();
   }, [getTorneos]);
 
-  //Crear una funcion que cuando un usuario le de click a Unirse lo redireccione a waitingroom
-  
-  const unirseTorneo = (torneo) => {
-    setTorneoSeleccionado(torneo);
-    navigate('/waitroom');
+  const unirseTorneo = (data) => {
+    data.torneo = data._id;
+    data.user = user._id;
+    console.log(data);
+    navigate('/waitroom', { state: data });
   };
 
   return (
@@ -56,7 +60,7 @@ function TorneoGetPage() {
                     <td>{torneo.premio}</td>
                     <td>
                       <button onClick={() => unirseTorneo(torneo)}>
-                        Unirse
+                        Unirse  
                       </button>
                     </td>
                   </tr>

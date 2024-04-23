@@ -1,11 +1,12 @@
-nav{
+/* Navbar.css */
+nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
     background-color: #333333;
 }
 
-nav .title{
+nav .title {
     font-size: 1.5rem;
     margin: 1rem;
     font-weight: bold;
@@ -13,17 +14,17 @@ nav .title{
     color: white;
 }
 
-nav ul{
+nav ul {
     display: flex;
     list-style: none;
     margin: 1rem;
 }
 
-nav ul li{
+nav ul li {
     list-style: none;
 }
 
-nav ul li a{
+nav ul li a {
     display: block;
     text-decoration: none;
     color: white;
@@ -31,4 +32,27 @@ nav ul li a{
     padding: 0.5rem;
     margin: 0 0.5rem;
     border-radius: 0.5rem;
+}
+
+/* Estilos adicionales para el menú horizontal */
+nav ul li {
+    position: relative;
+}
+
+nav ul li ul {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    display: none;
+    background-color: #333333;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+}
+
+nav ul li:hover > ul {
+    display: block;
+}
+
+nav ul li ul li {
+    white-space: nowrap;
 }
