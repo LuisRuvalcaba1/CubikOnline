@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import { useAuthTimer } from "../context/TimerContext";
+import { removeTokenRequest } from "../api/auth";
+import { useAuth } from "../context/AuthContext";
+import { useAuthTorneo } from "../context/TorneoContext";
 import "./Timer.css";
 
 function TimerUserLoged() {
@@ -13,6 +16,9 @@ function TimerUserLoged() {
   const [tiemposGuardados, setTiemposGuardados] = useState([]);
   const [showSidebar, setShowSidebar] = useState(false);
   const [session, setSession] = useState(1);
+  const { user, logout, statusChangeAuth } = useAuth();
+  const { deleteTorneoByJuez } = useAuthTorneo();
+
 
   useEffect(() => {
     getTimersContext()

@@ -51,11 +51,13 @@ export const Navbar = () => {
         );
       case "/torneo":
         return (
-          <li>
-            <Link to="/torneoget" replace>
-              Torneos
-            </Link>
-          </li>
+          <>
+            <li>
+              <Link to="/torneoget" replace>
+                Torneos
+              </Link>
+            </li>
+          </>
         );
       default:
         return null;
@@ -84,6 +86,11 @@ export const Navbar = () => {
                         <li><Link to="/profile" replace>Profile</Link></li>
                         <li><Link to="/torneo" replace>Torneo</Link></li>
                         <li><Link to="/timerul" replace>Timer</Link></li>
+                        <li>
+            <Link to="/torneoget" replace>
+              Torneos
+            </Link>
+          </li>
                         {renderLinks()}
                     </>
                     

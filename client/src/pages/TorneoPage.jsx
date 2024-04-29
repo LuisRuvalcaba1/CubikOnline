@@ -1,18 +1,20 @@
 import { useForm } from "react-hook-form";
 import { useAuth } from "../context/AuthContext";
 import { useAuthTorneo } from "../context/TorneoContext";
-import { useEffect } from "react";
-import {useNavigate} from 'react-router-dom';
-
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function TorneoPage() {
   const { register, handleSubmit } = useForm();
-  const { user, changeToJugde, isJuez} = useAuth();
+  const { user, changeToJugde, isJuez } = useAuth();
   const { createTorneo } = useAuthTorneo();
-  const navigation = useNavigate();  
+  const navigation = useNavigate();
+  const [participantes, setParticipantes] = useState([]);
 
   const onSubmit = async (data, event) => {
     event.preventDefault();
+    data.qty_participantes = parseInt(data.qty_participantes, 10);
+    setParticipantes(data.qty_participantes);
     try {
       const userInfo = {
         email: user.email,
@@ -21,8 +23,8 @@ function TorneoPage() {
       data.juez = user._id;
       await Promise.all([
         console.log(data),
-        changeToJugde(userInfo), 
-        createTorneo(data), 
+        changeToJugde(userInfo),
+        createTorneo(data),
       ]);
       console.log("Torneo creado y rol de usuario cambiado a juez");
     } catch (error) {
@@ -30,11 +32,11 @@ function TorneoPage() {
     }
   };
 
-  useEffect(()=> {
-    if(isJuez) {
-        navigation('/yourtournament')
+  useEffect(() => {      
+    if (isJuez) {
+      navigation("/yourtournament", { state: { participantes } });
     }
-}, [isJuez, navigation]);
+  }, [isJuez, navigation]);
 
   return (
     <div
@@ -60,8 +62,8 @@ function TorneoPage() {
           <input
             type="range"
             id="participants"
-            min="4"
-            max="16"
+            min="2"
+            max="4"
             {...register("qty_participantes", { required: true })}
           />
         </label>
@@ -71,7 +73,7 @@ function TorneoPage() {
           <input
             type="range"
             id="rango"
-            min="0"
+            min="1"
             max="10"
             {...register("rango", { required: true })}
           />

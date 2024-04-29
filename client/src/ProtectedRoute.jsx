@@ -12,3 +12,5 @@ function ProtectedRoute() {
 }
 
 export default ProtectedRoute;
+
+//Request de si sigue vivo el cliente.

@@ -22,12 +22,10 @@ export function handleConfrontationEvents(confrontationNS) {
         matchedPairs.push(pair);
         user1.emit("paired", user2.userId);
         user2.emit("paired", user1.userId);
-
         // Generar el scramble y enviarlo a ambos clientes emparejados
         const scramble = generarNuevoScramble();
         user1.emit("scramble", scramble);
         user2.emit("scramble", scramble);
-        console.log;
       }
     });
 

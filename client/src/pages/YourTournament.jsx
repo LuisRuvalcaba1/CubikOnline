@@ -1,12 +1,34 @@
 import { useEffect, useState } from "react";
 import { useAuthTorneo } from "../context/TorneoContext";
 import io from 'socket.io-client';
-
+import { useAuth } from "../context/AuthContext";
+import { useLocation } from "react-router-dom";
 import './Torneo.css';
 
 function YourTournament() {
+    const { user } = useAuth();
     const { getTorneoById, deleteTorneo } = useAuthTorneo();
-    const [torneo, setTorneo] = useState([]);	
+    const { participantes } = useLocation().state;
+    const [torneo, setTorneo] = useState([]);
+    const [socket, setSocket] = useState(null);
+    const [juez , setJuez] = useState(null);
+    const [usuariosConectados, setUsuariosConectados] = useState([]); // Estado para almacenar usuarios conectados
+
+    useEffect(() => {
+      setJuez(user._id);
+    }, [user]);
+
+    useEffect(() => {
+      const socket = io('http://localhost:4000/join');
+      setSocket(socket);
+      socket.emit('juez', user._id);
+      socket.emit('n_participantes', participantes);
+
+      return () => {
+        socket.disconnect();
+      }
+    }, [user, participantes]);
+
     useEffect(() => {
         const fetchTorneo = async () => {
             try {
@@ -22,17 +44,7 @@ function YourTournament() {
         fetchTorneo();
     }, [getTorneoById]);
 
-    useEffect(() => {
-      const socket = io('http://localhost:4000/join');
-      socket.emit('juez', JSON.stringify({ id: torneo.juez }));
-      // socket.on('n_participantes', (participantes) => {
-      //   setTorneo((prevTorneo) => ({ ...prevTorneo, participantes }));
-      // });
-      return () => {
-        socket.disconnect();
-      }
-    }
-    , [torneo]);
+    
   return (
     <div>
       <h1>Your Tournament</h1>
@@ -61,6 +73,8 @@ function YourTournament() {
                   ))}
                 </tbody>
               </table>
+
+              <h2>Usuarios conectados:</h2>              
             </div>
           ) : (
             <p>Loading...</p>

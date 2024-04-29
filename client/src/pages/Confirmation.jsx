@@ -1,25 +1,9 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import io from "socket.io-client";
 import { useAuthTimerPvP } from "../context/TimerPvPContext";
 import "./Confirmation.css";
 
 function Confirmation() {
   const { resultadoTimerPvP } = useAuthTimerPvP();
-
-  const [resultado, setResultado] = useState(null);
-  const [socket, setSocket] = useState("");
-
-  function mostrarResultado() {
-    if (resultado !== null) {
-      if (resultado) {
-        return <p>¡Felicidades! Ganaste el duelo.</p>;
-      } else {
-        return <p>Lo siento, perdiste el duelo.</p>;
-      }
-    }
-    return null;
-  }
 
   return (
     <div className="confirmation-container">

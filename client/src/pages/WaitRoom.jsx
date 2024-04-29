@@ -3,13 +3,11 @@ import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from 'react';
 import { useAuthTorneo } from "../context/TorneoContext";
 import { useLocation } from "react-router-dom";
-import { set } from 'mongoose';
 
 
 function WaitRoom() {
   const {user, torneo} = useLocation().state;
   const [socket, setSocket] = useState(null);
-  const [participantes, setParticipantes] = useState([]);
   const { getTorneoById } = useAuthTorneo();
   const [usuario, setUsuario] = useState('');
 
@@ -22,7 +20,6 @@ function WaitRoom() {
     const fetchTorneo = async () => {
       try {
         const torneo = await getTorneoById();
-        setParticipantes(torneo.participantes);
         console.log(torneo);
       } catch (error) {
         console.error("Error al obtener el torneo:", error);
@@ -38,15 +35,10 @@ function WaitRoom() {
     const socket = io('http://localhost:4000/join');
     setSocket(socket);
 
-    socket.emit('user', JSON.stringify({ id: user._id }))
+    socket.emit('user', user)
     socket.on('user', (user) => {
       setUsuario(user)
     })
-
-    socket.on('n_participantes', (participantes) => {
-      setParticipantes(participantes);
-    });
-
     return () => {
       socket.disconnect();
     };
