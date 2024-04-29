@@ -30,7 +30,7 @@ function TorneoGetPage() {
 
   const unirseTorneo = (data) => {
     data.torneo = data._id;
-    data.user = user._id;
+    data.user2 = user._id;
     console.log(data);
     navigate('/waitroom', { state: data });
   };

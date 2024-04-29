@@ -12,7 +12,6 @@ function YourTournament() {
     const [torneo, setTorneo] = useState([]);
     const [socket, setSocket] = useState(null);
     const [juez , setJuez] = useState(null);
-    const [usuariosConectados, setUsuariosConectados] = useState([]); // Estado para almacenar usuarios conectados
 
     useEffect(() => {
       setJuez(user._id);
