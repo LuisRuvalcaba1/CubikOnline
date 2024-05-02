@@ -64,10 +64,28 @@ function WaitRoom() {
       );
     });
 
+    if (socket) {
+      socket.on("nuevaRonda", (data) => {
+        setIsPaired(true);
+        setScramble(data.scramble);
+      });
+    }
+    
     return () => {
       socket.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    if (resultado && resultado.includes("Ganaste")) {
+      setGanador(true);
+      if (socket) {
+        socket.emit("finalRound");
+      }
+    } else if (resultado && resultado.includes("Perdiste")) {
+      setGanador(false);
+    }
+  }, [resultado]);  
 
   useEffect(() => {
     let interval;

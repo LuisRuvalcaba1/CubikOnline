@@ -1,9 +1,8 @@
 export function handleJoinTournament(joinNS) {
   let participantes = [];
   let juezID = [];
-  let scrambles = [];
   let n_p;
-  let currentRound = 0;
+  let ganadores = [];
   let roundParticipants = [];
   const participantesData = {};
 
@@ -49,27 +48,23 @@ export function handleJoinTournament(joinNS) {
             participant.emit("scramble", scramble);
           });
         });
-
-        currentRound++;
       }
     });
 
-    socket.on("roundComplete", () => {
-      if (currentRound < 5) {
-        const scramble = scrambles[currentRound];
-        const groups = groupParticipants(participantes, 2);
-        groups.forEach((group) => {
-          group.forEach((participant) => {
-            participant.emit(
-              "paired",
-              group.map((p) => p.userId)
-            );
-            participant.emit("scramble", scramble);
+    socket.on("finalRound", () => {
+      if (ganadores.length > 1) {
+        const nuevosGrupos = groupParticipants(ganadores, 2);
+        nuevosGrupos.forEach((grupo) => {
+          const scramble = generarNuevoScramble();
+          grupo.forEach((participante) => {
+            participante.emit("nuevaRonda", {
+              oponentes: grupo.map((p) => p.userId),
+              scramble,
+            });
           });
         });
-        currentRound++;
-      } else {
-        console.log("Torneo completado");
+        roundParticipants = []; // Reiniciar la lista de participantes por ronda
+        ganadores = []; // Reiniciar la lista de ganadores
       }
     });
 
@@ -133,7 +128,7 @@ export function handleJoinTournament(joinNS) {
           promedio: promedio2,
           promedioOponente: promedio1,
         });
-
+        ganadores.push(ganador); 
         console.log(`Winner: ${ganador.userId}`);
       }
     });
