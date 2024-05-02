@@ -3,9 +3,9 @@ export function handleJoinTournament(joinNS) {
   let juezID = [];
   let scrambles = [];
   let n_p;
-  let rondas = [];
-  const tiempos = {};
-  let scrambleIndex = 0;
+  let currentRound = 0;
+  let roundParticipants = [];
+  const participantesData = {};
 
   joinNS.on("connection", (socket) => {
     console.log("Conectado al espacio de nombres de torneos");
@@ -15,7 +15,7 @@ export function handleJoinTournament(joinNS) {
       n_p = n;
       socket.emit("n_participantes", n);
       console.log(`n_participantes: ${socket.n_p}`);
-      console.log(typeof(socket.n_p));
+      console.log(typeof socket.n_p);
     });
 
     socket.on("juez", (juez) => {
@@ -30,58 +30,46 @@ export function handleJoinTournament(joinNS) {
       socket.emit("user", user);
       participantes.push(socket);
       console.log(`User connected: ${socket.userId}`);
+      console.log(
+        "Participantes:",
+        participantes.map((s) => s.userId)
+      );
 
       console.log(participantes.length);
-      console.log("Usuarios faltantes",n_p - participantes.length);
-      if (participantes.length == n_p) {
-        for(let i = 0; i<5 ; i++){
-          scrambles.push(generarNuevoScramble());
-          console.log(scrambles[i]);
-        }
+      console.log("Usuarios faltantes", n_p - participantes.length);
+      if (participantes.length === n_p) {
+        const groups = groupParticipants(participantes, n_p);
+        groups.forEach((group) => {
+          const scramble = generarNuevoScramble();
+          group.forEach((participant) => {
+            participant.emit(
+              "paired",
+              group.map((p) => p.userId)
+            );
+            participant.emit("scramble", scramble);
+          });
+        });
 
-        while (participantes.length >= 2) {
-          const [user1, user2] = participantes.splice(0, 2);
-          const pair = { user1, user2 };
-          rondas.push(pair);
-          user1.emit("paired", user2.userId);
-          user2.emit("paired", user1.userId);
-          user1.emit("scramble", scrambles[0]);
-          user2.emit("scramble", scrambles[0]);
-        }
-    
-        console.log("Usuarios emparejados");
+        currentRound++;
       }
     });
 
-    socket.on("roundResult", (data) => {
-      const { winner, loser } = JSON.parse(data);
-    
-      // Encontrar la ronda correspondiente
-      const round = rondas.find(
-        (round) =>
-          round &&
-          (round.user1.userId === winner ||
-            round.user1.userId === loser ||
-            round.user2.userId === winner ||
-            round.user2.userId === loser)
-      );
-    
-      if (round) {
-        // Remover los participantes de la ronda actual
-        rondas = rondas.filter((r) => r !== round);
-    
-        // Agregar el ganador a la siguiente ronda
-        const ganador = round.user1.userId === winner ? round.user1 : round.user2;
-        participantes.push(ganador);
-    
-        // Iniciar una nueva ronda si hay suficientes participantes
-        if (participantes.length >= 2) {
-          iniciarNuevaRonda();
-        } else if (participantes.length === 1) {
-          // Declarar el ganador final si solo queda un participante
-          const ganador = participantes[0];
-          joinNS.emit("finalResult", `El ganador final es ${ganador.username}`);
-        }
+    socket.on("roundComplete", () => {
+      if (currentRound < 5) {
+        const scramble = scrambles[currentRound];
+        const groups = groupParticipants(participantes, 2);
+        groups.forEach((group) => {
+          group.forEach((participant) => {
+            participant.emit(
+              "paired",
+              group.map((p) => p.userId)
+            );
+            participant.emit("scramble", scramble);
+          });
+        });
+        currentRound++;
+      } else {
+        console.log("Torneo completado");
       }
     });
 
@@ -90,63 +78,125 @@ export function handleJoinTournament(joinNS) {
       participantes = participantes.filter(
         (client) => client.userId !== socket.userId
       );
-
-      juezID = juezID.filter(
-        (client) => client.juezID !== socket.juezID
-      );
+      juezID = juezID.filter((client) => client.juezID !== socket.juezID);
     });
 
     socket.on("times", (message) => {
-      const { time } = JSON.parse(message);
+      const time = JSON.parse(message);
       const userId = socket.userId;
-    
-      if (!tiempos[userId]) {
-        tiempos[userId] = [];
+      console.log(`Tiempo de ${userId} : `, time);
+
+      if (!participantesData[userId]) {
+        participantesData[userId] = { tiempos: [] };
       }
-    
-      tiempos[userId].push(time);
+
+      const pair = roundParticipants.find(
+        (pair) => pair.user1.userId === userId || pair.user2.userId === userId
+      );
+
+      if (!pair) {
+        console.error("Pair not found");
+        return;
+      }
+
+      pair.user1.tiempos = pair.user1.tiempos || [];
+      pair.user2.tiempos = pair.user2.tiempos || [];
+
+      if (pair.user1.userId === socket.userId) {
+        pair.user1.tiempos.push(time);
+        console.log(pair.user1.tiempos);
+      } else {
+        pair.user2.tiempos.push(time);
+        console.log(pair.user2.tiempos);
+      }
+
+      if (pair.user1.tiempos.length === 5 && pair.user2.tiempos.length === 5) {
+        const tiempos1 = pair.user1.tiempos.map(convertTimeToMilliseconds);
+        const tiempos2 = pair.user2.tiempos.map(convertTimeToMilliseconds);
+
+        const promedio1 = tiempos1.reduce((a, b) => a + b, 0) / tiempos1.length;
+        const promedio2 = tiempos2.reduce((a, b) => a + b, 0) / tiempos2.length;
+
+        console.log(`Promedio de ${pair.user1.userId}: ${promedio1}`);
+        console.log(`Promedio de ${pair.user2.userId}: ${promedio2}`);
+
+        const ganador = promedio1 < promedio2 ? pair.user1 : pair.user2;
+        const perdedor = promedio1 < promedio2 ? pair.user2 : pair.user1;
+
+        ganador.emit("resultado", {
+          ganador: true,
+          promedio: promedio1,
+          promedioOponente: promedio2,
+        });
+        perdedor.emit("resultado", {
+          ganador: false,
+          promedio: promedio2,
+          promedioOponente: promedio1,
+        });
+
+        console.log(`Winner: ${ganador.userId}`);
+      }
     });
 
     socket.on("nextScramble", () => {
-      if (scrambleIndex < scrambles.length) {
-        socket.emit("newScramble", scrambles[scrambleIndex]);
-        scrambleIndex++;
-      } else {
-        // Calcular el tiempo promedio de cada usuario
-        const promedios = {};
-        for (const userId in tiempos) {
-          const tiemposUsuario = tiempos[userId];
-          const totalSegundos = tiemposUsuario.reduce((total, tiempo) => {
-            const [minutos, segundos, milisegundos] = tiempo.split(":").map(Number);
-            return total + minutos * 60 + segundos + milisegundos / 1000;
-          }, 0);
-          const promedioSegundos = totalSegundos / tiemposUsuario.length;
-          promedios[userId] = promedioSegundos;
-        }
-    
-        // Encontrar el usuario con el tiempo promedio más bajo
-        const ganador = Object.entries(promedios).reduce((min, [userId, promedio]) => {
-          return promedio < min[1] ? [userId, promedio] : min;
-        }, [null, Infinity]);
-    
-        // Emitir el resultado a todos los clientes
-        joinNS.emit("result", `El ganador es ${ganador[0]} con un tiempo promedio de ${ganador[1].toFixed(3)} segundos`);
+      const userId = socket.userId;
+      const participanteData = participantesData[userId];
+
+      if (!participanteData) {
+        console.error("Datos del participante no encontrados");
+        return;
       }
+
+      // Generar un nuevo scramble y enviarlo al usuario
+      const nuevoScramble = generarNuevoScramble();
+      socket.emit("scramble", nuevoScramble);
     });
-
   });
-}
 
-function iniciarNuevaRonda() {
-  while (participantes.length >= 2) {
-    const [user1, user2] = participantes.splice(0, 2);
-    const pair = { user1, user2 };
-    rondas.push(pair);
-    user1.emit("paired", user2.userId);
-    user2.emit("paired", user1.userId);
-    user1.emit("scramble", scrambles[scrambleIndex]);
-    user2.emit("scramble", scrambles[scrambleIndex]);
-    scrambleIndex++;
+  function groupParticipants(participantes, groupSize) {
+    const groups = [];
+    let groupIndex = 0;
+
+    while (participantes.length >= groupSize) {
+      const group = participantes.splice(0, groupSize);
+      groups.push(group);
+
+      console.log(
+        `Grupo ${groupIndex}:`,
+        group.map((s) => s.userId)
+      );
+
+      // Agregar cada par de participantes a roundParticipants
+      if (groupSize === 2) {
+        const [user1, user2] = group;
+        roundParticipants.push({ user1, user2 });
+        console.log(`Par ${groupIndex}:`, {
+          user1: user1.userId,
+          user2: user2.userId,
+        });
+      }
+
+      groupIndex++;
+    }
+
+    console.log(
+      "Grupos formados:",
+      groups.map((g) => g.map((s) => s.userId))
+    );
+    console.log(
+      "roundParticipants:",
+      roundParticipants.map((p) => ({
+        user1: p.user1.userId,
+        user2: p.user2.userId,
+      }))
+    );
+
+    return groups;
+  }
+
+  function convertTimeToMilliseconds(timeString) {
+    const [minutes, seconds, milliseconds] = timeString.split(":").map(Number);
+    return minutes * 60 * 1000 + seconds * 1000 + milliseconds;
   }
 }
 
@@ -174,4 +224,3 @@ function generarNuevoScramble() {
 
   return nuevoScramble.trim();
 }
-

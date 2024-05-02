@@ -5,10 +5,11 @@ import { useAuthTorneo } from "../context/TorneoContext";
 import { useLocation } from "react-router-dom";
 
 function WaitRoom() {
-  const {user} = useAuth();
+  const { user } = useAuth();
   const { user2, torneo } = useLocation().state;
   const { getTorneoById } = useAuthTorneo();
   const [usuario, setUsuario] = useState("");
+  const [solveCount, setSolveCount] = useState(0);
   const [isPaired, setIsPaired] = useState(false);
   const [milisegundos, setMilisegundos] = useState(0);
   const [segundos, setSegundos] = useState(0);
@@ -19,6 +20,7 @@ function WaitRoom() {
   const [socket, setSocket] = useState("");
   const [resultado, setResultado] = useState(null);
   const [ganador, setGanador] = useState(null);
+  const [tiempos, setTiempos] = useState({});
 
   useEffect(() => {
     setUsuario(user2);
@@ -46,40 +48,26 @@ function WaitRoom() {
       setUsuario(user);
     });
 
-    socket.on("finalResult", (result) => {
-      setGanador(result);
-    });
-
     socket.on("paired", () => {
       setIsPaired(true);
     });
 
-    socket.on("newScramble", (newScramble) => {
-      setScramble(newScramble);
+    socket.on("scramble", (nuevoScramble) => {
+      setScramble(nuevoScramble);
     });
 
-    if (socket) {
-      socket.on("result", (result) => {
-        setResultado(result);
-      });
-    }
+    socket.on("resultado", (data) => {
+      setResultado(
+        `${data.ganador ? "Ganaste" : "Perdiste"} con un promedio de ${
+          data.promedio
+        }. El promedio de tu oponente fue ${data.promedioOponente}.`
+      );
+    });
 
     return () => {
       socket.disconnect();
     };
   }, []);
-
-  function enviarResultadoRonda(tiempo) {
-    if (socket) {
-      const message = JSON.stringify({
-        winner: socket.userId,
-        loser: null,
-        time: tiempo,
-      });
-      socket.emit("roundResult", message);
-      console.log("Enviado:", message);
-    }
-  }
 
   useEffect(() => {
     let interval;
@@ -102,7 +90,7 @@ function WaitRoom() {
     }
 
     return () => clearInterval(interval);
-  }, [activo, tiempoInicial]);
+  }, [activo, tiempoInicial]);  
 
   function registrarTiempo() {
     if (tiempoInicial && isPaired) {
@@ -111,19 +99,17 @@ function WaitRoom() {
       const tiempoMilisegundos = Math.floor(tiempoTranscurrido % 1000);
       const tiempoSegundos = Math.floor((tiempoTranscurrido / 1000) % 60);
       const tiempoMinutos = Math.floor((tiempoTranscurrido / (1000 * 60)) % 60);
-
+  
       const time = `${tiempoMinutos}:${
         tiempoSegundos < 10 ? "0" : ""
       }${tiempoSegundos}:${
         tiempoMilisegundos < 10 ? "00" : tiempoMilisegundos < 100 ? "0" : ""
       }${tiempoMilisegundos}`;
-
-      enviarResultadoRonda(time);
-
+  
       if (socket) {
-        const message = JSON.stringify({ time: time });
+        const message = JSON.stringify(time);
         socket.emit("times", message);
-        socket.emit("nextScramble");
+        socket.emit("nextScramble"); 
         console.log("Enviado:", message);
       }
     }
@@ -167,8 +153,6 @@ function WaitRoom() {
           </div>
           {resultado && <p>{resultado}</p>}
         </>
-      ) : ganador ? (
-        <p>{user.username}</p>
       ) : (
         <>
           <h1>Wait Room</h1>
