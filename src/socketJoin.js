@@ -38,7 +38,7 @@ export function handleJoinTournament(joinNS) {
       console.log(participantes.length);
       console.log("Usuarios faltantes", n_p - participantes.length);
       if (participantes.length === n_p) {
-        const groups = groupParticipants(participantes, n_p);
+        const groups = groupParticipants(participantes, 2);
         groups.forEach((group) => {
           const scramble = generarNuevoScramble();
           group.forEach((participant) => {
