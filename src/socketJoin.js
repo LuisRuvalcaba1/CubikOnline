@@ -4,7 +4,7 @@ export function handleJoinTournament(joinNS) {
   let n_p;
   let ganadores = [];
   let roundParticipants = [];
-  const participantesData = {};
+  let participantesData = {};
 
   joinNS.on("connection", (socket) => {
     console.log("Conectado al espacio de nombres de torneos");
@@ -61,9 +61,10 @@ export function handleJoinTournament(joinNS) {
               oponentes: grupo.map((p) => p.userId),
               scramble,
             });
+            participante.emit("paired"); // Emitir el evento "paired"
           });
         });
-        roundParticipants = []; // Reiniciar la lista de participantes por ronda
+        reiniciarRonda(nuevosGrupos);
         ganadores = []; // Reiniciar la lista de ganadores
       }
     });
@@ -80,44 +81,41 @@ export function handleJoinTournament(joinNS) {
       const time = JSON.parse(message);
       const userId = socket.userId;
       console.log(`Tiempo de ${userId} : `, time);
-
+    
       if (!participantesData[userId]) {
-        participantesData[userId] = { tiempos: [] };
+        participantesData[userId] = []; // Inicializar con un arreglo vacío
       }
-
+    
       const pair = roundParticipants.find(
         (pair) => pair.user1.userId === userId || pair.user2.userId === userId
       );
-
+    
       if (!pair) {
         console.error("Pair not found");
         return;
       }
-
-      pair.user1.tiempos = pair.user1.tiempos || [];
-      pair.user2.tiempos = pair.user2.tiempos || [];
-
+    
+      participantesData[userId].push(time); // Agregar el tiempo al arreglo
+      console.log(participantesData[userId]);
+    
       if (pair.user1.userId === socket.userId) {
-        pair.user1.tiempos.push(time);
-        console.log(pair.user1.tiempos);
+        pair.user1.tiempos = participantesData[userId];
       } else {
-        pair.user2.tiempos.push(time);
-        console.log(pair.user2.tiempos);
+        pair.user2.tiempos = participantesData[userId];
       }
-
-      if (pair.user1.tiempos.length === 5 && pair.user2.tiempos.length === 5) {
-        const tiempos1 = pair.user1.tiempos.map(convertTimeToMilliseconds);
+    
+      if (pair.user1 && pair.user2 && Array.isArray(pair.user1.tiempos) && Array.isArray(pair.user2.tiempos) && pair.user1.tiempos.length === 5 && pair.user2.tiempos.length === 5) {        const tiempos1 = pair.user1.tiempos.map(convertTimeToMilliseconds);
         const tiempos2 = pair.user2.tiempos.map(convertTimeToMilliseconds);
-
+    
         const promedio1 = tiempos1.reduce((a, b) => a + b, 0) / tiempos1.length;
         const promedio2 = tiempos2.reduce((a, b) => a + b, 0) / tiempos2.length;
-
+    
         console.log(`Promedio de ${pair.user1.userId}: ${promedio1}`);
         console.log(`Promedio de ${pair.user2.userId}: ${promedio2}`);
-
+    
         const ganador = promedio1 < promedio2 ? pair.user1 : pair.user2;
         const perdedor = promedio1 < promedio2 ? pair.user2 : pair.user1;
-
+    
         ganador.emit("resultado", {
           ganador: true,
           promedio: promedio1,
@@ -128,7 +126,7 @@ export function handleJoinTournament(joinNS) {
           promedio: promedio2,
           promedioOponente: promedio1,
         });
-        ganadores.push(ganador); 
+        ganadores.push(ganador);
         console.log(`Winner: ${ganador.userId}`);
       }
     });
@@ -192,6 +190,30 @@ export function handleJoinTournament(joinNS) {
   function convertTimeToMilliseconds(timeString) {
     const [minutes, seconds, milliseconds] = timeString.split(":").map(Number);
     return minutes * 60 * 1000 + seconds * 1000 + milliseconds;
+  }
+
+  function reiniciarRonda(nuevosGrupos) {
+    roundParticipants = []; // Reiniciar la lista de participantes por ronda
+    participantesData = {}; // Reiniciar los datos de los participantes (tiempos registrados)
+    console.log("participantesData reiniciado:", participantesData);
+
+    nuevosGrupos.forEach((grupo, index) => {
+      if (grupo.length === 2) {
+        const [user1, user2] = grupo;
+        roundParticipants.push({ user1, user2 });
+        console.log(`Par ${index}:`, {
+          user1: user1.userId,
+          user2: user2.userId,
+        });
+      }
+    });
+    console.log(
+      "roundParticipants:",
+      roundParticipants.map((p) => ({
+        user1: p.user1.userId,
+        user2: p.user2.userId,
+      }))
+    );
   }
 }
 

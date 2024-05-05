@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import "./Timer.css";
-import { Link,useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 import { useAuth } from "../context/AuthContext";
 import { useAuthTimerPvP } from '../context/TimerPvPContext';

@@ -3,9 +3,11 @@ import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import { useAuthTorneo } from "../context/TorneoContext";
 import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function WaitRoom() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { user2, torneo } = useLocation().state;
   const { getTorneoById } = useAuthTorneo();
   const [usuario, setUsuario] = useState("");
@@ -64,17 +66,23 @@ function WaitRoom() {
       );
     });
 
-    if (socket) {
-      socket.on("nuevaRonda", (data) => {
-        setIsPaired(true);
-        setScramble(data.scramble);
-      });
-    }
-    
     return () => {
       socket.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("nuevaRonda", (data) => {
+        setIsPaired(true);
+        setScramble(data.scramble);
+        setActivo(false); // Detener el cronómetro
+        setMilisegundos(0); // Reiniciar los contadores
+        setSegundos(0);
+        setMinutos(0);
+      });
+    }
+  }, [socket]);
 
   useEffect(() => {
     if (resultado && resultado.includes("Ganaste")) {
@@ -84,6 +92,7 @@ function WaitRoom() {
       }
     } else if (resultado && resultado.includes("Perdiste")) {
       setGanador(false);
+      navigate("/");
     }
   }, [resultado]);  
 
