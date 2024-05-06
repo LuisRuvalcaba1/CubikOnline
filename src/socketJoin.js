@@ -69,6 +69,12 @@ export function handleJoinTournament(joinNS) {
       }
     });
 
+    socket.on("getTiemposUsuarios", () => {
+      juezID.forEach((juez) => {
+        juez.emit("tiemposUsuarios", participantesData);
+      });
+    });
+
     socket.on("disconnect", () => {
       console.log(`User disconnected: ${socket.userId}`);
       participantes = participantes.filter(
@@ -81,148 +87,189 @@ export function handleJoinTournament(joinNS) {
       const time = JSON.parse(message);
       const userId = socket.userId;
       console.log(`Tiempo de ${userId} : `, time);
-    
+
       if (!participantesData[userId]) {
         participantesData[userId] = []; // Inicializar con un arreglo vacío
       }
-    
+
       const pair = roundParticipants.find(
         (pair) => pair.user1.userId === userId || pair.user2.userId === userId
       );
-    
+
       if (!pair) {
         console.error("Pair not found");
         return;
       }
-    
+
       participantesData[userId].push(time); // Agregar el tiempo al arreglo
       console.log(participantesData[userId]);
-    
+
       if (pair.user1.userId === socket.userId) {
         pair.user1.tiempos = participantesData[userId];
       } else {
         pair.user2.tiempos = participantesData[userId];
       }
 
-      juezID.forEach((juez) => {
-        juez.emit("tiemposUsuarios", participantesData);
+      const tiemposPorGrupo = {};
+
+      
+
+      // Agrupar los tiempos de los usuarios por grupo
+      roundParticipants.forEach((pair) => {
+        const grupoId = `${pair.user1.userId}-${pair.user2.userId}`;
+
+        tiemposPorGrupo[grupoId] = {
+          user1: {
+            userId: pair.user1.userId,
+            tiempos: pair.user1.tiempos || [],
+          },
+          user2: {
+            userId: pair.user2.userId,
+            tiempos: pair.user2.tiempos || [],
+          },
+        };
+
+        if (participantesData[userId].length === 5) {
+          if (
+            pair.user1 &&
+            pair.user2 &&
+            Array.isArray(pair.user1.tiempos) &&
+            Array.isArray(pair.user2.tiempos) &&
+            pair.user1.tiempos.length === 5 &&
+            pair.user2.tiempos.length === 5
+          ) {
+            const tiempos1 = pair.user1.tiempos.map(convertTimeToMilliseconds);
+            const tiempos2 = pair.user2.tiempos.map(convertTimeToMilliseconds);
+
+            const promedio1 =
+              tiempos1.reduce((a, b) => a + b, 0) / tiempos1.length;
+            const promedio2 =
+              tiempos2.reduce((a, b) => a + b, 0) / tiempos2.length;
+
+            console.log(`Promedio de ${pair.user1.userId}: ${promedio1}`);
+            console.log(`Promedio de ${pair.user2.userId}: ${promedio2}`);
+
+            const ganador = promedio1 < promedio2 ? pair.user1 : pair.user2;
+            const perdedor = promedio1 < promedio2 ? pair.user2 : pair.user1;
+
+            ganador.emit("resultado", {
+              ganador: true,
+              promedio: promedio1,
+              promedioOponente: promedio2,
+            });
+            perdedor.emit("resultado", {
+              ganador: false,
+              promedio: promedio2,
+              promedioOponente: promedio1,
+            });
+
+            juezID.forEach((juez) => {
+              juez.emit("finalizarGrupo", pair);
+            });
+            
+            ganadores.push(ganador);
+            console.log(`Winner: ${ganador.userId}`);
+          }
+        }
       });
-    
-      if (pair.user1 && pair.user2 && Array.isArray(pair.user1.tiempos) && Array.isArray(pair.user2.tiempos) && pair.user1.tiempos.length === 5 && pair.user2.tiempos.length === 5) {        const tiempos1 = pair.user1.tiempos.map(convertTimeToMilliseconds);
-        const tiempos2 = pair.user2.tiempos.map(convertTimeToMilliseconds);
-    
-        const promedio1 = tiempos1.reduce((a, b) => a + b, 0) / tiempos1.length;
-        const promedio2 = tiempos2.reduce((a, b) => a + b, 0) / tiempos2.length;
-    
-        console.log(`Promedio de ${pair.user1.userId}: ${promedio1}`);
-        console.log(`Promedio de ${pair.user2.userId}: ${promedio2}`);
-    
-        const ganador = promedio1 < promedio2 ? pair.user1 : pair.user2;
-        const perdedor = promedio1 < promedio2 ? pair.user2 : pair.user1;
-    
-        ganador.emit("resultado", {
-          ganador: true,
-          promedio: promedio1,
-          promedioOponente: promedio2,
-        });
-        perdedor.emit("resultado", {
-          ganador: false,
-          promedio: promedio2,
-          promedioOponente: promedio1,
-        });
-        ganadores.push(ganador);
-        console.log(`Winner: ${ganador.userId}`);
-      }
+
+      juezID.forEach((juez) => {
+        juez.emit("tiemposUsuarios", tiemposPorGrupo);
+      });
+
+      socket.on("nextScramble", () => {
+        const userId = socket.userId;
+        const participanteData = participantesData[userId];
+
+        if (!participanteData) {
+          console.error("Datos del participante no encontrados");
+          return;
+        }
+
+        // Generar un nuevo scramble y enviarlo al usuario
+        const nuevoScramble = generarNuevoScramble();
+        socket.emit("scramble", nuevoScramble);
+      });
     });
 
-    socket.on("nextScramble", () => {
-      const userId = socket.userId;
-      const participanteData = participantesData[userId];
+    function groupParticipants(participantes, groupSize) {
+      const groups = [];
+      let groupIndex = 0;
 
-      if (!participanteData) {
-        console.error("Datos del participante no encontrados");
-        return;
+      while (participantes.length >= groupSize) {
+        const group = participantes.splice(0, groupSize);
+        groups.push(group);
+
+        console.log(
+          `Grupo ${groupIndex}:`,
+          group.map((s) => s.userId)
+        );
+
+        if (groupSize === 2) {
+          const [user1, user2] = group;
+          roundParticipants.push({ user1, user2 });
+          console.log(`Par ${groupIndex}:`, {
+            user1: user1.userId,
+            user2: user2.userId,
+          });
+        }
+
+        groupIndex++;
       }
-
-      // Generar un nuevo scramble y enviarlo al usuario
-      const nuevoScramble = generarNuevoScramble();
-      socket.emit("scramble", nuevoScramble);
-    });
-  });
-
-  function groupParticipants(participantes, groupSize) {
-    const groups = [];
-    let groupIndex = 0;
-
-    while (participantes.length >= groupSize) {
-      const group = participantes.splice(0, groupSize);
-      groups.push(group);
 
       console.log(
-        `Grupo ${groupIndex}:`,
-        group.map((s) => s.userId)
+        "Grupos formados:",
+        groups.map((g) => g.map((s) => s.userId))
+      );
+      console.log(
+        "roundParticipants:",
+        roundParticipants.map((p) => ({
+          user1: p.user1.userId,
+          user2: p.user2.userId,
+        }))
       );
 
-      if (groupSize === 2) {
-        const [user1, user2] = group;
-        roundParticipants.push({ user1, user2 });
-        console.log(`Par ${groupIndex}:`, {
-          user1: user1.userId,
-          user2: user2.userId,
-        });
-      }
+      juezID.forEach((juez) => {
+        juez.emit(
+          "grupos",
+          groups.map((g) => g.map((s) => s.userId))
+        );
+      });
 
-      groupIndex++;
+      return groups;
     }
 
-    console.log(
-      "Grupos formados:",
-      groups.map((g) => g.map((s) => s.userId))
-    );
-    console.log(
-      "roundParticipants:",
-      roundParticipants.map((p) => ({
-        user1: p.user1.userId,
-        user2: p.user2.userId,
-      }))
-    );
+    function convertTimeToMilliseconds(timeString) {
+      const [minutes, seconds, milliseconds] = timeString
+        .split(":")
+        .map(Number);
+      return minutes * 60 * 1000 + seconds * 1000 + milliseconds;
+    }
 
-    juezID.forEach((juez) => {
-      juez.emit("grupos", groups.map((g) => g.map((s) => s.userId)));
-    });
-  
+    function reiniciarRonda(nuevosGrupos) {
+      roundParticipants = [];
+      participantesData = {};
+      console.log("participantesData reiniciado:", participantesData);
 
-    return groups;
-  }
-
-  function convertTimeToMilliseconds(timeString) {
-    const [minutes, seconds, milliseconds] = timeString.split(":").map(Number);
-    return minutes * 60 * 1000 + seconds * 1000 + milliseconds;
-  }
-
-  function reiniciarRonda(nuevosGrupos) {
-    roundParticipants = []; // Reiniciar la lista de participantes por ronda
-    participantesData = {}; // Reiniciar los datos de los participantes (tiempos registrados)
-    console.log("participantesData reiniciado:", participantesData);
-
-    nuevosGrupos.forEach((grupo, index) => {
-      if (grupo.length === 2) {
-        const [user1, user2] = grupo;
-        roundParticipants.push({ user1, user2 });
-        console.log(`Par ${index}:`, {
-          user1: user1.userId,
-          user2: user2.userId,
-        });
-      }
-    });
-    console.log(
-      "roundParticipants:",
-      roundParticipants.map((p) => ({
-        user1: p.user1.userId,
-        user2: p.user2.userId,
-      }))
-    );
-  }
+      nuevosGrupos.forEach((grupo, index) => {
+        if (grupo.length === 2) {
+          const [user1, user2] = grupo;
+          roundParticipants.push({ user1, user2 });
+          console.log(`Par ${index}:`, {
+            user1: user1.userId,
+            user2: user2.userId,
+          });
+        }
+      });
+      console.log(
+        "roundParticipants:",
+        roundParticipants.map((p) => ({
+          user1: p.user1.userId,
+          user2: p.user2.userId,
+        }))
+      );
+    }
+  });
 }
 
 function generarNuevoScramble() {

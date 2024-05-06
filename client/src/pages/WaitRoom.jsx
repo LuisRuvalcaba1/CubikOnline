@@ -23,6 +23,7 @@ function WaitRoom() {
   const [resultado, setResultado] = useState(null);
   const [ganador, setGanador] = useState(null);
   const [tiempos, setTiempos] = useState({});
+  const [tiemposRegistrados, setTiemposRegistrados] = useState(0);
 
   useEffect(() => {
     setUsuario(user2);
@@ -76,8 +77,8 @@ function WaitRoom() {
       socket.on("nuevaRonda", (data) => {
         setIsPaired(true);
         setScramble(data.scramble);
-        setActivo(false); // Detener el cronómetro
-        setMilisegundos(0); // Reiniciar los contadores
+        setActivo(false);
+        setMilisegundos(0); 
         setSegundos(0);
         setMinutos(0);
       });
@@ -120,24 +121,27 @@ function WaitRoom() {
   }, [activo, tiempoInicial]);  
 
   function registrarTiempo() {
-    if (tiempoInicial && isPaired) {
-      const tiempoFinal = performance.now();
-      const tiempoTranscurrido = tiempoFinal - tiempoInicial;
-      const tiempoMilisegundos = Math.floor(tiempoTranscurrido % 1000);
-      const tiempoSegundos = Math.floor((tiempoTranscurrido / 1000) % 60);
-      const tiempoMinutos = Math.floor((tiempoTranscurrido / (1000 * 60)) % 60);
+    if (tiemposRegistrados < 5) { // Agregar esta condición
+      if (tiempoInicial && isPaired) {
+        const tiempoFinal = performance.now();
+        const tiempoTranscurrido = tiempoFinal - tiempoInicial;
+        const tiempoMilisegundos = Math.floor(tiempoTranscurrido % 1000);
+        const tiempoSegundos = Math.floor((tiempoTranscurrido / 1000) % 60);
+        const tiempoMinutos = Math.floor((tiempoTranscurrido / (1000 * 60)) % 60);
   
-      const time = `${tiempoMinutos}:${
-        tiempoSegundos < 10 ? "0" : ""
-      }${tiempoSegundos}:${
-        tiempoMilisegundos < 10 ? "00" : tiempoMilisegundos < 100 ? "0" : ""
-      }${tiempoMilisegundos}`;
+        const time = `${tiempoMinutos}:${
+          tiempoSegundos < 10 ? "0" : ""
+        }${tiempoSegundos}:${
+          tiempoMilisegundos < 10 ? "00" : tiempoMilisegundos < 100 ? "0" : ""
+        }${tiempoMilisegundos}`;
   
-      if (socket) {
-        const message = JSON.stringify(time);
-        socket.emit("times", message);
-        socket.emit("nextScramble"); 
-        console.log("Enviado:", message);
+        if (socket) {
+          const message = JSON.stringify(time);
+          socket.emit("times", message);
+          socket.emit("nextScramble");
+          console.log("Enviado:", message);
+          setTiemposRegistrados(tiemposRegistrados + 1); // Incrementar el contador de tiempos registrados
+        }
       }
     }
   }
