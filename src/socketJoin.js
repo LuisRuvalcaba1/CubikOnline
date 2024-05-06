@@ -103,6 +103,10 @@ export function handleJoinTournament(joinNS) {
       } else {
         pair.user2.tiempos = participantesData[userId];
       }
+
+      juezID.forEach((juez) => {
+        juez.emit("tiemposUsuarios", participantesData);
+      });
     
       if (pair.user1 && pair.user2 && Array.isArray(pair.user1.tiempos) && Array.isArray(pair.user2.tiempos) && pair.user1.tiempos.length === 5 && pair.user2.tiempos.length === 5) {        const tiempos1 = pair.user1.tiempos.map(convertTimeToMilliseconds);
         const tiempos2 = pair.user2.tiempos.map(convertTimeToMilliseconds);
@@ -159,7 +163,6 @@ export function handleJoinTournament(joinNS) {
         group.map((s) => s.userId)
       );
 
-      // Agregar cada par de participantes a roundParticipants
       if (groupSize === 2) {
         const [user1, user2] = group;
         roundParticipants.push({ user1, user2 });
@@ -183,6 +186,11 @@ export function handleJoinTournament(joinNS) {
         user2: p.user2.userId,
       }))
     );
+
+    juezID.forEach((juez) => {
+      juez.emit("grupos", groups.map((g) => g.map((s) => s.userId)));
+    });
+  
 
     return groups;
   }

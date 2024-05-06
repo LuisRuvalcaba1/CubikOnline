@@ -1,85 +1,77 @@
 import { useEffect, useState } from "react";
 import { useAuthTorneo } from "../context/TorneoContext";
-import io from 'socket.io-client';
+import io from "socket.io-client";
 import { useAuth } from "../context/AuthContext";
 import { useLocation } from "react-router-dom";
-import './Torneo.css';
+import "./Torneo.css";
+import { useNavigate } from "react-router-dom";
+import Modal from "react-modal";
+
+Modal.setAppElement("#root");
 
 function YourTournament() {
-    const { user } = useAuth();
-    const { getTorneoById, deleteTorneo } = useAuthTorneo();
-    const { participantes } = useLocation().state;
-    const [torneo, setTorneo] = useState([]);
-    const [socket, setSocket] = useState(null);
-    const [juez , setJuez] = useState(null);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { getTorneoById, deleteTorneo } = useAuthTorneo();
+  const { participantes } = useLocation().state;
+  const [torneo, setTorneo] = useState([]);
+  const [socket, setSocket] = useState(null);
+  const [juez, setJuez] = useState(null);
+  const [grupos, setGrupos] = useState([]);
+  const [grupoSeleccionado, setGrupoSeleccionado] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
-    useEffect(() => {
-      setJuez(user._id);
-    }, [user]);
+  useEffect(() => {
+    setJuez(user._id);
+  }, [user]);
 
-    useEffect(() => {
-      const socket = io('http://localhost:4000/join');
-      setSocket(socket);
-      socket.emit('juez', user._id);
-      socket.emit('n_participantes', participantes);
+  useEffect(() => {
+    const socket = io("http://localhost:4000/join");
+    setSocket(socket);
+    socket.emit("juez", user._id);
+    socket.emit("n_participantes", participantes);
 
-      return () => {
-        socket.disconnect();
+    socket.on("grupos", (gruposFormados) => {
+      setGrupos(gruposFormados);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [user, participantes]);
+
+  const onSubmit = (data) => {
+    setGrupoSeleccionado(data);
+
+    navigate("/resultroundusers", { state: { grupo: data } })
+  }
+
+  useEffect(() => {
+    const fetchTorneo = async () => {
+      try {
+        const torneo = await getTorneoById();
+        setTorneo(torneo);
+        console.log(torneo);
+      } catch (error) {
+        console.error("Error al obtener el torneo:", error);
       }
-    }, [user, participantes]);
+    };
 
-    useEffect(() => {
-        const fetchTorneo = async () => {
-            try {
-                const torneo = await getTorneoById();
-                setTorneo(torneo);
-                console.log(torneo);
-                
-            } catch (error) {
-                console.error("Error al obtener el torneo:", error);
-            }
-        };
-    
-        fetchTorneo();
-    }, [getTorneoById]);
+    fetchTorneo();
+  }, [getTorneoById]);
 
-    
   return (
     <div>
       <h1>Your Tournament</h1>
+      <div>
+        <h2>Grupos formados:</h2>
+        {grupos.map((grupo, index) => (
+          <button key={index} onClick={() => onSubmit(grupo)}>
+            Grupo {index + 1}
+          </button>
+        ))}
+      </div>
 
-        <div>
-          {torneo.length > 0 ? (
-            <div>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Nombre</th>
-                    <th>Participantes</th>
-                    <th>Rango</th>
-                    <th>Premio</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {torneo.map((torneo) => (
-                    <><tr key={torneo._id}>
-                      <td>{torneo.nombre}</td>
-                      <td>{torneo.qty_participantes}</td>
-                      <td>{torneo.rango}</td>
-                      <td>{torneo.premio}</td>
-                    </tr><button onClick={() => deleteTorneo(torneo._id)}>Delete</button></>
-
-                  ))}
-                </tbody>
-              </table>
-
-              <h2>Usuarios conectados:</h2>              
-            </div>
-          ) : (
-            <p>Loading...</p>
-          )
-          }
-        </div>
     </div>
   );
 }

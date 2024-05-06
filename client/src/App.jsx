@@ -27,6 +27,8 @@ import {
   TorneoGetPage,
   YourTournament,
   WaitRoom,
+  WaitRound,
+  ResultRoundUsers,
 } from "./imports.js";
 
 
@@ -61,6 +63,8 @@ function App() {
                     <Route path="/torneoget" element={<TorneoGetPage />} />
                     <Route path="/yourtournament" element={<YourTournament />} />
                     <Route path="/waitroom" element={<WaitRoom />} />
+                    <Route path="/waitround" element={<WaitRound />} />
+                    <Route path="/resultroundusers" element={<ResultRoundUsers />} />
                   </Route>
                 </Routes>
               </BrowserRouter>
