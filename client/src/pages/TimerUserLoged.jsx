@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuthTimer } from "../context/TimerContext";
-import { removeTokenRequest } from "../api/auth";
+import { renewTokenRequest, removeTokenRequest } from "../api/auth";
 import { useAuth } from "../context/AuthContext";
 import { useAuthTorneo } from "../context/TorneoContext";
 import "./Timer.css";
@@ -19,7 +19,6 @@ function TimerUserLoged() {
   const { user, logout, statusChangeAuth } = useAuth();
   const { deleteTorneoByJuez } = useAuthTorneo();
 
-
   useEffect(() => {
     getTimersContext()
       .then((response) => {
@@ -33,6 +32,39 @@ function TimerUserLoged() {
   useEffect(() => {
     generarNuevoScramble();
   }, []);
+
+  useEffect(() => {
+
+    const renovarToken = async () => {
+      try {
+        await renewTokenRequest();
+      } catch (error) {
+        console.error('Error al renovar el token:', error);
+      }
+    }
+
+    const eliminarToken = async () => {
+      try {
+        const data = {
+          email: user.email,
+          status: "inactive",
+          role: "user",
+        };
+        deleteTorneoByJuez(data._id);
+        statusChangeAuth(data);
+        await logout();
+        await removeTokenRequest();
+      } catch (error) {
+        console.error('Error al eliminar el token:', error);
+      }
+    };
+
+    renovarToken();
+
+    const timeoutId = setTimeout(eliminarToken, 21600000); 
+
+    return () => clearTimeout(timeoutId);
+  }, [user, deleteTorneoByJuez, statusChangeAuth, logout]);
 
   useEffect(() => {
     let interval;
@@ -134,7 +166,6 @@ function TimerUserLoged() {
           return [nuevoTiempo, ...prevTiempos];
         } else {
           console.error("prevTiempos no es un array:", prevTiempos);
-          // Devuelve un valor predeterminado o maneja este caso según sea necesario
           return [];
         }
       });
@@ -143,6 +174,7 @@ function TimerUserLoged() {
         time,
         scramble,
         session,
+        user: user._id,
       };
 
       createNewTimer(values)

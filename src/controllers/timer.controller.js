@@ -2,12 +2,12 @@ import TimerModel from "../models/timer.model.js";
 
 export const createTimer = async (req, res) => {
     try {
-      const { time, scramble, session } = req.body;
+      const { time, scramble, session, user } = req.body;
       const newTimer = new TimerModel({
         time,
         scramble,
         session,
-        user: req.user.id,
+        user
       });
       
       const savedTimer = await newTimer.save();
@@ -15,12 +15,14 @@ export const createTimer = async (req, res) => {
       console.log(savedTimer);
     } catch (error) {
       res.status(500).json({ message: error.message });
+      console.log(error);
     }
   };
   
   export const getTimers = async (req, res) => {
     try {
-        const timers = await TimerModel.find({ user: req.user.id }).populate('user');
+     
+        const timers = await TimerModel.find().populate("user");
         res.status(200).json(timers);
 
     } catch (error) {
