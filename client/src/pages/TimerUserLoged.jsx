@@ -18,6 +18,7 @@ function TimerUserLoged() {
   const [session, setSession] = useState(1);
   const { user, logout, statusChangeAuth } = useAuth();
   const { deleteTorneoByJuez } = useAuthTorneo();
+  const [categoria, setCategoria] = useState("3x3");
 
   useEffect(() => {
     getTimersContext()
@@ -31,17 +32,16 @@ function TimerUserLoged() {
 
   useEffect(() => {
     generarNuevoScramble();
-  }, []);
+  }, [categoria]);
 
   useEffect(() => {
-
     const renovarToken = async () => {
       try {
         await renewTokenRequest();
       } catch (error) {
-        console.error('Error al renovar el token:', error);
+        console.error("Error al renovar el token:", error);
       }
-    }
+    };
 
     const eliminarToken = async () => {
       try {
@@ -55,13 +55,13 @@ function TimerUserLoged() {
         await logout();
         await removeTokenRequest();
       } catch (error) {
-        console.error('Error al eliminar el token:', error);
+        console.error("Error al eliminar el token:", error);
       }
     };
 
     renovarToken();
 
-    const timeoutId = setTimeout(eliminarToken, 21600000); 
+    const timeoutId = setTimeout(eliminarToken, 21600000);
 
     return () => clearTimeout(timeoutId);
   }, [user, deleteTorneoByJuez, statusChangeAuth, logout]);
@@ -110,21 +110,38 @@ function TimerUserLoged() {
   }, [activo]);
 
   function generarNuevoScramble() {
-    const movimientos = ["R", "L", "U", "D", "F", "B"];
-    const modificadores = ["", "'", "2"];
+    const movimientos = {
+      "2x2": ["R", "L", "U", "D", "F", "B"],
+      "3x3": ["R", "L", "U", "D", "F", "B"],
+      "4x4": ["R", "L", "U", "D", "F", "B", "r", "l", "u", "d", "f", "b"],
+      "5x5": ["R", "L", "U", "D", "F", "B", "r", "l", "u", "d", "f", "b"],
+    };
 
+    const modificadores = ["", "'", "2"];
+    const movimientosCategoria = movimientos[categoria];
     let nuevoScramble = "";
     let ultimoMovimiento = "";
 
-    for (let i = 0; i < 20; i++) {
+    const longitudScramble = {
+      "2x2": 8,
+      "3x3": 20,
+      "4x4": 40,
+      "5x5": 60,
+    };
+
+    for (let i = 0; i < longitudScramble[categoria]; i++) {
       let movimientoAleatorio =
-        movimientos[Math.floor(Math.random() * movimientos.length)];
+        movimientosCategoria[
+          Math.floor(Math.random() * movimientosCategoria.length)
+        ];
       let modificadorAleatorio =
         modificadores[Math.floor(Math.random() * modificadores.length)];
 
       while (movimientoAleatorio === ultimoMovimiento) {
         movimientoAleatorio =
-          movimientos[Math.floor(Math.random() * movimientos.length)];
+          movimientosCategoria[
+            Math.floor(Math.random() * movimientosCategoria.length)
+          ];
       }
 
       nuevoScramble += movimientoAleatorio + modificadorAleatorio + " ";
@@ -246,6 +263,19 @@ function TimerUserLoged() {
                 </li>
               )}
             </ul>
+          </div>
+          <div>
+            <label>Categoría: </label>
+            <select
+              className="text-black"
+              value={categoria}
+              onChange={(e) => setCategoria(e.target.value)}
+            >
+              <option className="text-black" value="2x2">2x2</option>
+              <option className="text-black" value="3x3">3x3</option>
+              <option className="text-black" value="4x4">4x4</option>
+              <option className="text-black" value="5x5">5x5</option>
+            </select>
           </div>
         </div>
         <div>
