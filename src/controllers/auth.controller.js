@@ -3,8 +3,9 @@ import bcrypt from "bcryptjs";
 import { createAccessToken } from "../libs/jwt.js";
 import jwt from "jsonwebtoken";
 import { DB } from "../config.js";
+
 export const register = async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, firstName, lastName, email, password } = req.body;
   try {
     const userFound = await User.findOne({ email });
     if (userFound) return res.status(400).json(["The email is already in use"]);
@@ -12,6 +13,8 @@ export const register = async (req, res) => {
     const passwordHash = await bcrypt.hash(password, 10);
     const newUser = new User({
       username,
+      firstName,
+      lastName,
       email,
       password: passwordHash,
       points: 0,

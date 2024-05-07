@@ -25,6 +25,14 @@ function RegisterPage(){
                 </div>))
             }
             <form onSubmit={onSubmit}>
+            <input type="text" {... register('firstName', {required:true})} 
+                className='w-full bg-zinc-700 text-white px-4 py-2 rounded-md'
+                placeholder='Primer Nombre'/>
+                {errors.firstName && <p className='text-red-500'>First name is required</p>}
+                <input type="text" {... register('lastName', {required:true})} 
+                className='w-full bg-zinc-700 text-white px-4 py-2 rounded-md'
+                placeholder='Apellido Paterno'/>
+                {errors.lastName && <p className='text-red-500'>Last name is required</p>}
                 <input type="text" {... register('username', {required:true})} 
                 className='w-full bg-zinc-700 text-white px-4 py-2 rounded-md'
                 placeholder='Username'/>
