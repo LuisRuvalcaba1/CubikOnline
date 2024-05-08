@@ -42,7 +42,7 @@ function LoginPage() {
           <input
             type="email"
             {...register("email", { required: true })}
-            className="w-full bg-zinc-700 text-white px-4 py-2 rounded-md"
+            className="w-full bg-zinc-700 text-white px-4 py-2 rounded-md "
             placeholder="Email"
           />
           {errors.email && <p className="text-red-500">Email is required</p>}
@@ -59,7 +59,7 @@ function LoginPage() {
           )}
           <button type="submit">Login</button>
 
-          <p className="flex gap-x-2 justify-between">
+          <p className="flex gap-x-2 justify-between, text">
             Dont have an account?
             <Link to="/register" className="sky-text-500">
               {" "}

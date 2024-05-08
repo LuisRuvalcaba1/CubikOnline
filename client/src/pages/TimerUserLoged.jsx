@@ -19,6 +19,15 @@ function TimerUserLoged() {
   const { user, logout, statusChangeAuth } = useAuth();
   const { deleteTorneoByJuez } = useAuthTorneo();
   const [categoria, setCategoria] = useState("3x3");
+  const [expandedScramble, setExpandedScramble] = useState(null);
+
+  const handleTimeClick = (time, scramble) => {
+    if (expandedScramble === scramble) {
+      setExpandedScramble(null);
+    } else {
+      setExpandedScramble(scramble);
+    }
+  };
 
   useEffect(() => {
     getTimersContext()
@@ -259,7 +268,6 @@ function TimerUserLoged() {
               {tiemposGuardados && tiemposGuardados.length > 0 && (
                 <li>
                   <p>Tiempo: {getBestTime(tiemposGuardados, session)}</p>
-                  {/* <p>Scramble: {scramble}</p> */}
                 </li>
               )}
             </ul>
@@ -271,24 +279,37 @@ function TimerUserLoged() {
               value={categoria}
               onChange={(e) => setCategoria(e.target.value)}
             >
-              <option className="text-black" value="2x2">2x2</option>
-              <option className="text-black" value="3x3">3x3</option>
-              <option className="text-black" value="4x4">4x4</option>
-              <option className="text-black" value="5x5">5x5</option>
+              <option className="text-black" value="2x2">
+                2x2
+              </option>
+              <option className="text-black" value="3x3">
+                3x3
+              </option>
+              <option className="text-black" value="4x4">
+                4x4
+              </option>
+              <option className="text-black" value="5x5">
+                5x5
+              </option>
             </select>
           </div>
         </div>
         <div>
           <a>Session</a>
           <div>
-            <button onClick={() => setSession(session - 1)}>-</button>
+            <button
+              onClick={() => setSession(Math.max(session - 1, 1))}
+              disabled={session <= 1}
+            >
+              Anterior
+            </button>
             <input
               type="number"
               value={session}
               onChange={(e) => {
-                const val = Math.floor(e.target.value);
-                if (isNaN(val)) {
-                  return;
+                let val = Math.floor(e.target.value);
+                if (isNaN(val) || val <= 0) {
+                  val = 1;
                 }
                 setSession(val);
               }}
@@ -297,34 +318,57 @@ function TimerUserLoged() {
                 color: "black",
                 fontWeight: "bold",
                 backgroundColor: "white",
-                padding: "10px",
+                width: "50px",
+                textAlign: "center",
               }}
+              min={1}
             />
-            <button onClick={() => setSession(session + 1)}>+</button>
+            <button onClick={() => setSession(session + 1)}>Siguiente</button>
           </div>
         </div>
         <ul>
           {tiemposGuardados
             .filter((timer) => timer.session === session)
             .map((timer, index) => (
-              <li key={index}>
+              <li
+                key={index}
+                onClick={() => handleTimeClick(timer.time, timer.scramble)}
+              >
                 <p>Tiempo: {timer.time}</p>
-                <p>Scramble: {timer.scramble}</p>
+                {expandedScramble === timer.scramble && (
+                  <p>Scramble: {timer.scramble}</p>
+                )}
               </li>
             ))}
         </ul>
       </div>
-      {!activo && <p className="scramble">{scramble}</p>}
-      <div className="cronometro">
-        <p>
-          {minutos < 10 ? `0${minutos}` : minutos} :{" "}
-          {segundos < 10 ? `0${segundos}` : segundos} :{" "}
-          {milisegundos < 10
-            ? `00${milisegundos}`
-            : milisegundos < 100
-            ? `0${milisegundos}`
-            : milisegundos}
-        </p>
+
+      <div>
+        {!activo && (
+          <p
+            className="scramble"
+            style={{
+              fontSize: "20px",
+              marginLeft: "300px",
+              textAlign: "center",
+              maxWidth: "60%",
+              wordWrap: "break-word",
+            }}
+          >
+            {scramble}
+          </p>
+        )}
+        <div className="cronometro" style={{textAlign: "center", marginLeft: "100px"}}>
+          <p>
+            {minutos < 10 ? `0${minutos}` : minutos} :{" "}
+            {segundos < 10 ? `0${segundos}` : segundos} :{" "}
+            {milisegundos < 10
+              ? `00${milisegundos}`
+              : milisegundos < 100
+              ? `0${milisegundos}`
+              : milisegundos}
+          </p>
+        </div>
       </div>
     </div>
   );
