@@ -132,9 +132,9 @@ function TimerUserLoged() {
     let ultimoMovimiento = "";
 
     const longitudScramble = {
-      "2x2": 8,
-      "3x3": 20,
-      "4x4": 40,
+      "2x2": 9,
+      "3x3": 21,
+      "4x4": 46,
       "5x5": 60,
     };
 
@@ -258,7 +258,7 @@ function TimerUserLoged() {
       >
         ☰
       </button>
-      <div className={`sidebar ${showSidebar ? "show" : ""}`}>
+      <div className={`sidebar ${showSidebar ? "show" : ""} bg-gray-700`}>
         <h2>Tiempos Guardados</h2>
         {/*Visualizacion del mejor tiempo en la session*/}
         <div>

@@ -10,8 +10,15 @@ function Timer() {
   const [scramble, setScramble] = useState('');
   const [tiemposGuardados, setTiemposGuardados] = useState([]);
   const [showSidebar, setShowSidebar] = useState(false);
-
+  const [alertaMostrada, setAlertaMostrada] = useState(false); 
+  
   useEffect(() => {
+
+    if (!alertaMostrada) {
+      alert("Los tiempos y scrambles no se guardarán si abandonas esta página.");
+      setAlertaMostrada(true);
+    }
+
     generarNuevoScramble();
     const tiemposGuardadosLocal = JSON.parse(localStorage.getItem('tiempos'));
     if (tiemposGuardadosLocal) {
@@ -112,7 +119,7 @@ function Timer() {
   return (
     <div className="">
       <button className="sidebar-toggle" onClick={() => setShowSidebar(!showSidebar)}>☰</button>
-      <div className={`sidebar ${showSidebar ? 'show' : ''}`}>
+      <div className={`sidebar ${showSidebar ? 'show' : ''} bg-gray-700`}>
         <h2>Tiempos Guardados</h2>
         <ul>
           {tiemposGuardados.map((item, index) => (

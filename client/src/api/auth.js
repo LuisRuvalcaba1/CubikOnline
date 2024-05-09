@@ -10,6 +10,8 @@ export const loginRequest = user => axios.post(`/login`, user)
 
 export const verifyTokenRequest = () => axios.get(`/verify`)
 
+export const getUserByEmailRequest = email => axios.get(`/getUserByEmail`, email)
+
 export const updatePasswordRequest = (email, newPassword) => axios.put(`/account/password/`, email, newPassword)
 
 export const updateUserRequest = (email, points) => axios.put(`/profile/`, email ,points);

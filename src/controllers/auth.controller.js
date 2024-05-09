@@ -68,6 +68,18 @@ export const login = async (req, res) => {
   }
 };
 
+export const getUserByEmail = async (email) => {
+  try {
+    const userFound = await User.findOne({ email });
+    if (!userFound) {
+    }
+    return userFound;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
 export const logout = (req, res) => {
   res.cookie("token", "", {
     expires: new Date(0),

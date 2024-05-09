@@ -49,10 +49,10 @@ function TorneoPage() {
       >
         <h2>Configuración de Torneo</h2>
         <label htmlFor="nombre">
-          <b>Nombre</b>
           <input
             type="text"
             id="nombre"
+            placeholder="Nombre del torneo"
             {...register("nombre", { required: true })}
           />
         </label>
