@@ -6,6 +6,17 @@ import { useAuthTorneo } from "../context/TorneoContext";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 
+const profileMenu = [
+  { name: "Perfil", href: "/profile" },
+  { name: "Cambiar contraseña", href: "/account/password" },
+  { name: "Salir", href: "/" },
+];
+
+const torneoMenu = [
+  { name: "Crear Torneo", href: "/torneo" },
+  { name: "Torneos Disponibles", href: "/torneoget" },
+];
+
 export const Navbar = () => {
   //const location = useLocation();
   const refreshPage = () => {
@@ -83,7 +94,7 @@ export const Navbar = () => {
           CubikOnline
         </Link>
         <div className="hidden sm:block sm:ml-6">
-          <div className="flex space-x-4">
+          <div className="flex space-x-5">
             {isAuthenticated && isJuez ? (
               <>
                 <Link
@@ -104,32 +115,6 @@ export const Navbar = () => {
             ) : isAuthenticated ? (
               <>
                 <Link
-                  to="/"
-                  replace
-                  onClick={onSubmit}
-                  className="text-white hover:bg-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Logout
-                </Link>
-                <Link
-                  to="/profile"
-                  className="text-white hover:bg-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Perfil
-                </Link>
-                <Link
-                  to="/account/password"
-                  className="text-white hover:bg-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Cambiar contraseña
-                </Link>
-                <Link
-                  to="/timerul"
-                  className="text-white hover:bg-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Timer
-                </Link>
-                <Link
                   to="/store"
                   className="text-white hover:bg-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                 >
@@ -137,17 +122,96 @@ export const Navbar = () => {
                 </Link>
 
                 <Link
-                  to="/torneo"
+                  to="/timerul"
                   className="text-white hover:bg-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  Crear Torneo
+                  Timer
                 </Link>
+
                 <Link
-                  to="/torneoget"
+                  to="/timerpvp"
                   className="text-white hover:bg-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  Torneos Disponibles
+                  Confrontaciones
                 </Link>
+                <Menu as="div" className="relative inline-block text-right">
+                  <div>
+                    <Menu.Button className="text-white hover:bg-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                      Torneo
+                    </Menu.Button>
+                  </div>
+                  <Transition
+                    as={Fragment}
+                    enter="transition ease-out duration-100"
+                    enterFrom="transform opacity-0 scale-95"
+                    enterTo="transform opacity-100 scale-100"
+                    leave="transition ease-in duration-75"
+                    leaveFrom="transform opacity-100 scale-100"
+                    leaveTo="transform opacity-0 scale-95"
+                  >
+                    <Menu.Items className="absolute right-0 w-56 mt-2 origin-top-right bg-gray-700 divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                      <div className="px-1 py-1 ">
+                        {torneoMenu.map((item) => (
+                          <Menu.Item key={item.name}>
+                            {({ active }) => (
+                              <Link
+                                to={item.href}
+                                className={`${
+                                  active
+                                    ? "bg-gray-900 text-white"
+                                    : "text-white"
+                                } group flex rounded-md items-center w-full px-2 py-2 text-sm`}
+                              >
+                                {item.name}
+                              </Link>
+                            )}
+                          </Menu.Item>
+                        ))}
+                      </div>
+                    </Menu.Items>
+                  </Transition>
+                </Menu>
+
+                <Menu as="div" className="relative inline-block text-left">
+                  <div>
+                    <Menu.Button className="text-white hover:bg-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                      Perfil
+                    </Menu.Button>
+                  </div>
+                  <Transition
+                    as={Fragment}
+                    enter="transition ease-out duration-100"
+                    enterFrom="transform opacity-0 scale-95"
+                    enterTo="transform opacity-100 scale-100"
+                    leave="transition ease-in duration-75"
+                    leaveFrom="transform opacity-100 scale-100"
+                    leaveTo="transform opacity-0 scale-95"
+                  >
+                    <Menu.Items className="absolute right-0 w-56 mt-2 origin-top-right bg-gray-700 divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                      <div className="px-1 py-1 ">
+                        {profileMenu.map((item) => (
+                          <Menu.Item key={item.name}>
+                            {({ active }) => (
+                              <Link
+                                to={item.href}
+                                className={`${
+                                  active
+                                    ? "bg-gray-900 text-white"
+                                    : "text-white"
+                                } group flex rounded-md items-center w-full px-2 py-2 text-sm`}
+                                onClick={
+                                  item.name === "Salir" ? onSubmit : null
+                                } // Add this line
+                              >
+                                {item.name}
+                              </Link>
+                            )}
+                          </Menu.Item>
+                        ))}
+                      </div>
+                    </Menu.Items>
+                  </Transition>
+                </Menu>
               </>
             ) : (
               <>

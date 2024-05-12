@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useAuthTimer } from "../context/TimerContext";
 import { renewTokenRequest, removeTokenRequest } from "../api/auth";
 import { useAuth } from "../context/AuthContext";
@@ -14,7 +14,7 @@ function TimerUserLoged() {
   const [tiempoInicial, setTiempoInicial] = useState(null);
   const [scramble, setScramble] = useState("");
   const [tiemposGuardados, setTiemposGuardados] = useState([]);
-  const [showSidebar, setShowSidebar] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(true);
   const [session, setSession] = useState(1);
   const { user, logout, statusChangeAuth } = useAuth();
   const { deleteTorneoByJuez } = useAuthTorneo();
@@ -250,126 +250,135 @@ function TimerUserLoged() {
     }${milisegundos}`;
   }
 
-  return (
-    <div className="">
-      <button
-        className="sidebar-toggle"
-        onClick={() => setShowSidebar(!showSidebar)}
-      >
-        ☰
-      </button>
-      <div className={`sidebar ${showSidebar ? "show" : ""} bg-gray-700`}>
-        <h2>Tiempos Guardados</h2>
-        {/*Visualizacion del mejor tiempo en la session*/}
-        <div>
-          <div>
-            <h3>Mejor Tiempo</h3>
-            <ul>
-              {tiemposGuardados && tiemposGuardados.length > 0 && (
-                <li>
-                  <p>Tiempo: {getBestTime(tiemposGuardados, session)}</p>
-                </li>
-              )}
-            </ul>
-          </div>
-          <div>
-            <label>Categoría: </label>
-            <select
-              className="text-black"
-              value={categoria}
-              onChange={(e) => setCategoria(e.target.value)}
-            >
-              <option className="text-black" value="2x2">
-                2x2
-              </option>
-              <option className="text-black" value="3x3">
-                3x3
-              </option>
-              <option className="text-black" value="4x4">
-                4x4
-              </option>
-              <option className="text-black" value="5x5">
-                5x5
-              </option>
-            </select>
-          </div>
-        </div>
-        <div>
-          <a>Session</a>
-          <div>
-            <button
-              onClick={() => setSession(Math.max(session - 1, 1))}
-              disabled={session <= 1}
-            >
-              Anterior
-            </button>
-            <input
-              type="number"
-              value={session}
-              onChange={(e) => {
-                let val = Math.floor(e.target.value);
-                if (isNaN(val) || val <= 0) {
-                  val = 1;
-                }
-                setSession(val);
-              }}
-              style={{
-                fontSize: "20px",
-                color: "black",
-                fontWeight: "bold",
-                backgroundColor: "white",
-                width: "50px",
-                textAlign: "center",
-              }}
-              min={1}
-            />
-            <button onClick={() => setSession(session + 1)}>Siguiente</button>
-          </div>
-        </div>
-        <ul>
-          {tiemposGuardados
-            .filter((timer) => timer.session === session)
-            .map((timer, index) => (
-              <li
-                key={index}
-                onClick={() => handleTimeClick(timer.time, timer.scramble)}
-              >
-                <p>Tiempo: {timer.time}</p>
-                {expandedScramble === timer.scramble && (
-                  <p>Scramble: {timer.scramble}</p>
-                )}
-              </li>
-            ))}
-        </ul>
-      </div>
+  function getAverageOf5(tiempos, session) {
+    const tiemposSesion = tiempos.filter((timer) => timer.session === session);
+    if (tiemposSesion.length < 5) return "N/A";
 
-      <div>
-        {!activo && (
-          <p
-            className="scramble"
-            style={{
-              fontSize: "20px",
-              marginLeft: "300px",
-              textAlign: "center",
-              maxWidth: "60%",
-              wordWrap: "break-word",
-            }}
+    const ultimosTiempos = tiemposSesion
+      .slice(0, 5)
+      .map((timer) => convertToMillisecondsFromString(timer.time));
+    const promedio = ultimosTiempos.reduce((acc, curr) => acc + curr, 0) / 5;
+
+    return convertToTimeFormat(promedio);
+  }
+
+  function getAverageOf12(tiempos, session) {
+    const tiemposSesion = tiempos.filter((timer) => timer.session === session);
+    if (tiemposSesion.length < 12) return "N/A";
+
+    const ultimosTiempos = tiemposSesion
+      .slice(0, 12)
+      .map((timer) => convertToMillisecondsFromString(timer.time));
+    const filteredTimes = ultimosTiempos.sort((a, b) => a - b).slice(1, 11);
+    const promedio = filteredTimes.reduce((acc, curr) => acc + curr, 0) / 10;
+
+    return convertToTimeFormat(promedio);
+  }
+
+  return (
+    <div className="sidebar bg-gray-700">
+      <h2>Tiempos Guardados</h2>
+      <Fragment>
+        <Fragment className="text-x1 font-bold">
+          <label>Categoría: </label>
+          <select
+            className="text-black"
+            value={categoria}
+            onChange={(e) => setCategoria(e.target.value)}
           >
-            {scramble}
-          </p>
-        )}
-        <div className="cronometro" style={{textAlign: "center", marginLeft: "100px"}}>
-          <p>
-            {minutos < 10 ? `0${minutos}` : minutos} :{" "}
-            {segundos < 10 ? `0${segundos}` : segundos} :{" "}
-            {milisegundos < 10
-              ? `00${milisegundos}`
-              : milisegundos < 100
-              ? `0${milisegundos}`
-              : milisegundos}
-          </p>
-        </div>
-      </div>
+            <option className="text-black" value="2x2">
+              2x2
+            </option>
+            <option className="text-black" value="3x3">
+              3x3
+            </option>
+            <option className="text-black" value="4x4">
+              4x4
+            </option>
+            <option className="text-black" value="5x5">
+              5x5
+            </option>
+          </select>
+        </Fragment>
+
+        <Fragment>
+          <h4>Promedio de 5</h4>
+          <ul>
+            {tiemposGuardados && tiemposGuardados.length > 0 && (
+              <li>
+                <p>Tiempo: {getAverageOf5(tiemposGuardados, session)}</p>
+              </li>
+            )}
+          </ul>
+        </Fragment>
+        <Fragment>
+          <h3>Promedio de 12</h3>
+          <ul>
+            {tiemposGuardados && tiemposGuardados.length > 0 && (
+              <li>
+                <p>Tiempo: {getAverageOf12(tiemposGuardados, session)}</p>
+              </li>
+            )}
+          </ul>
+          <h3>Mejor Tiempo</h3>
+          <ul>
+            {tiemposGuardados && tiemposGuardados.length > 0 && (
+              <li>
+                <p>Tiempo: {getBestTime(tiemposGuardados, session)}</p>
+              </li>
+            )}
+          </ul>
+        </Fragment>
+      </Fragment>
+      <Fragment>
+        <h3>Session</h3>
+        <Fragment>
+          <button
+            onClick={() => setSession(Math.max(session - 1, 1))}
+            disabled={session <= 1}
+          
+          >
+            Anterior
+          </button>
+          <input
+            type="number"
+            value={session}
+            onChange={(e) => {
+              let val = Math.floor(e.target.value);
+              if (isNaN(val) || val <= 0) {
+                val = 1;
+              }
+              setSession(val);
+            }}
+            style={{
+              
+              fontSize: "20px",
+              color: "white",
+              fontWeight: "bold",
+              background: "#374151",
+              width: "50px",
+              textAlign: "center",
+            }}
+            min={1}
+          />
+          <button onClick={() => setSession(session + 1)}>Siguiente</button>
+        </Fragment>
+      </Fragment>
+      <ul>
+        {tiemposGuardados
+          .filter((timer) => timer.session === session)
+          .map((timer, index) => (
+            <li
+              key={index}
+              onClick={() => handleTimeClick(timer.time, timer.scramble)}
+            >
+              <p>Tiempo: {timer.time}</p>
+              {expandedScramble === timer.scramble && (
+                <p>Scramble: {timer.scramble}</p>
+              )}
+            </li>
+          ))}
+      </ul>
     </div>
   );
 }

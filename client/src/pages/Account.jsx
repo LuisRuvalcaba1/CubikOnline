@@ -1,12 +1,16 @@
 import { useAuth } from "../context/AuthContext.jsx";
 import { useForm } from "react-hook-form";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import emailjs from "@emailjs/browser";
-import { getUserByEmailRequest } from "../api/auth.js";
+
 function Account() {
   const { updatePassword } = useAuth();
   const { register, handleSubmit } = useForm();
-  const token = '';
+  const [showTokenInput, setShowTokenInput] = useState(false);
+  const [token, setToken] = useState("");
+  const [showPassForm, setShowPassForm] = useState(false);
+  const [email, setEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const form = useRef();
 
   const serviceID = "service_pldhi1s";
@@ -15,7 +19,9 @@ function Account() {
 
   const sendEmail = (e) => {
     e.preventDefault();
-
+    console.log(e.target.elements.message.value);
+    setToken(e.target.elements.message.value);
+    // e.target.elements.message.value = token
     emailjs
       .sendForm(serviceID, templateID, form.current, {
         publicKey: publicKey,
@@ -28,20 +34,43 @@ function Account() {
           console.log("FAILED...", error.text);
         }
       );
+    setShowTokenInput(true);
+  };
+
+  const verifyToken = (e) => {
+    e.preventDefault();
+    const enteredToken = e.target.elements.token.value;
+
+    if (enteredToken === token) {
+      setShowPassForm(true);
+    } else {
+      alert("Token no valido");
+    }
   };
 
   const generateToken = () => {
-    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const numbers = "0123456789";
     let token = "";
-    for (let i = 0; i < 6; i++) {
-      token += characters.charAt(Math.floor(Math.random() * characters.length));
+
+    for (let i = 0; i < 2; i++) {
+        token += letters.charAt(Math.floor(Math.random() * letters.length));
+    }
+
+    for (let i = 0; i < 4; i++) {
+        token += numbers.charAt(Math.floor(Math.random() * numbers.length));
     }
     return token;
-  };
-  
+};
+
+// Ejemplo de uso
+console.log(generateToken());
+
+  // const newToken = generateToken()
+  // setToken(newToken)
 
   const onSubmit = handleSubmit((data) => {
-    console.log(data);
+    console.log(data)
     updatePassword(data);
   });
 
@@ -52,27 +81,49 @@ function Account() {
         <h2>Change Password</h2>
         <form ref={form} onSubmit={sendEmail}>
           <label>Name</label>
-          <input type="text" name="to_name" className="text-black"/>
+          <input type="text" name="to_name" className="text-black" />
           <label>Email</label>
-          <input type="email" name="to_email" className="text-black"/>
-          <input type="hidden" value={generateToken(token)} {...register("message")} />
-          <input type="submit" value="Send" />
-          <input type="hidden" value={"Cubik"} {...register("from_name")} />
-        </form>
-      </div>
-      <div>
-        
-        <h2>Change Password</h2>
-        <form onSubmit={onSubmit}>
-          <label htmlFor="password">Password</label>
           <input
-            type="password"
-            id="password"
-            {...register("password", { required: true })}
+            type="email"
+            name="email"
+            className="text-black"
+            {...register("email")}
           />
-          <button type="submit">Change</button>
+          <input
+            type="hidden"
+            name="message"
+            value={generateToken()}
+            // {...register("message")}
+          />
+          <input type="submit" value="Send" />
+          <input
+            type="hidden"
+            name="from_name"
+            value={"Cubik"}
+            //{...register("from_name")}
+          />
         </form>
-        </div>
+        {showTokenInput && (
+          <form onSubmit={verifyToken}>
+            <label>Token</label>
+            <input type="text" name="token" className="text-black" />
+            <input type="submit" value="Verify" />
+          </form>
+        )}
+        {showPassForm && (
+          <form onSubmit={onSubmit}>
+            <label>New Password</label>
+            <input
+              type="password"
+              name="newPassword"
+              {...register("newPassword")}
+              className="text-black"
+              required
+            />
+            <input type="submit" value="Change Password" />
+          </form>
+        )}
+      </div>
     </div>
   );
 }
