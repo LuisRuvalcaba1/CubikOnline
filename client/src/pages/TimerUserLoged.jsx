@@ -276,110 +276,144 @@ function TimerUserLoged() {
   }
 
   return (
-    <div className="sidebar bg-gray-700">
-      <h2>Tiempos Guardados</h2>
-      <Fragment>
-        <Fragment className="text-x1 font-bold">
-          <label>Categoría: </label>
-          <select
-            className="text-black"
-            value={categoria}
-            onChange={(e) => setCategoria(e.target.value)}
-          >
-            <option className="text-black" value="2x2">
-              2x2
-            </option>
-            <option className="text-black" value="3x3">
-              3x3
-            </option>
-            <option className="text-black" value="4x4">
-              4x4
-            </option>
-            <option className="text-black" value="5x5">
-              5x5
-            </option>
-          </select>
-        </Fragment>
-
-        <Fragment>
-          <h4>Promedio de 5</h4>
-          <ul>
-            {tiemposGuardados && tiemposGuardados.length > 0 && (
-              <li>
-                <p>Tiempo: {getAverageOf5(tiemposGuardados, session)}</p>
-              </li>
-            )}
-          </ul>
-        </Fragment>
-        <Fragment>
-          <h3>Promedio de 12</h3>
-          <ul>
-            {tiemposGuardados && tiemposGuardados.length > 0 && (
-              <li>
-                <p>Tiempo: {getAverageOf12(tiemposGuardados, session)}</p>
-              </li>
-            )}
-          </ul>
-          <h3>Mejor Tiempo</h3>
-          <ul>
-            {tiemposGuardados && tiemposGuardados.length > 0 && (
-              <li>
-                <p>Tiempo: {getBestTime(tiemposGuardados, session)}</p>
-              </li>
-            )}
-          </ul>
-        </Fragment>
-      </Fragment>
-      <Fragment>
-        <h3>Session</h3>
-        <Fragment>
-          <button
-            onClick={() => setSession(Math.max(session - 1, 1))}
-            disabled={session <= 1}
-          
-          >
-            Anterior
-          </button>
-          <input
-            type="number"
-            value={session}
-            onChange={(e) => {
-              let val = Math.floor(e.target.value);
-              if (isNaN(val) || val <= 0) {
-                val = 1;
-              }
-              setSession(val);
-            }}
+    <>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
+        }}
+      >
+        {!activo && (
+          <p
+            className="scramble"
             style={{
-              
-              fontSize: "20px",
-              color: "white",
-              fontWeight: "bold",
-              background: "#374151",
-              width: "50px",
-              textAlign: "center",
+              fontSize: "40px",
+              maxWidth: "60%",
+              wordWrap: "break-word",
             }}
-            min={1}
-          />
-          <button onClick={() => setSession(session + 1)}>Siguiente</button>
-        </Fragment>
-      </Fragment>
-      <ul>
-        {tiemposGuardados
-          .filter((timer) => timer.session === session)
-          .map((timer, index) => (
-            <li
-              key={index}
-              onClick={() => handleTimeClick(timer.time, timer.scramble)}
+          >
+            {scramble}
+          </p>
+        )}
+        <p className="cronometro">
+          <p>
+            {minutos < 10 ? `0${minutos}` : minutos} :{" "}
+            {segundos < 10 ? `0${segundos}` : segundos} :{" "}
+            {milisegundos < 10
+              ? `00${milisegundos}`
+              : milisegundos < 100
+              ? `0${milisegundos}`
+              : milisegundos}
+          </p>
+        </p>
+      </div>
+      <div className="sidebar bg-gray-700">
+        <h2>Tiempos Guardados</h2>
+        <Fragment>
+          <Fragment className="text-x1 font-bold">
+            <label>Categoría: </label>
+            <select
+              className="text-black"
+              value={categoria}
+              onChange={(e) => setCategoria(e.target.value)}
             >
-              <p>Tiempo: {timer.time}</p>
-              {expandedScramble === timer.scramble && (
-                <p>Scramble: {timer.scramble}</p>
+              <option className="text-black" value="2x2">
+                2x2
+              </option>
+              <option className="text-black" value="3x3">
+                3x3
+              </option>
+              <option className="text-black" value="4x4">
+                4x4
+              </option>
+              <option className="text-black" value="5x5">
+                5x5
+              </option>
+            </select>
+          </Fragment>
+
+          <Fragment>
+            <h4>Promedio de 5</h4>
+            <ul>
+              {tiemposGuardados && tiemposGuardados.length > 0 && (
+                <li>
+                  <p>Tiempo: {getAverageOf5(tiemposGuardados, session)}</p>
+                </li>
               )}
-            </li>
-          ))}
-      </ul>
-    </div>
+            </ul>
+          </Fragment>
+          <Fragment>
+            <h3>Promedio de 12</h3>
+            <ul>
+              {tiemposGuardados && tiemposGuardados.length > 0 && (
+                <li>
+                  <p>Tiempo: {getAverageOf12(tiemposGuardados, session)}</p>
+                </li>
+              )}
+            </ul>
+            <h3>Mejor Tiempo</h3>
+            <ul>
+              {tiemposGuardados && tiemposGuardados.length > 0 && (
+                <li>
+                  <p>Tiempo: {getBestTime(tiemposGuardados, session)}</p>
+                </li>
+              )}
+            </ul>
+          </Fragment>
+        </Fragment>
+        <Fragment>
+          <h3>Session</h3>
+          <Fragment>
+            <button
+              onClick={() => setSession(Math.max(session - 1, 1))}
+              disabled={session <= 1}
+            >
+              Anterior
+            </button>
+            <input
+              type="number"
+              value={session}
+              onChange={(e) => {
+                let val = Math.floor(e.target.value);
+                if (isNaN(val) || val <= 0) {
+                  val = 1;
+                }
+                setSession(val);
+              }}
+              style={{
+                fontSize: "20px",
+                color: "white",
+                fontWeight: "bold",
+                background: "#374151",
+                width: "50px",
+                textAlign: "center",
+              }}
+              min={1}
+            />
+            <button onClick={() => setSession(session + 1)}>Siguiente</button>
+          </Fragment>
+        </Fragment>
+        <ul>
+          {tiemposGuardados
+            .filter((timer) => timer.session === session)
+            .reverse() 
+            .map((timer, index) => (
+              <li
+                key={index}
+                onClick={() => handleTimeClick(timer.time, timer.scramble)}
+              >
+                <p>Tiempo: {timer.time}</p>
+                {expandedScramble === timer.scramble && (
+                  <p>Scramble: {timer.scramble}</p>
+                )}
+              </li>
+            ))}
+        </ul>
+      </div>
+      
+    </>
   );
 }
 

@@ -71,6 +71,7 @@ function AprendizajePage() {
           de las manecillas del reloj.
         </a>
 
+
         <img className="Notacion" src={Notacion} alt="Notacion" />
 
         <a className="description">

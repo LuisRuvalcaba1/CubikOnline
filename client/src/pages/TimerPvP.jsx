@@ -127,17 +127,37 @@ function TimerPvP() {
       {isPaired ? (
         <>
           <h1>Emparejado</h1>
-          <p>{scramble}</p>
-          <div className="cronometro">
-            <p>
-              {minutos < 10 ? `0${minutos}` : minutos} :{" "}
-              {segundos < 10 ? `0${segundos}` : segundos} :{" "}
-              {milisegundos < 10
-                ? `00${milisegundos}`
-                : milisegundos < 100
-                  ? `0${milisegundos}`
-                  : milisegundos}
-            </p>
+          <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
+        }}
+      >
+        {!activo && (
+          <p
+            className="scramble"
+            style={{
+              fontSize: "40px",
+              maxWidth: "60%",
+              wordWrap: "break-word",
+            }}
+          >
+            {scramble}
+          </p>
+        )}
+        <p className="cronometro">
+          <p>
+            {minutos < 10 ? `0${minutos}` : minutos} :{" "}
+            {segundos < 10 ? `0${segundos}` : segundos} :{" "}
+            {milisegundos < 10
+              ? `00${milisegundos}`
+              : milisegundos < 100
+              ? `0${milisegundos}`
+              : milisegundos}
+          </p>
+        </p>
           </div>
         </>
       ) : (

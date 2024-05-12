@@ -22,7 +22,7 @@ export const createTimer = async (req, res) => {
   export const getTimers = async (req, res) => {
     try {
      
-        const timers = await TimerModel.find().populate("user");
+        const timers = await TimerModel.find({user: user._id}).populate("user");
         res.status(200).json(timers);
 
     } catch (error) {

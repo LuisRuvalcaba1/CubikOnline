@@ -2,7 +2,7 @@ import http from 'http';
 import app from './app.js';
 import { connectDB } from './db.js';
 import {initializeWebSocket as socket} from './sockets.js';
-import {PORT} from './config.js';  
+const PORT = process.env.PORT || 4000;
 
 connectDB();
 
