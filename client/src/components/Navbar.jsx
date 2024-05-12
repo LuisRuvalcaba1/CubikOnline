@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "./Navbar.css";
 import { useAuth } from "../context/AuthContext";
 import { useForm } from "react-hook-form";
@@ -18,14 +18,10 @@ const torneoMenu = [
 ];
 
 export const Navbar = () => {
-  //const location = useLocation();
+
   const refreshPage = () => {
     window.reload().location();
   };
-
-  // function classNames(...classes) {
-  //   return classes.filter(Boolean).join(" ");
-  // }
 
   const { user, logout, statusChangeAuth, isAuthenticated, isJuez } = useAuth();
   const { handleSubmit } = useForm();
