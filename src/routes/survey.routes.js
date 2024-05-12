@@ -5,23 +5,15 @@ import {
   getSurveyById,
   updateSurvey,
   deleteSurvey,
-} from "../controllers/surveyControllers.js";
+} from "../controllers/survey.controller.js";
+import { authRequired } from "../middlewares/validateToken.js";
 
 const router = express.Router();
 
-// Crear una nueva encuesta
-router.post("/survey", createSurvey);
-
-// Obtener todas las encuestas
-router.get("/survey", getSurveys);
-
-// Obtener una encuesta por ID
-router.get("/survey/:id", getSurveyById);
-
-// Actualizar una encuesta
-router.put("/survey/:id", updateSurvey);
-
-// Eliminar una encuesta
-router.delete("/survey/:id", deleteSurvey);
+router.post("/survey", authRequired, createSurvey);
+router.get("/survey", authRequired, getSurveys);
+router.get("/survey/:id", authRequired, getSurveyById);
+router.put("/survey/:id", authRequired, updateSurvey);
+router.delete("/survey/:id", authRequired, deleteSurvey);
 
 export default router;

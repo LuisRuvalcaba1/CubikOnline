@@ -25,6 +25,8 @@ import TorneoGetPage from "./pages/TorneoGetPage.jsx";
 import YourTournament from "./pages/YourTournament.jsx";
 import WaitRoom from "./pages/WaitRoom.jsx";
 import ResultRoundUsers from "./pages/ResultRoundUsers.jsx";
+import { SurveyProvider } from "./context/SurveyContext.jsx";
+import Encuesta from "./pages/Encuesta.jsx";
 
 export {
   BrowserRouter,
@@ -56,4 +58,6 @@ export {
   YourTournament,
   WaitRoom,
   ResultRoundUsers,
+  SurveyProvider,
+  Encuesta,
 };
