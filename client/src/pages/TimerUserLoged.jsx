@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuthTimer } from "../context/TimerContext";
 import { renewTokenRequest, removeTokenRequest } from "../api/auth";
 import { useAuth } from "../context/AuthContext";
@@ -30,49 +30,49 @@ function TimerUserLoged() {
 
   useEffect(() => {
     getTimersContext()
-      .then((user) => {
-        setTiemposGuardados(user.data);
+      .then((response) => {
+        setTiemposGuardados(response.data);
       })
       .catch((error) => {
         console.error("Error fetching timers:", error);
       });
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     generarNuevoScramble();
   }, [categoria]);
 
-  useEffect(() => {
-    const renovarToken = async () => {
-      try {
-        await renewTokenRequest();
-      } catch (error) {
-        console.error("Error al renovar el token:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const renovarToken = async () => {
+  //     try {
+  //       await renewTokenRequest();
+  //     } catch (error) {
+  //       console.error("Error al renovar el token:", error);
+  //     }
+  //   };
 
-    const eliminarToken = async () => {
-      try {
-        const data = {
-          email: user.email,
-          status: "inactive",
-          role: "user",
-        };
-        deleteTorneoByJuez(data._id);
-        statusChangeAuth(data);
-        await logout();
-        await removeTokenRequest();
-      } catch (error) {
-        console.error("Error al eliminar el token:", error);
-      }
-    };
+  //   const eliminarToken = async () => {
+  //     try {
+  //       const data = {
+  //         email: user.email,
+  //         status: "inactive",
+  //         role: "user",
+  //       };
+  //       deleteTorneoByJuez(data._id);
+  //       statusChangeAuth(data);
+  //       await logout();
+  //       await removeTokenRequest();
+  //     } catch (error) {
+  //       console.error("Error al eliminar el token:", error);
+  //     }
+  //   };
 
-    renovarToken();
+  //   renovarToken();
 
-    const timeoutId = setTimeout(eliminarToken, 21600000);
+  //   const timeoutId = setTimeout(eliminarToken, 21600000);
 
-    return () => clearTimeout(timeoutId);
-  }, [user, deleteTorneoByJuez, statusChangeAuth, logout]);
+  //   return () => clearTimeout(timeoutId);
+  // }, [user, deleteTorneoByJuez, statusChangeAuth, logout]);
 
   useEffect(() => {
     let interval;
@@ -199,7 +199,6 @@ function TimerUserLoged() {
         time,
         scramble,
         session,
-        user: user._id,
       };
 
       createNewTimer(values)

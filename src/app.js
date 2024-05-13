@@ -17,9 +17,6 @@ const app = express();
 app.use(cors({
     origin: CLIENT,
     credentials: true,
-    exposedHeaders: ['set-cookie'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE']
 }));
 
 app.use(morgan('dev'));

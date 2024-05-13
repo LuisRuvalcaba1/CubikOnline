@@ -7,44 +7,33 @@ export const authRequired = (req, res, next) => {
 
   jwt.verify(token, DB, (err, user) => {
     if (err) return res.status(401).json({ message: "invalidToken" });
-
     req.user = user;
     next();
   });
 };
 
-export const generateToken = (user) => {
-  const token = jwt.sign({ _id: user._id }, DB, { expiresIn: "1d" });
-  return token;
-};
 
-export const setTokenCookie = (res, token) => {
-  res.cookie("token", token, {
-    httpOnly: true,
-  });
-};
+// export const removeToken = (req, res) => {
+//   try {
+//     res.clearCookie("token");
 
-export const removeToken = (req, res) => {
-  try {
-    res.clearCookie("token");
+//     res.status(200).json({ message: "Token removed and user inactivated" });
+//   } catch (error) {
+//     return res.status(500).json({ message: error.message });
+//   }
 
-    res.status(200).json({ message: "Token removed and user inactivated" });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
+//   res.status(200).json({ message: "Token removed and user inactivated" });
+// };
 
-  res.status(200).json({ message: "Token removed and user inactivated" });
-};
+// export const renewToken = (req, res) => {
+//   const { token } = req.cookies;
+//   if (!token) return res.status(401).json({ message: 'Unauthorized' });
 
-export const renewToken = (req, res) => {
-  const { token } = req.cookies;
-  if (!token) return res.status(401).json({ message: 'Unauthorized' });
+//   jwt.verify(token, DB, (err, user) => {
+//     if (err) return res.status(401).json({ message: 'Invalid token' });
 
-  jwt.verify(token, DB, (err, user) => {
-    if (err) return res.status(401).json({ message: 'Invalid token' });
-
-    const newToken = generateToken(user);
-    setTokenCookie(res, newToken);
-    res.status(200).json({ message: 'Token renewed' });
-  });
-};
+//     const newToken = generateToken(user);
+//     setTokenCookie(res, newToken);
+//     res.status(200).json({ message: 'Token renewed' });
+//   });
+// };

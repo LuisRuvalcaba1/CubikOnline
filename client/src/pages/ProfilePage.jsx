@@ -1,7 +1,7 @@
-import { useEffect } from "react";
+//import { useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useForm } from "react-hook-form";
-import { removeTokenRequest, renewTokenRequest } from "../api/auth";
+//import { removeTokenRequest, renewTokenRequest } from "../api/auth";
 import { useAuthTorneo } from "../context/TorneoContext";
 
 function ProfilePage() {
@@ -9,38 +9,38 @@ function ProfilePage() {
   const { user, updateUserPoints, logout, statusChangeAuth } = useAuth();
   const { deleteTorneoByJuez } = useAuthTorneo();
 
-  useEffect(() => {
+  // useEffect(() => {
 
-    const renovarToken = async () => {
-      try {
-        await renewTokenRequest();
-      } catch (error) {
-        console.error('Error al renovar el token:', error);
-      }
-    }
+  //   const renovarToken = async () => {
+  //     try {
+  //       await renewTokenRequest();
+  //     } catch (error) {
+  //       console.error('Error al renovar el token:', error);
+  //     }
+  //   }
 
-    const eliminarToken = async () => {
-      try {
-        const data = {
-          email: user.email,
-          status: "inactive",
-          role: "user",
-        };
-        deleteTorneoByJuez(data._id);
-        statusChangeAuth(data);
-        await logout();
-        await removeTokenRequest();
-      } catch (error) {
-        console.error('Error al eliminar el token:', error);
-      }
-    };
+  //   const eliminarToken = async () => {
+  //     try {
+  //       const data = {
+  //         email: user.email,
+  //         status: "inactive",
+  //         role: "user",
+  //       };
+  //       deleteTorneoByJuez(data._id);
+  //       statusChangeAuth(data);
+  //       await logout();
+  //       await removeTokenRequest();
+  //     } catch (error) {
+  //       console.error('Error al eliminar el token:', error);
+  //     }
+  //   };
 
-    renovarToken();
+  //   renovarToken();
 
-    const timeoutId = setTimeout(eliminarToken, 21600000); 
+  //   const timeoutId = setTimeout(eliminarToken, 21600000); 
 
-    return () => clearTimeout(timeoutId);
-  }, [user, deleteTorneoByJuez, statusChangeAuth, logout]);
+  //   return () => clearTimeout(timeoutId);
+  // }, [user, deleteTorneoByJuez, statusChangeAuth, logout]);
 
   const onSubmit = handleSubmit((data) => {
     data.email = user.email;
