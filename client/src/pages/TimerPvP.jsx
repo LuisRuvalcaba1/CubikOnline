@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 import { useAuth } from "../context/AuthContext";
 import { useAuthTimerPvP } from '../context/TimerPvPContext';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
 
 function TimerPvP() {
   const navigate = useNavigate();
@@ -21,9 +22,15 @@ function TimerPvP() {
   const [resultado, setResultado] = useState(null);
   const { setResultadoCon } = useAuthTimerPvP();
 
+  useEffect(() => {
+    // Redirigir al componente de asignación de rango si el rango es 0
+    if (user.rank === 0) {
+      navigate('/rankingusers');
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
-    const socket = io('http://localhost:4000/confrontation');
+    const socket = io(`${BACKEND_URL}/confrontation`);
     setSocket(socket);
 
     socket.emit('user', JSON.stringify({ id: user._id }))

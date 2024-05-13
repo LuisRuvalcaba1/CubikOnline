@@ -30,6 +30,7 @@ import {
   ResultRoundUsers,
   SurveyProvider,
   Encuesta,
+  RankingUsers,
 } from "./imports.js";
 
 function App() {
@@ -66,6 +67,7 @@ function App() {
                           path="/confirmation"
                           element={<Confirmation />}
                         />
+                        <Route path="/rankingusers" element={<RankingUsers />} />
                         <Route path="/torneo" element={<TorneoPage />} />
                         <Route path="/torneoget" element={<TorneoGetPage />} />
                         <Route

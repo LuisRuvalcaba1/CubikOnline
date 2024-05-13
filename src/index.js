@@ -2,7 +2,7 @@ import http from 'http';
 import app from './app.js';
 import { connectDB } from './db.js';
 import {initializeWebSocket as socket} from './sockets.js';
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT;
 
 connectDB();
 
@@ -11,4 +11,4 @@ const httpServer = server.listen(PORT);
 socket(httpServer)
 
 
-console.log('Server on port ', PORT);
+console.log('Server on port', PORT);

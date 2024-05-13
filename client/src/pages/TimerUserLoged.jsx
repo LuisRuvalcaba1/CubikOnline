@@ -14,7 +14,6 @@ function TimerUserLoged() {
   const [tiempoInicial, setTiempoInicial] = useState(null);
   const [scramble, setScramble] = useState("");
   const [tiemposGuardados, setTiemposGuardados] = useState([]);
-  const [showSidebar, setShowSidebar] = useState(true);
   const [session, setSession] = useState(1);
   const { user, logout, statusChangeAuth } = useAuth();
   const { deleteTorneoByJuez } = useAuthTorneo();
@@ -31,13 +30,13 @@ function TimerUserLoged() {
 
   useEffect(() => {
     getTimersContext()
-      .then((response) => {
-        setTiemposGuardados(response.data);
+      .then((user) => {
+        setTiemposGuardados(user.data);
       })
       .catch((error) => {
         console.error("Error fetching timers:", error);
       });
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     generarNuevoScramble();
@@ -297,7 +296,7 @@ function TimerUserLoged() {
             {scramble}
           </p>
         )}
-        <p className="cronometro">
+        <div className="cronometro">
           <p>
             {minutos < 10 ? `0${minutos}` : minutos} :{" "}
             {segundos < 10 ? `0${segundos}` : segundos} :{" "}
@@ -307,12 +306,12 @@ function TimerUserLoged() {
               ? `0${milisegundos}`
               : milisegundos}
           </p>
-        </p>
+        </div>
       </div>
       <div className="sidebar bg-gray-700">
         <h2>Tiempos Guardados</h2>
-        <Fragment>
-          <Fragment className="text-x1 font-bold">
+        <div>
+          <div className="text-x1 font-bold">
             <label>Categoría: </label>
             <select
               className="text-black"
@@ -332,9 +331,9 @@ function TimerUserLoged() {
                 5x5
               </option>
             </select>
-          </Fragment>
+          </div>
 
-          <Fragment>
+          <div>
             <h4>Promedio de 5</h4>
             <ul>
               {tiemposGuardados && tiemposGuardados.length > 0 && (
@@ -343,8 +342,8 @@ function TimerUserLoged() {
                 </li>
               )}
             </ul>
-          </Fragment>
-          <Fragment>
+          </div>
+          <div>
             <h3>Promedio de 12</h3>
             <ul>
               {tiemposGuardados && tiemposGuardados.length > 0 && (
@@ -361,11 +360,11 @@ function TimerUserLoged() {
                 </li>
               )}
             </ul>
-          </Fragment>
-        </Fragment>
-        <Fragment>
+          </div>
+        </div>
+        <div>
           <h3>Session</h3>
-          <Fragment>
+          <div>
             <button
               onClick={() => setSession(Math.max(session - 1, 1))}
               disabled={session <= 1}
@@ -393,12 +392,14 @@ function TimerUserLoged() {
               min={1}
             />
             <button onClick={() => setSession(session + 1)}>Siguiente</button>
-          </Fragment>
-        </Fragment>
+          </div>
+        </div>
         <ul>
           {tiemposGuardados
-            .filter((timer) => timer.session === session)
-            .reverse() 
+            .filter(
+              (timer) => timer.session === session
+            )
+            .reverse()
             .map((timer, index) => (
               <li
                 key={index}
@@ -412,7 +413,6 @@ function TimerUserLoged() {
             ))}
         </ul>
       </div>
-      
     </>
   );
 }

@@ -64,7 +64,6 @@ export default defineConfig({
           ],
 
           pages2:[
-            "./src/pages/Ronda.jsx",
             "./src/pages/Store.jsx",
             "./src/pages/Torneo.css",
             "./src/pages/TimerPvP.jsx",

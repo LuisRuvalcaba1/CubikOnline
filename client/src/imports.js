@@ -27,6 +27,7 @@ import WaitRoom from "./pages/WaitRoom.jsx";
 import ResultRoundUsers from "./pages/ResultRoundUsers.jsx";
 import { SurveyProvider } from "./context/SurveyContext.jsx";
 import Encuesta from "./pages/Encuesta.jsx";
+import RankingUsers from "./pages/RankingUsers.jsx";
 
 export {
   BrowserRouter,
@@ -60,4 +61,5 @@ export {
   ResultRoundUsers,
   SurveyProvider,
   Encuesta,
+  RankingUsers,
 };
