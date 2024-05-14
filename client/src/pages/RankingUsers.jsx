@@ -72,6 +72,7 @@ const RankingUsers = () => {
         if (!activo) {
           setTiempoInicial(performance.now());
         } else {
+          console.log(tiemposGuardados.length);
           if (tiemposGuardados.length === 12) {
             setAverageTime(getAverageOf12(tiemposGuardados));
             setRank(getRank(averageTime));
@@ -90,7 +91,7 @@ const RankingUsers = () => {
       if (averageTime === "") {
         return "";
       }
-      if (averageTime < "00:30:00") {
+      if (averageTime < "00:2:00") {
         console.log("entra");
         return "1";
       } else if (averageTime < "00:45:00") {
