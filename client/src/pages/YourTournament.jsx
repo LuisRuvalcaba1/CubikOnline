@@ -4,6 +4,7 @@ import io from "socket.io-client";
 import { useAuth } from "../context/AuthContext";
 import { useLocation } from "react-router-dom";
 import "./Torneo.css";
+import { removeTokenRequest } from "../api/auth";
 import { useNavigate } from "react-router-dom";
 import Modal from "react-modal";
 
@@ -11,7 +12,6 @@ Modal.setAppElement("#root");
 
 function YourTournament() {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const { getTorneoById, deleteTorneo } = useAuthTorneo();
   const { participantes } = useLocation().state;
   const [torneo, setTorneo] = useState([]);
@@ -19,7 +19,29 @@ function YourTournament() {
   const [juez, setJuez] = useState(null);
   const [grupos, setGrupos] = useState([]);
   const [grupoSeleccionado, setGrupoSeleccionado] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
+  const { user, logout, statusChangeAuth } = useAuth();
+  const { deleteTorneoByJuez } = useAuthTorneo();
+
+  useEffect(() => {
+    const eliminarToken = async () => {
+      try {
+        const data = {
+          email: user.email,
+          status: "inactive",
+          role: "user",
+        };
+        deleteTorneoByJuez(data._id);
+        statusChangeAuth(data);
+        await logout();
+        await removeTokenRequest();
+      } catch (error) {
+        console.error("Error al eliminar el token:", error);
+      }
+    };
+    const timeoutId = setTimeout(eliminarToken, 21600000);
+
+    return () => clearTimeout(timeoutId);
+  }, [user, deleteTorneoByJuez, statusChangeAuth, logout]);
 
   useEffect(() => {
     setJuez(user._id);
@@ -43,8 +65,8 @@ function YourTournament() {
   const onSubmit = (data) => {
     setGrupoSeleccionado(data);
 
-    navigate("/resultroundusers", { state: { grupo: data } })
-  }
+    navigate("/resultroundusers", { state: { grupo: data } });
+  };
 
   useEffect(() => {
     const fetchTorneo = async () => {
@@ -71,7 +93,6 @@ function YourTournament() {
           </button>
         ))}
       </div>
-
     </div>
   );
 }

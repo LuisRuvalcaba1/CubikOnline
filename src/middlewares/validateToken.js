@@ -13,17 +13,17 @@ export const authRequired = (req, res, next) => {
 };
 
 
-// export const removeToken = (req, res) => {
-//   try {
-//     res.clearCookie("token");
+export const removeToken = (req, res) => {
+  try {
+    res.clearCookie("token");
 
-//     res.status(200).json({ message: "Token removed and user inactivated" });
-//   } catch (error) {
-//     return res.status(500).json({ message: error.message });
-//   }
+    res.status(200).json({ message: "Token removed and user inactivated" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
 
-//   res.status(200).json({ message: "Token removed and user inactivated" });
-// };
+  res.status(200).json({ message: "Token removed and user inactivated" });
+};
 
 // export const renewToken = (req, res) => {
 //   const { token } = req.cookies;

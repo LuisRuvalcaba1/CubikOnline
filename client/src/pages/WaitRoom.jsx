@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuthTorneo } from "../context/TorneoContext";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
 function WaitRoom() {
   const { user } = useAuth();

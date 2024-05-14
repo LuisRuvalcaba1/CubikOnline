@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuthTimer } from "../context/TimerContext";
-import { renewTokenRequest, removeTokenRequest } from "../api/auth";
+import { removeTokenRequest } from "../api/auth";
 import { useAuth } from "../context/AuthContext";
 import { useAuthTorneo } from "../context/TorneoContext";
 import "./Timer.css";
@@ -42,37 +42,26 @@ function TimerUserLoged() {
     generarNuevoScramble();
   }, [categoria]);
 
-  // useEffect(() => {
-  //   const renovarToken = async () => {
-  //     try {
-  //       await renewTokenRequest();
-  //     } catch (error) {
-  //       console.error("Error al renovar el token:", error);
-  //     }
-  //   };
+  useEffect(() => {
+    const eliminarToken = async () => {
+      try {
+        const data = {
+          email: user.email,
+          status: "inactive",
+          role: "user",
+        };
+        deleteTorneoByJuez(data._id);
+        statusChangeAuth(data);
+        await logout();
+        await removeTokenRequest();
+      } catch (error) {
+        console.error('Error al eliminar el token:', error);
+      }
+    };
+    const timeoutId = setTimeout(eliminarToken, 21600000); 
 
-  //   const eliminarToken = async () => {
-  //     try {
-  //       const data = {
-  //         email: user.email,
-  //         status: "inactive",
-  //         role: "user",
-  //       };
-  //       deleteTorneoByJuez(data._id);
-  //       statusChangeAuth(data);
-  //       await logout();
-  //       await removeTokenRequest();
-  //     } catch (error) {
-  //       console.error("Error al eliminar el token:", error);
-  //     }
-  //   };
-
-  //   renovarToken();
-
-  //   const timeoutId = setTimeout(eliminarToken, 21600000);
-
-  //   return () => clearTimeout(timeoutId);
-  // }, [user, deleteTorneoByJuez, statusChangeAuth, logout]);
+    return () => clearTimeout(timeoutId);
+  }, [user, deleteTorneoByJuez, statusChangeAuth, logout]);
 
   useEffect(() => {
     let interval;

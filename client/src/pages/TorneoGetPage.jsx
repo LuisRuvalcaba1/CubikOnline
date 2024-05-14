@@ -1,18 +1,14 @@
 import { useAuthTorneo } from "../context/TorneoContext";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import io from 'socket.io-client';
 import { useAuth } from "../context/AuthContext";
 import { useForm } from "react-hook-form";
 
 function TorneoGetPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const {register, handleSubmit} = useForm();
   const { getTorneos } = useAuthTorneo();
   const [torneos, setTorneos] = useState([]);
-  const [torneoSeleccionado, setTorneoSeleccionado] = useState(null);
-  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
     const fetchTorneos = async () => {
@@ -52,6 +48,11 @@ function TorneoGetPage() {
                 </tr>
               </thead>
               <tbody>
+                {torneos.length === 0 && (
+                  <tr>
+                    <td colSpan="4">No hay torneos</td>
+                  </tr>
+                ) }
                 {torneos.map((torneo) => (
                   <tr key={torneo._id}>
                     <td>{torneo.nombre}</td>
