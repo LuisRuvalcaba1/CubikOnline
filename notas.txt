@@ -1,0 +1,27 @@
+ useEffect(() => {
+      const checkRegistrationDate = async () => {
+        try {
+          if (!isAuthenticated) return;
+  
+          const registrationDate = new Date(user.createdAt);
+          const currentDate = new Date();
+          const diffInDays = Math.ceil((currentDate - registrationDate) / (1000 * 60 * 60 * 24));
+  
+          if (diffInDays >= 1) {
+            setShowSurvey(true);
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      };
+  
+      checkRegistrationDate();
+    }, [isAuthenticated, user]);
+  
+    const handleSurveyAnswers = (e) => {
+      const { name, value } = e.target;
+      setSurveyAnswers((prevAnswers) => ({
+        ...prevAnswers,
+        [name]: value,
+      }));
+    };

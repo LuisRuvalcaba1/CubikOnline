@@ -6,3 +6,10 @@ body {
   background-color: #202020;
   color: white
 }
+
+module.exports = {
+  theme: {
+    colors: {
+    }
+  }
+}

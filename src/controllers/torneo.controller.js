@@ -3,13 +3,13 @@ import mongoose from "mongoose";
 
 export const createTorneo = async (req, res) => {
   try {
-    const { nombre, qty_participantes, rango, premio, juez } = req.body;
+    const { nombre, qty_participantes, rango, premio } = req.body;
     const torneo = await Torneo.create({
       nombre,
       qty_participantes,
       rango,
       premio,
-      juez,
+      juez: req.user.id,
     });
     res.status(201).json(torneo);
   } catch (error) {
@@ -46,7 +46,7 @@ export const deleteTorneoById = async (req, res) => {
 
 export const deleteTorneoByJuez = async (req, res) => {
   try {
-    await Torneo.deleteMany(req.params.id);
+    await Torneo.deleteMany({ juez: req.user.id });
     res.status(204).json();
   } catch (error) {
     res.status(404).json({ message: error.message });

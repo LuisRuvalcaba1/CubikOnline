@@ -29,7 +29,6 @@ import {
   WaitRoom,
   ResultRoundUsers,
   SurveyProvider,
-  Encuesta,
   RankingUsers,
 } from "./imports.js";
 
@@ -57,7 +56,6 @@ function App() {
                       <Route path="/product" element={<ProductPage />} />
 
                       <Route element={<ProtectedRoute />}>
-                        <Route path="/encuesta" element={<Encuesta />} />
                         <Route path="/store" element={<Store />} />
                         <Route path="/timerul" element={<TimerUserLoged />} />
                         <Route path="/profile" element={<ProfilePage />} />

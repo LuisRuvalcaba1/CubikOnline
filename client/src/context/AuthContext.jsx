@@ -146,7 +146,6 @@ export const AuthProvider = ({ children }) => {
   const statusChangeAuth = async (email, status, role) => {
     try {
       const res = await statusChangeRequest(email, status, role);
-      console.log(res.data);
       return res.data;
     } catch (error) {
       console.log(error);

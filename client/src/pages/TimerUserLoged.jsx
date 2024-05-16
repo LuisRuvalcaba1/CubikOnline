@@ -55,10 +55,10 @@ function TimerUserLoged() {
         await logout();
         await removeTokenRequest();
       } catch (error) {
-        console.error('Error al eliminar el token:', error);
+        console.error("Error al eliminar el token:", error);
       }
     };
-    const timeoutId = setTimeout(eliminarToken, 21600000); 
+    const timeoutId = setTimeout(eliminarToken, 21600000);
 
     return () => clearTimeout(timeoutId);
   }, [user, deleteTorneoByJuez, statusChangeAuth, logout]);
@@ -240,26 +240,39 @@ function TimerUserLoged() {
   function getAverageOf5(tiempos, session) {
     const tiemposSesion = tiempos.filter((timer) => timer.session === session);
     if (tiemposSesion.length < 5) return "N/A";
-
-    const ultimosTiempos = tiemposSesion
-      .slice(0, 5)
-      .map((timer) => convertToMillisecondsFromString(timer.time));
-    const promedio = ultimosTiempos.reduce((acc, curr) => acc + curr, 0) / 5;
-
-    return convertToTimeFormat(promedio);
+  
+    const ultimosGrupo = tiemposSesion.slice(-5).sort((a, b) => convertToMillisecondsFromString(b.time) - convertToMillisecondsFromString(a.time));
+    const tiemposFiltrados = ultimosGrupo.slice(1, 4);
+  
+    if (tiemposFiltrados.length === 3) {
+      const promedio =
+        tiemposFiltrados.reduce(
+          (acc, curr) => acc + convertToMillisecondsFromString(curr.time),
+          0
+        ) / 3;
+      return convertToTimeFormat(promedio);
+    }
+  
+    return "N/A";
   }
-
+  
   function getAverageOf12(tiempos, session) {
     const tiemposSesion = tiempos.filter((timer) => timer.session === session);
     if (tiemposSesion.length < 12) return "N/A";
-
-    const ultimosTiempos = tiemposSesion
-      .slice(0, 12)
-      .map((timer) => convertToMillisecondsFromString(timer.time));
-    const filteredTimes = ultimosTiempos.sort((a, b) => a - b).slice(1, 11);
-    const promedio = filteredTimes.reduce((acc, curr) => acc + curr, 0) / 10;
-
-    return convertToTimeFormat(promedio);
+  
+    const ultimosGrupo = tiemposSesion.slice(-12).sort((a, b) => convertToMillisecondsFromString(b.time) - convertToMillisecondsFromString(a.time));
+    const tiemposFiltrados = ultimosGrupo.slice(1, 11);
+  
+    if (tiemposFiltrados.length === 10) {
+      const promedio =
+        tiemposFiltrados.reduce(
+          (acc, curr) => acc + convertToMillisecondsFromString(curr.time),
+          0
+        ) / 10;
+      return convertToTimeFormat(promedio);
+    }
+  
+    return "N/A";
   }
 
   return (
@@ -296,7 +309,7 @@ function TimerUserLoged() {
           </p>
         </div>
       </div>
-      <div className="sidebar bg-gray-700">
+      <div className="sidebar bg-neutral-700">
         <h2>Tiempos Guardados</h2>
         <div>
           <div className="text-x1 font-bold">
@@ -330,9 +343,6 @@ function TimerUserLoged() {
                 </li>
               )}
             </ul>
-          </div>
-          <div>
-            <h3>Promedio de 12</h3>
             <ul>
               {tiemposGuardados && tiemposGuardados.length > 0 && (
                 <li>
@@ -384,9 +394,7 @@ function TimerUserLoged() {
         </div>
         <ul>
           {tiemposGuardados
-            .filter(
-              (timer) => timer.session === session
-            )
+            .filter((timer) => timer.session === session)
             .reverse()
             .map((timer, index) => (
               <li

@@ -119,7 +119,7 @@ function Timer() {
   return (
     <div className="">
       <button className="sidebar-toggle" onClick={() => setShowSidebar(!showSidebar)}>☰</button>
-      <div className={`sidebar ${showSidebar ? 'show' : ''} bg-gray-700`}>
+      <div className={`sidebar ${showSidebar ? 'show' : ''} bg-neutral-700`}>
         <h2>Tiempos Guardados</h2>
         <ul>
           {tiemposGuardados.map((item, index) => (
