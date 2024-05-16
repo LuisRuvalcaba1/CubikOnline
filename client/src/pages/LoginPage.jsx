@@ -30,8 +30,8 @@ function LoginPage() {
   }, [isAuthenticated, navigation]);
 
   return (
-    <div className="flex h-screen items-center justify-center">
-      <div className="bg-zinc-800 max-w-md w-full p-10 rounded-md">
+    <div className="flex h-screen items-center justify-center bg-black bg-opacity-20">
+      <div className="bg-zinc-800 max-w-md w-full p-10 rounded-lg">
         {signinErrors.map((error, i) => (
           <div className="bg-red-500 p-2 text-white" key={i}>
             {error}

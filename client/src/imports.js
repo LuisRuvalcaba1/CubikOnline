@@ -25,7 +25,6 @@ import TorneoGetPage from "./pages/TorneoGetPage.jsx";
 import YourTournament from "./pages/YourTournament.jsx";
 import WaitRoom from "./pages/WaitRoom.jsx";
 import ResultRoundUsers from "./pages/ResultRoundUsers.jsx";
-import { SurveyProvider } from "./context/SurveyContext.jsx";
 import RankingUsers from "./pages/RankingUsers.jsx";
 
 export {
@@ -58,6 +57,5 @@ export {
   YourTournament,
   WaitRoom,
   ResultRoundUsers,
-  SurveyProvider,
   RankingUsers,
 };

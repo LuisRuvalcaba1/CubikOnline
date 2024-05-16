@@ -9,9 +9,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@headlessui/react": "^2.0.3",
     "@tensorflow-models/coco-ssd": "^2.2.3",
     "@tensorflow/tfjs": "^4.19.0",
     "axios": "^1.6.7",
+    "bootstrap": "^5.3.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "js-cookie": "^3.0.5",
@@ -19,6 +21,7 @@
     "mongoose": "^8.3.5",
     "proptypes": "^1.1.0",
     "react": "^18.2.0",
+    "react-bootstrap": "^2.10.2",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.50.1",
     "react-modal": "^3.16.1",

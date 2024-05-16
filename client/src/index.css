@@ -3,13 +3,17 @@
 @tailwind utilities;
 
 body {
-  background-color: #202020;
+  background-color: #262626;
   color: white
 }
+.component-container {
+  background-color: #737373;
+  padding: 10px; /* Ajusta el padding según tus necesidades */
+}
 
-module.exports = {
-  theme: {
-    colors: {
-    }
-  }
+.horizontal-line {
+  border: none;
+  border-bottom: 1px solid black; /* Puedes ajustar el grosor y color de la línea aquí */
+  width: 100%; /* O ajusta la anchura según tus necesidades */
+  background-color: transparent; /* Para que el fondo del input sea transparente */
 }

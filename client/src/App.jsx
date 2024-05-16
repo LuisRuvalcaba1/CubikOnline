@@ -28,7 +28,6 @@ import {
   YourTournament,
   WaitRoom,
   ResultRoundUsers,
-  SurveyProvider,
   RankingUsers,
 } from "./imports.js";
 
@@ -40,7 +39,6 @@ function App() {
           <StoreProvider>
             <TimerPvPProvider>
               <TorneoProvider>
-                <SurveyProvider>
                   <BrowserRouter>
                     <Navbar />
                     <Routes>
@@ -80,7 +78,6 @@ function App() {
                       </Route>
                     </Routes>
                   </BrowserRouter>
-                </SurveyProvider>
               </TorneoProvider>
             </TimerPvPProvider>
           </StoreProvider>
