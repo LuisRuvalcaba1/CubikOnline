@@ -8,6 +8,7 @@ import {
   getUsersRequest,
   statusChangeRequest,
   changeToJugdeRequest,
+  updateUserRankRequest,
 } from "../api/auth.js";
 import Cookies from "js-cookie";
 
@@ -165,6 +166,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateUserRank = async (user) => {
+    try {
+      const res = await updateUserRankRequest(user);
+      console.log(res.data);
+      return res.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -175,6 +187,7 @@ export const AuthProvider = ({ children }) => {
         getUsersTable,
         statusChangeAuth,
         changeToJugde,
+        updateUserRank,
         logout,
         loading,
         user,

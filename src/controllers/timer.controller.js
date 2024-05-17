@@ -69,3 +69,13 @@ export const deleteTimerById = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const deleteTimersBySession = async (req, res) => {
+  try {
+    await TimerModel.deleteMany({session: 200, user: req.user.id});
+    res.status(204).json();
+  }
+  catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

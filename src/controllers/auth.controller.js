@@ -146,14 +146,17 @@ export const verifyToken = async (req, res) => {
   });
 };
 
-export const updateUser = async (req, res) => {
+export const updateUserRank = async (req, res) => {
   try {
-    const userFound = User.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const {email, rank} = req.body;
+    const userFound = await User.findOne({email});
+    if (!userFound) return res.status(400).json({ message: "User not found" });
+    userFound.rank = rank;
+    await userFound.save();
     if (!userFound) return res.status(404).json({ message: "User not found" });
     res.json(userFound);
-  } catch (error) {
+  }
+  catch (error) {
     res.status(500).json({ message: error.message });
   }
 };

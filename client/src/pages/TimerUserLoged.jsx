@@ -289,8 +289,8 @@ function TimerUserLoged() {
           <p
             className="scramble"
             style={{
-              fontSize: "40px",
-              maxWidth: "60%",
+              fontSize: "35px",
+              maxWidth: "50%",
               wordWrap: "break-word",
             }}
           >
@@ -309,7 +309,7 @@ function TimerUserLoged() {
           </p>
         </div>
       </div>
-      <div className="sidebar bg-neutral-700">
+      <div className="sidebar bg-neutral-700 w-46">
         <h2>Tiempos Guardados</h2>
         <div>
           <div className="text-x1 font-bold">
@@ -343,6 +343,7 @@ function TimerUserLoged() {
                 </li>
               )}
             </ul>
+            <h4>Promedio de 12</h4>
             <ul>
               {tiemposGuardados && tiemposGuardados.length > 0 && (
                 <li>

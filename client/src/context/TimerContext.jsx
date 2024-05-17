@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 export const AuthTimerContext = createContext();
-import { timerRequest, getTimersRequest } from "../api/timer";
+import { timerRequest, getTimersRequest, deleteTimersBySession } from "../api/timer";
 
 
 //import axios from 'axios';
@@ -34,9 +34,19 @@ export const TimerProvider = ({ children }) => {
     }
   };
 
+  const deleteTimerBySession = async () => {
+    try {
+      const response = await deleteTimersBySession();
+      console.log(response);
+    } catch (error) {
+      console.error("Error deleting timer:", error);
+    }
+  }
+
   const value = {
     createNewTimer,
     getTimersContext,
+    deleteTimerBySession,
   };
 
   return (

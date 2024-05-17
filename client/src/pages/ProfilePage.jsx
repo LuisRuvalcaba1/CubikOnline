@@ -26,6 +26,7 @@ function ProfilePage() {
     }
   
     const userCreatedAt = getTimestampFromObjectId(user._id);
+    console.log(userCreatedAt);
     const oneMinuteAgo = moment().subtract(2, 'minutes');
     return moment(userCreatedAt).isBefore(oneMinuteAgo);
   }
@@ -70,8 +71,7 @@ function ProfilePage() {
           <p>Nombre: {user.username}</p>
           <p>Rango: {user.rank}</p>
           <p>Points: {user.points}</p>
-          <p>Creado en: {user.createdAt}</p>
-          {/*Formulario para sumar puntos al usuario */}
+            {/*Formulario para sumar puntos al usuario */}
           <form onSubmit={onSubmit}>
             <label htmlFor="points">Añadir Puntos:</label>
             <input
