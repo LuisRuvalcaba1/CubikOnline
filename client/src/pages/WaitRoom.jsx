@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuthTorneo } from "../context/TorneoContext";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
+const URL = import.meta.env.VITE_BACKEND_URL
 
 function WaitRoom() {
   const { user } = useAuth();
@@ -44,7 +44,7 @@ function WaitRoom() {
   }, [getTorneoById]);
 
   useEffect(() => {
-    const socket = io("http://localhost:4000/join");
+    const socket = io(`${URL}/join`);
     setSocket(socket);
 
     socket.emit("user", user2);

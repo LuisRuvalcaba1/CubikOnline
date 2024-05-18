@@ -27,7 +27,7 @@ function ProfilePage() {
   
     const userCreatedAt = getTimestampFromObjectId(user._id);
     console.log(userCreatedAt);
-    const oneMinuteAgo = moment().subtract(2, 'minutes');
+    const oneMinuteAgo = moment().subtract(2, 'days');
     return moment(userCreatedAt).isBefore(oneMinuteAgo);
   }
 

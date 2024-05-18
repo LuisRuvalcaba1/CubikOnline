@@ -7,6 +7,7 @@ import "./Torneo.css";
 import { removeTokenRequest } from "../api/auth";
 import { useNavigate } from "react-router-dom";
 import Modal from "react-modal";
+const URL = import.meta.env.VITE_BACKEND_URL
 
 Modal.setAppElement("#root");
 
@@ -48,7 +49,7 @@ function YourTournament() {
   }, [user]);
 
   useEffect(() => {
-    const socket = io("http://localhost:4000/join");
+    const socket = io(`${URL}/join`);
     setSocket(socket);
     socket.emit("juez", user._id);
     socket.emit("n_participantes", participantes);

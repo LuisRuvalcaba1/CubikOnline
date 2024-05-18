@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 import { useAuth } from "../context/AuthContext";
 import { useAuthTimerPvP } from '../context/TimerPvPContext';
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const URL = import.meta.env.VITE_BACKEND_URL
 
 function TimerPvP() {
   const navigate = useNavigate();
@@ -29,7 +29,7 @@ function TimerPvP() {
   }, [user, navigate]);
 
   useEffect(() => {
-    const socket = io(`${BACKEND_URL}/confrontation`);
+    const socket = io(`${URL}/confrontation`);
     setSocket(socket);
 
     socket.emit('user', JSON.stringify({ id: user._id }))
