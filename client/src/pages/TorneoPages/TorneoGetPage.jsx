@@ -1,7 +1,7 @@
-import { useAuthTorneo } from "../context/TorneoContext";
+import { useAuthTorneo } from "../../context/TorneoContext";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { useForm } from "react-hook-form";
 
 function TorneoGetPage() {

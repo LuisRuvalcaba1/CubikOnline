@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
-import { useAuth } from "../context/AuthContext";
-import { useAuthTorneo } from "../context/TorneoContext";
+import { useAuth } from "../../context/AuthContext";
+import { useAuthTorneo } from "../../context/TorneoContext";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 

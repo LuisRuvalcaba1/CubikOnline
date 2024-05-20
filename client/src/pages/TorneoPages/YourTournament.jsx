@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { useAuthTorneo } from "../context/TorneoContext";
+import { useAuthTorneo } from "../../context/TorneoContext";
 import io from "socket.io-client";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { useLocation } from "react-router-dom";
 import "./Torneo.css";
-import { removeTokenRequest } from "../api/auth";
+import { removeTokenRequest } from "../../api/auth";
 import { useNavigate } from "react-router-dom";
 import Modal from "react-modal";
 const URL = import.meta.env.VITE_BACKEND_URL

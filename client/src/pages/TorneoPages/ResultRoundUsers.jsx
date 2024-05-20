@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { useAuthTorneo } from "../context/TorneoContext";
+import { useAuthTorneo } from "../../context/TorneoContext";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import io from "socket.io-client";
-import { useAuth } from "../context/AuthContext";
-
+import { useAuth } from "../../context/AuthContext";
+const URL = import.meta.env.VITE_BACKEND_URL;
 function ResultRoundUsers() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -35,7 +35,7 @@ function ResultRoundUsers() {
   });
 
   useEffect(() => {
-    const socket = io("http://localhost:4000/join");
+    const socket = io(`${URL}/join`);
     setSocket(socket);
 
     socket.emit("grupo", grupo);

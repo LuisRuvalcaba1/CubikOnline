@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import "./Timer.css";
 import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
-import { useAuth } from "../context/AuthContext";
-import { useAuthTimerPvP } from '../context/TimerPvPContext';
+import { useAuth } from "../../context/AuthContext";
+import { useAuthTimerPvP } from '../../context/TimerPvPContext';
 const URL = import.meta.env.VITE_BACKEND_URL
 
 function TimerPvP() {
