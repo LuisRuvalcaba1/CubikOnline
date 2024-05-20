@@ -1,62 +1,60 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-    username: 
-    {
+    username: {
         type: String,
         required: true,
         trim: true,
         unique: true,
     },
-    firstName:
-    {
+    firstName: {
         type: String,
         required: true,
         trim: true,
     },
-    lastName:
-    {
+    lastName: {
         type: String,
         required: true,
         trim: true,
     },
-    password: 
-    {
+    password: {
         type: String,
         required: true,
         trim: true,
     },
-    email: 
-    {
+    email: {
         type: String,
         required: true,
         trim: true,
         unique: true,
     },
-    points:
-    {
+    points: {
         type: Number,
         required: false,
     },
-    role: 
-    {
+    role: {
         type: String,
         required: true,
         default: 'user'
     },
-    status: 
-    {
+    status: {
         type: String,
         required: true,
         default: 'active'
     },
-    rank:
-    {
+    rank: {
         type: Number,
         required: true,
         trim: true,
     },
+    verificado: {
+        type: Boolean,
+        default: false
+    },
+    tokenVerificacion: {
+        type: String,
+        default: null
+    }
+}, {timestamps: true});
 
-},{timestamps: true})
-
-export default mongoose.model('User', userSchema)
+export default mongoose.model('User', userSchema);

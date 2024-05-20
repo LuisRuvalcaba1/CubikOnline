@@ -21,13 +21,14 @@ export const register = async (req, res) => {
       role: "user",
       status: "active",
       rank: 0,
+      verificado: false,
+      tokenVerificacion: null,
     });
 
     const userSaved = await newUser.save();
     const token = await createAccessToken({ id: userSaved._id });
     res.cookie("token", token);
     res.json({
-      _id: userSaved._id,
       username: userSaved.username,
       email: userSaved.email,
     });
@@ -55,7 +56,6 @@ export const login = async (req, res) => {
       httpOnly: true,
     });
     res.json({
-      _id: userFound._id,
       username: userFound.username,
       email: userFound.email,
       points: userFound.points,

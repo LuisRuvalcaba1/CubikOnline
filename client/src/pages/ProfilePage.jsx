@@ -4,12 +4,11 @@ import { useForm } from "react-hook-form";
 import { removeTokenRequest } from "../api/auth";
 import { useAuthTorneo } from "../context/TorneoContext";
 import Encuesta from "../components/Encuesta";
-import moment from "moment";
 
 function ProfilePage() {
   const [showModal, setShowModal] = useState(false);
   const { register, handleSubmit } = useForm();
-  const { user, updateUserPoints, logout, statusChangeAuth, isAuthenticated } =
+  const { user, updateUserPoints, logout, statusChangeAuth } =
     useAuth();
   const { deleteTorneoByJuez } = useAuthTorneo();
 
@@ -19,23 +18,19 @@ function ProfilePage() {
     const timestamp = parseInt(objectId.toString().slice(0, 8), 16);
     return new Date(timestamp * 1000);
   }
-  
-  const isUserOlderThanOneMinute = () => {
-    if (!user || !user._id) {
-      return false;
-    }
-  
-    const userCreatedAt = getTimestampFromObjectId(user._id);
-    console.log(userCreatedAt);
-    const oneMinuteAgo = moment().subtract(2, 'days');
-    return moment(userCreatedAt).isBefore(oneMinuteAgo);
-  }
 
   useEffect(() => {
-    if (isAuthenticated && isUserOlderThanOneMinute()) {
-      setShowModal(true);
+    const userCreatedAt = user ? getTimestampFromObjectId(user._id) : null;
+    const currentDate = new Date();
+    const diffInDays = Math.floor((currentDate - userCreatedAt) / (1000 * 60 * 60 * 24));
+
+    if (userCreatedAt && diffInDays >= 2) {
+      const remainderDays = diffInDays % 2;
+      if (remainderDays === 0) {
+        setShowModal(true);
+      }
     }
-  }, [isAuthenticated, user]);
+  }, [user]);
 
   useEffect(() => {
     const eliminarToken = async () => {

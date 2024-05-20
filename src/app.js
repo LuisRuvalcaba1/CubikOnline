@@ -13,10 +13,15 @@ import tokenRoutes from './routes/token.routes.js'
 import cookieParser from "cookie-parser";
 const app = express();
 
-app.use(cors({
+const corsOptions = {
     origin: CLIENT,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
-}));
+    allowedHeaders: 'Content-Type, Authorization, X-Requested-With',
+    optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
 
 app.use(morgan('dev'));
 app.use(express.json());

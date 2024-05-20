@@ -1,27 +1,151 @@
- useEffect(() => {
-      const checkRegistrationDate = async () => {
-        try {
-          if (!isAuthenticated) return;
-  
-          const registrationDate = new Date(user.createdAt);
-          const currentDate = new Date();
-          const diffInDays = Math.ceil((currentDate - registrationDate) / (1000 * 60 * 60 * 24));
-  
-          if (diffInDays >= 1) {
-            setShowSurvey(true);
-          }
-        } catch (err) {
-          console.error(err);
-        }
-      };
-  
-      checkRegistrationDate();
-    }, [isAuthenticated, user]);
-  
-    const handleSurveyAnswers = (e) => {
-      const { name, value } = e.target;
-      setSurveyAnswers((prevAnswers) => ({
-        ...prevAnswers,
-        [name]: value,
-      }));
-    };
+Algoritmos de CFOP:
+
+OLL:
+Cruz: Aristas Bien Orientadas
+R U2 R' U' (R U R' U') R U' R'
+R U2 R2 U' R2 U' R2 U2 R
+L' U R U' L U R'
+R U' L' U R' U' L
+R2 D' R U2 R' D R U2 R
+r U R' U' r' F R F'
+R' F' L' F R F' L F
+Punto
+R U2 R2 F R F' U2 R' F R F'
+F (R U R' U') F' f (R U R' U') f'
+M R U R' U r U2 r' U M'
+M U' r U2 r' U' R U' R2 r
+r' R U (R U R' U') r R2 F R F'
+F R U R' d R' U2 R' F R F'
+R U R' U R' F R F' U2 R' F R F'
+r' R U (R U R' U') r2 R2 U R U' r'
+Línea
+R U R' U R d' R U' R' F'
+R U' y R2 D R' U2 R D' R2 d R'
+f (R U R' U') (R U R' U') f'
+F (R U R' U') x R U' L U R' U' r'
+L Pequeña
+r U R' U R U' R' U R U2 r'
+R' F R' F' R2 U2 y R' F R F'
+F' L' U' L U L' U' L U F
+r' U' R U' R' U R U' R' U2 r
+R B' R B R2 U2 F R' F' R
+F (R U R' U') (R U R' U') F'
+Cuadrados
+r U2 R' U' R U' r'
+l' U2 L U L' U l
+Relámpagos
+L F R' F R F2 L'
+U2 r R2 U' R U' R' U2 R U' M
+R U' R' U2 R U y R U' R' U' F'
+R2 U R' B' R U' R2 U l U l'
+r' U' R U' R' U2 r
+F' L' U' L U F U' F' L' U' L U F
+L' U L U2 L' U' y' L' U L U F
+L2 U' L B L' U L2 U' r' U' r
+Pez
+F R U' R' U' R U R' F'
+L U2 L2 B L B' L U2 L'
+R' U' R y' x' R U' R F R U R'
+L U L' y x L' U L F' L' U' L
+Forma de C
+F’ L’ U’ L y’ R U’ R’ U2 R
+R U R2 U’ R’ F R U R U’ F’
+Forma de L Grande
+R' F R U R' F' R y L U' L'
+L' B' L R' U' R U L' B L
+L F' L' U' L F L' y' R' U R
+R B R' L U L' U' R B' R'
+Forma de P
+F U R U' R' F'
+L d R' d' L' U L F L'
+F' U' L' U L F
+R' d' L d R U' R' F' R
+Forma de T
+R U R' U' R' F R F'
+F R U R' U' F'
+Forma de W
+R U R' U R U' R' U' R' F R F'
+L' U' L U' L' U L U L F' L' F
+Forma de Z
+R' F (R U R' U') y L' d R
+L F' L' U' L U y' R d' L'
+Esquinas Bien Orientadas
+M' U' M U2 M' U' M
+L' (R U R' U') L R' F R F'
+
+PLL:
+
+Básicos (Permutan solo aristas o esquinas)
+U1: R U R' U R' U' R2 U' R' U R' U R
+U2: R' U R' U' R' U' R' U R U R2
+Z: M2 U' M2 U' M' U2 M2 U2 M' U2
+H: M2 U M2 U2 M2 U M2
+Avanzados
+A1: R U R' F' r U R' U' r' F R2 U' R'
+A2: R U R2 F' r U R U' r' F R U' R'
+E: X' R U' R' D R U R' D' R U R' D R U' R' D'
+J: R U R' F' (R U R' U') R' F R2 U' R'
+L: R' U' R2 B R' U' R' U R B' R' U R
+T: (R U R' U') R' F R2 U' R' U' R U R' F'
+F: R' U' F' (R U R' U') R' F R2 U' R' U' R U R' U R
+Y: F R U' R' U' R U R' F' (R U R' U') R' F R F'
+V: R' U R' U' Y R' F' R2 U' R' U R' F R F
+R1: R' U2 R U2 R' F (R U R' U') R' F' R2
+R2: R U' R' U' R U R D R' U' R D' R' U2 R'
+N1: R U R' U R U R' F' (R U R' U') R' F R2 U' R' U2 R U' R'
+N2: R' U' R U2 R' U' R2 B R' U' R' U R B' R' U R U R' U R
+G1: R2 u R' U R' U' R u' R2 F' U F
+G2: F' U' F R2 u R' U R U' R u' R2
+G3: R2 F2 R U2 R U2 R' F (R U R' U') R' F R2
+G4: R2 F' R U R U' R' F' R U2 R' U2 R' F2 R2
+
+F2L:
+
+Arista y esquina en la capa superior
+Caso 1: U' F' U F
+Caso 2: U R U' R'
+Caso 3: F' U' F
+Caso 4: R U R'
+Esquina apuntando con el blanco a un lateral
+Caso 5: R U' R' U R U' R' U2
+Caso 6: U' R' U2 R U F' U' F
+Caso 7: R U' R' U2 F' U' F
+Caso 8: F' U F U2 R U R'
+Caso 9: U' R U' R' U R U R'
+Caso 10: d R' U R U' R' U' R
+Caso 11: U F' U' F U2 F' U F
+Caso 12: U' R U R' U' R U2 R
+Caso 13: U' R U R' U R U R'
+Caso 14: U' R U' R' U F' U' F
+Caso 15: y' U R' U2 R U2 R' U R
+Caso 16: U' R U2 R' U2 R U' R'
+Esquina apuntando con el blanco arriba
+Caso 17: R U R' U2 (R U R' U') R U R'
+Caso 18: R U R' U R U2 R' F' U2 F
+Caso 19: F' U2 F U F' U' F
+Caso 20: R U2 R' U' R U R'
+Caso 21: U' F' U2 F U' F' U F
+Caso 22: U R U2 R' U R U' R'
+Caso 23: U2 R U R' U R U' R'
+Caso 24: U2 F' U' F U' F' U F
+Esquina en la capa inferior y arista en la superior
+Caso 25: U R U' R' U' F' U F
+Caso 26: U' F' U F U R U' R'
+Caso 27: F' U F U' F' U F
+Caso 28: R U' R' U R U' R'
+Caso 29: U' (R U R' U') R U R'
+Caso 30: U' R U' R' F' U' F
+Esquina en la capa inferior y arista en la capa intermedia
+Caso 31: (R U R' U') (R U R' U') R U R'
+Caso 32: R U' R' F' U2 F
+Caso 33: U' R U2 R' U R U R'
+Caso 34: U' R U' R' U2 R U' R'
+Caso 35: d R' U' R d' R U R'
+Caso 36: U' R U R' d R' U' R
+Esquina y arista en la capa inferior
+Caso 37: (Resuelto)
+Caso 38: R U2 R' U R U2 R' U F' U' F
+Caso 39: R U' R' U R U2 R' U R U' R'
+Caso 40: (R U R' U') R U2 R' U' R U R'
+Caso 41: R U' R' U R' U' R F' U F
+Caso 42: F' U F U2 R U R' U R U' R'

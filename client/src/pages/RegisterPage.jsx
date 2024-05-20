@@ -2,7 +2,35 @@ import { useForm } from "react-hook-form";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+// const service = import.meta.env.serviceID;
+// const template = import.meta.env.templateID2;
+// const key = import.meta.env.publicKey;
+
 function RegisterPage() {
+  // const serviceID = `${service}`;
+  // const templateID = `${template}`;
+  // const publicKey = `${key}`;
+
+  // const sendEmail = (e) => {
+  //   e.preventDefault();
+  //   console.log(e.target.elements.message.value);
+  //   setToken(e.target.elements.message.value);
+  //   // e.target.elements.message.value = token
+  //   emailjs
+  //     .sendForm(serviceID, templateID, form.current, {
+  //       publicKey: publicKey,
+  //     })
+  //     .then(
+  //       () => {
+  //         console.log("SUCCESS!");
+  //       },
+  //       (error) => {
+  //         console.log("FAILED...", error.text);
+  //       }
+  //     );
+  //   setShowTokenInput(true);
+  // };
+  
   const {
     register,
     handleSubmit,

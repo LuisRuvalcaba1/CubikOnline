@@ -2,6 +2,9 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { useForm } from "react-hook-form";
 import { useRef, useState } from "react";
 import emailjs from "@emailjs/browser";
+const service = import.meta.env.serviceID;
+const template = import.meta.env.templateID;
+const key = import.meta.env.publicKey;
 
 function Account() {
   const { updatePassword } = useAuth();
@@ -13,9 +16,9 @@ function Account() {
   const [newPassword, setNewPassword] = useState("");
   const form = useRef();
 
-  const serviceID = "service_pldhi1s";
-  const templateID = "template_x9ft7di";
-  const publicKey = "kKxJMNK70fUYPciwV";
+  const serviceID = `${service}`;
+  const templateID = `${template}`;
+  const publicKey = `${key}`;
 
   const sendEmail = (e) => {
     e.preventDefault();
