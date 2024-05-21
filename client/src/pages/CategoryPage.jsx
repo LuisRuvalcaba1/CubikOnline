@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import cubo_2x2 from "../../images/2x2_Cubo.png";
-import cubo_3x3 from "../../images/3x3_Cubo.png";
-import cubo_4x4 from "../../images/4x4_Cubo.png";
-import cubo_5x5 from "../../images/5x5_Cubo.png";
+import cubo_2x2 from "../images/2x2_Cubo.png";
+import cubo_3x3 from "../images/3x3_Cubo.png";
+import cubo_4x4 from "../images/4x4_Cubo.png";
+import cubo_5x5 from "../images/5x5_Cubo.png";
 import "./Aprendizaje.css";
 
 function CategoryPage() {

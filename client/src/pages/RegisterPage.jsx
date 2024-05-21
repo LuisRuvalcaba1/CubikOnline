@@ -41,7 +41,7 @@ function RegisterPage() {
   const { signup, isAuthenticated, errors: registerErrors } = useAuth();
   const navigation = useNavigate();
   useEffect(() => {
-    if (isAuthenticated) navigation("/profile");
+    if (isAuthenticated) navigation("/login");
   }, [isAuthenticated]);
 
   const onSubmit = handleSubmit(async (values) => {

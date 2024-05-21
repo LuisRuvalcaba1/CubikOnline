@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { useAuthTorneo } from "../../context/TorneoContext";
+import { useAuthTorneo } from "../context/TorneoContext";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import io from "socket.io-client";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 const URL = import.meta.env.VITE_BACKEND_URL;
 function ResultRoundUsers() {
   const navigate = useNavigate();

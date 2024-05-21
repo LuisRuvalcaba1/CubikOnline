@@ -1,4 +1,4 @@
-import Camara from "../../components/Camara";
+import Camara from "../components/Camara";
 
 function CamaraPage() {
 

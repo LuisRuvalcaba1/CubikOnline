@@ -1,12 +1,12 @@
-import Notacion from "../../images/Notacion.png";
-import Partes from "../../images/Partes_rubik.png";
-import Capas from "../../images/Capas.png";
+import Notacion from "../images/Notacion.png";
+import Partes from "../images/Partes_rubik.png";
+import Capas from "../images/Capas.png";
 import "./Aprendizaje.css";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
-import { useAuth } from "../../context/AuthContext";
-import { removeTokenRequest, renewTokenRequest } from "../../api/auth";
-import { useAuthTorneo } from "../../context/TorneoContext";
+import { useAuth } from "../context/AuthContext";
+import { removeTokenRequest, renewTokenRequest } from "../api/auth";
+import { useAuthTorneo } from "../context/TorneoContext";
 
 function AprendizajePage() {
   const { user, logout, statusChangeAuth } = useAuth();

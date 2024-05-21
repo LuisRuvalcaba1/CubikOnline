@@ -1,17 +1,17 @@
 import "./Aprendizaje.css";
-import Posicion_cruz from "../../images/Posicion_de_la_cruz.png";
-import mov1 from "../../images/mov1.png";
-import mov2 from "../../images/mov2.png";
-import mov3 from "../../images/mov3.png";
-import mov1_arista from "../../images/mov1_arista.png";
-import mov2_arista from "../../images/mov2_arista.png";
-import caso_punto1 from "../../images/caso_punto1.png";
-import caso_punto2 from "../../images/caso_punto2.png";
-import caso_cruz_armada from "../../images/caso_cruz_armada.png";
-import caso_L from "../../images/caso_l.png";
-import caso_linea from "../../images/caso_linea.png";
+import Posicion_cruz from "../images/Posicion_de_la_cruz.png";
+import mov1 from "../images/mov1.png";
+import mov2 from "../images/mov2.png";
+import mov3 from "../images/mov3.png";
+import mov1_arista from "../images/mov1_arista.png";
+import mov2_arista from "../images/mov2_arista.png";
+import caso_punto1 from "../images/caso_punto1.png";
+import caso_punto2 from "../images/caso_punto2.png";
+import caso_cruz_armada from "../images/caso_cruz_armada.png";
+import caso_L from "../images/caso_l.png";
+import caso_linea from "../images/caso_linea.png";
 import { Link } from "react-router-dom";
-import orientar from "../../images/orientar_3x3.png";
+import orientar from "../images/orientar_3x3.png";
 function MetodoP() {
   return (
     <div className="contenedor" id="cont">

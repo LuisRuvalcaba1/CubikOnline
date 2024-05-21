@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useAuthTimer } from "../../context/TimerContext";
-import { useAuth } from "../../context/AuthContext";
+import { useAuthTimer } from "../context/TimerContext";
+import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 

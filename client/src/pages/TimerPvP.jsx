@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import "./Timer.css";
 import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
-import { useAuth } from "../../context/AuthContext";
-import { useAuthTimerPvP } from '../../context/TimerPvPContext';
+import { useAuth } from "../context/AuthContext";
+import { useAuthTimerPvP } from '../context/TimerPvPContext';
 const URL = import.meta.env.VITE_BACKEND_URL
 
 function TimerPvP() {
@@ -22,22 +22,27 @@ function TimerPvP() {
   const [resultado, setResultado] = useState(null);
   const { setResultadoCon } = useAuthTimerPvP();
 
-  useEffect(() => {
-    if (user.rank === 0) {
-      navigate('/rankingusers');
-    }
-  }, [user, navigate]);
+  // useEffect(() => {
+  //   if (user.rank === 0) {
+  //     navigate('/rankingusers');
+  //   }
+  // }, [user, navigate]);
 
   useEffect(() => {
-    const socket = io(`${URL}/confrontation`);
+    console.log('Usuario:', user._id);
+  }, [user]);
+  useEffect(() => {
+    const socket = io("http://localhost:4000/confrontation");
     setSocket(socket);
 
-    socket.emit('user', JSON.stringify({ id: user._id }))
+    if(!user) return;
+    socket.emit('user', JSON.stringify({ id: user._id}))
     socket.on('user', (user) => {
       setUsuario(user)
     })
 
     socket.on('paired', () => {
+      console.log('Emparejado');
       setIsPaired(true);
     });
 
@@ -55,6 +60,7 @@ function TimerPvP() {
       setResultadoCon(data.ganador);
       navigate('/confirmation');
       if (data.ganador) {
+        console.log('Ganaste');
         const winner = JSON.parse(data.winner);
         const loser = JSON.parse(data.loser);
         createTimerPvP(winner, loser);

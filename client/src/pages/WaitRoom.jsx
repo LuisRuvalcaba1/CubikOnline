@@ -1,7 +1,7 @@
 import io from "socket.io-client";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
-import { useAuthTorneo } from "../../context/TorneoContext";
+import { useAuthTorneo } from "../context/TorneoContext";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 const URL = import.meta.env.VITE_BACKEND_URL
@@ -12,7 +12,6 @@ function WaitRoom() {
   const { user2, torneo } = useLocation().state;
   const { getTorneoById } = useAuthTorneo();
   const [usuario, setUsuario] = useState("");
-  const [solveCount, setSolveCount] = useState(0);
   const [isPaired, setIsPaired] = useState(false);
   const [milisegundos, setMilisegundos] = useState(0);
   const [segundos, setSegundos] = useState(0);
@@ -44,7 +43,7 @@ function WaitRoom() {
   }, [getTorneoById]);
 
   useEffect(() => {
-    const socket = io(`${URL}/join`);
+    const socket = io("http://localhost:4000/join");
     setSocket(socket);
 
     socket.emit("user", user2);

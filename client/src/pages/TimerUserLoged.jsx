@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { useAuthTimer } from "../../context/TimerContext";
-import { removeTokenRequest } from "../../api/auth";
-import { useAuth } from "../../context/AuthContext";
-import { useAuthTorneo } from "../../context/TorneoContext";
+import { useAuthTimer } from "../context/TimerContext";
+import { removeTokenRequest } from "../api/auth";
+import { useAuth } from "../context/AuthContext";
+import { useAuthTorneo } from "../context/TorneoContext";
 import "./Timer.css";
 
 function TimerUserLoged() {

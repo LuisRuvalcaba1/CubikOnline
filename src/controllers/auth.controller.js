@@ -23,6 +23,7 @@ export const register = async (req, res) => {
       rank: 0,
       verificado: false,
       tokenVerificacion: null,
+      isPrivate: false,
     });
 
     const userSaved = await newUser.save();
@@ -35,6 +36,15 @@ export const register = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
     console.log(error);
+  }
+};
+
+export const searchUser = async (req, res) => {
+  const { username } = req.body;
+  try {
+    const userFound = await User.findOne({ username });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -56,6 +66,7 @@ export const login = async (req, res) => {
       httpOnly: true,
     });
     res.json({
+      _id: userFound._id,
       username: userFound.username,
       email: userFound.email,
       points: userFound.points,

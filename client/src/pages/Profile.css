@@ -1,0 +1,40 @@
+.contenedor#cont {
+    width: 73%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: block;
+    margin-top: 1%;
+  }
+  
+  .contenedor {
+    box-sizing: 1000px;
+    border-radius: 20px;
+    display: inline-block;
+    background-color: #595959;
+    text-align: left;
+  }
+  
+  .imagen {
+    width: 50%;
+    height: 50%;
+    border-radius: 20px;
+    display: inline-block;
+    margin-left: 25%;
+    margin-bottom: 3%;
+  }
+  
+  .titulo {
+    font-size: 30px;
+    color: white;
+    text-align: center;
+    margin-top: 2%;
+    margin-bottom: 3%;
+  }
+  
+  .texto {
+    font-size: 20px;
+    color: white;
+    margin-left: 5%;
+    font-size: large;
+  }

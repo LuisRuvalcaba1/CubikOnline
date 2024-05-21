@@ -16,7 +16,7 @@ export const updatePasswordRequest = (email, newPassword) => axios.put(`/account
 
 export const updateUserRequest = (email, points) => axios.put(`/profile/`, email ,points);
 
-export const getUsersRequest = () => axios.get(`/`)
+export const getUsersRequest = () => axios.get(`/`);
 
 export const statusChangeRequest = (email, status, role) => axios.put(`/`, email, status, role)
 

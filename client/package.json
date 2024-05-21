@@ -26,6 +26,7 @@
     "react-hook-form": "^7.50.1",
     "react-modal": "^3.16.1",
     "react-router-dom": "^6.22.0",
+    "react-switch": "^7.0.0",
     "react-webcam": "^7.2.0",
     "styled-components": "^6.1.11",
     "tfjs": "^0.6.0"

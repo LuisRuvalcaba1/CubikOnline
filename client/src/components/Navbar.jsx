@@ -9,6 +9,8 @@ import { Fragment } from "react";
 const profileMenu = [
   { name: "Perfil", href: "/profile" },
   { name: "Cambiar contraseña", href: "/account/password" },
+  {name: "Amigos", href: "/friends"},
+  {name: "Notificaciones", href: "/notifications"},
   { name: "Salir", href: "/" },
 ];
 
@@ -167,6 +169,13 @@ export const Navbar = () => {
                     </Menu.Items>
                   </Transition>
                 </Menu>
+
+                <Link
+                  to="/category"
+                  className="text-white hover:bg-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Aprendizaje
+                </Link>
 
                 <Menu as="div" className="relative inline-block text-left">
                   <div>
