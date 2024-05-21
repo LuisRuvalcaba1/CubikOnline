@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useAuthTimerPvP } from "../context/TimerPvPContext";
+import { useAuthTimerPvP } from "../../context/TimerPvPContext";
 import "./Confirmation.css";
 
 function Confirmation() {

@@ -1,0 +1,91 @@
+/* .contenidor{
+  text-align: center;
+}
+
+div{
+  display: block;
+} */
+
+.contenedor#cont {
+  width: 73%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: block;
+  margin-top: 1%;
+}
+
+.contenedor {
+  box-sizing: 1000px;
+  border-radius: 20px;
+  display: inline-block;
+  background-color: #595959;
+  text-align: left;
+}
+
+.imagen {
+  width: 50%;
+  height: 50%;
+  border-radius: 20px;
+  display: inline-block;
+  margin-left: 25%;
+  margin-bottom: 3%;
+}
+
+.titulo {
+  font-size: 30px;
+  color: white;
+  text-align: center;
+  margin-top: 2%;
+  margin-bottom: 3%;
+}
+
+.texto {
+  font-size: 20px;
+  color: white;
+  margin-left: 5%;
+  font-size: large;
+}
+
+.fila-container {
+  margin-top: 2%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-gap: 5px;
+  justify-items: center;
+  align-items: center;
+  margin-bottom: 2%;
+}
+.fila-item1 {
+  background: #a6a6a6;
+  text-align: center;
+  border-radius: 20px;
+}
+
+.fila-img {
+  width: 80%;
+  height: 80%;
+  margin-left: 10%;
+}
+
+.card {
+  width: 50%;
+  height: 50%;
+  margin-top: 2%;
+  display: inline-block;
+  margin-left: 25%;
+  border-radius: 20px;
+  background-color: #a6a6a6;
+  text-align: center;
+  margin-bottom: 3%;
+}
+
+.fila-container2 {
+  margin-top: 2%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 2fr));
+  grid-gap: 5px;
+  justify-items: center;
+  align-items: center;
+  margin-bottom: 2%;
+}

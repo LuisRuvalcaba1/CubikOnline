@@ -15,8 +15,11 @@ function ProfilePage() {
   const handleOnClose = () => setShowModal(false);
 
   const getTimestampFromObjectId = (objectId) => {
-    const timestamp = parseInt(objectId.toString().slice(0, 8), 16);
-    return new Date(timestamp * 1000);
+    if (objectId) {
+      const timestamp = parseInt(objectId.toString().slice(0, 8), 16);
+      return new Date(timestamp * 1000);
+    }
+    return null; // o puedes devolver una fecha predeterminada si lo prefieres
   }
 
   useEffect(() => {
@@ -66,7 +69,6 @@ function ProfilePage() {
           <p>Nombre: {user.username}</p>
           <p>Rango: {user.rank}</p>
           <p>Points: {user.points}</p>
-            {/*Formulario para sumar puntos al usuario */}
           <form onSubmit={onSubmit}>
             <label htmlFor="points">Añadir Puntos:</label>
             <input

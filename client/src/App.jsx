@@ -29,6 +29,8 @@ import {
   WaitRoom,
   ResultRoundUsers,
   RankingUsers,
+  MetodoFriedrich,
+  CategoryPage,
 } from "./imports.js";
 
 
@@ -50,7 +52,9 @@ function App() {
                         path="/learn"
                         element={<AprendizajePage />}
                       ></Route>
+                      <Route path="/category" element={<CategoryPage />} />
                       <Route path="/metodop" element={<MetodoP />}></Route>
+                      <Route path="/metodof" element={<MetodoFriedrich/>}></Route>
                       <Route path="/timer" element={<Timer />}></Route>
                       <Route path="/product" element={<ProductPage />} />
 
