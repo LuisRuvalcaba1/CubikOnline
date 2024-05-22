@@ -6,6 +6,6 @@ const router = Router();
 router.post('/addFriend', authRequired, addFriend);
 router.get('/getFriends', authRequired, getFriends);
 router.put('/acceptFriend/:id', authRequired, acceptFriend);
-router.put('/denyFriend/:id', authRequired, denyFriend);
+router.delete('/denyFriend/:id', authRequired, denyFriend);
 
 export default router;

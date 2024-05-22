@@ -24,6 +24,15 @@ export const addFriend = async (req, res) => {
   }
 };
 
+getAllFriends = async (req, res) => {
+  try {
+    const friends = await Amigos.find({ user1: req.user.id, status: true }).populate("user2");
+    res.json(friends);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
 export const getFriends = async (req, res) => {
   try {
     const friends = await Amigos.find({ user2: req.user.id, status: false }).populate("user1");
@@ -35,7 +44,6 @@ export const getFriends = async (req, res) => {
 
 export const acceptFriend = async (req, res) => {
   try {
-    // Aceptar una solicitud de amistad
     const friend = await Amigos.findByIdAndUpdate(
       req.params.id,
       { status: true },
@@ -54,14 +62,8 @@ export const acceptFriend = async (req, res) => {
 
 export const denyFriend = async (req, res) => {
   try {
-    // Rechazar una solicitud de amistad
-    const friend = await Amigos.findByIdAndDelete({user2: req.user.id});
-
-    if (!friend) {
-      return res.status(404).json({ message: "Solicitud de amistad no encontrada" });
-    }
-
-    res.json(friend);
+    await Amigos.findByIdAndDelete(req.params.id);
+    res.status(204).json();
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

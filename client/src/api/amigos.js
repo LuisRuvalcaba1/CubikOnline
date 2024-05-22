@@ -4,6 +4,6 @@ export const addFriendRequest = (email, friendEmail) => axios.post('/addFriend',
 
 export const getFriendsRequest = () => axios.get(`/getFriends`);
 
-export const acceptFriendRequest = (friendshipId) => axios.put(`/acceptFriend/`,friendshipId);
+export const acceptFriendRequest = (friendshipId) => axios.put(`/acceptFriend/${friendshipId}`,);
 
-export const denyFriendRequest = (friendshipId) => axios.delete(`/denyFriend/`,friendshipId);
+export const denyFriendRequest = (friendshipId) => axios.delete(`/denyFriend/${friendshipId}`);
