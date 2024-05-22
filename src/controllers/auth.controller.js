@@ -39,15 +39,6 @@ export const register = async (req, res) => {
   }
 };
 
-export const searchUser = async (req, res) => {
-  const { username } = req.body;
-  try {
-    const userFound = await User.findOne({ username });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -116,7 +107,8 @@ export const changeToJugde = async (req, res) => {
   const { email, role } = req.body;
   try {
     const userToChange = await User.findOne({ email });
-    if (!userToChange) return res.status(400).json({ message: "User not found" });
+    if (!userToChange)
+      return res.status(400).json({ message: "User not found" });
     userToChange.role = role;
     await userToChange.save();
     res.json(userToChange);
@@ -159,15 +151,28 @@ export const verifyToken = async (req, res) => {
 
 export const updateUserRank = async (req, res) => {
   try {
-    const {email, rank} = req.body;
-    const userFound = await User.findOne({email});
+    const { email, rank } = req.body;
+    const userFound = await User.findOne({ email });
     if (!userFound) return res.status(400).json({ message: "User not found" });
     userFound.rank = rank;
     await userFound.save();
     if (!userFound) return res.status(404).json({ message: "User not found" });
     res.json(userFound);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-  catch (error) {
+};
+
+export const isPrivate = async (req, res) => {
+  const { email, isPrivate } = req.body;
+  try {
+    const userPrivate = await User.findOne({ email });
+    userPrivate.isPrivate = isPrivate;
+    await userPrivate.save();
+    if (!userPrivate)
+      return res.status(404).json({ message: "User not found" });
+    res.json(userPrivate);
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
@@ -185,7 +190,7 @@ export const deleteUser = async (req, res) => {
 export const updateUserPoints = async (req, res) => {
   const { points, email } = req.body;
   try {
-    const userFound = await User.findOne({ email })
+    const userFound = await User.findOne({ email });
     if (!userFound) return res.status(404).json({ message: "User not found" });
     userFound.points = points;
     await userFound.save();
@@ -212,15 +217,16 @@ export const updateUserPassword = async (req, res) => {
 export const updateUserStatus = async (req, res) => {
   try {
     const userFound = await User.findByIdAndUpdate(
-      req.params.id, { status: req.body.status }, { new: true });
+      req.params.id,
+      { status: req.body.status },
+      { new: true }
+    );
     if (!userFound) return res.status(404).json({ message: "User not found" });
     res.json(userFound);
-  }
-  catch (error) {
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 export const getUsers = async (req, res) => {
   try {
@@ -236,8 +242,7 @@ export const getUser = async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
     res.json(user);
-  }
-  catch (error) {
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };

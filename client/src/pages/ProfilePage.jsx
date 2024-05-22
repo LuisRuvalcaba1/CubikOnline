@@ -5,13 +5,14 @@ import { removeTokenRequest } from "../api/auth";
 import { useAuthTorneo } from "../context/TorneoContext";
 import Encuesta from "../components/Encuesta";
 import Switch from "react-switch";
+import { isPrivateRequest } from "../api/auth";
 import { useNavigate } from "react-router-dom";
 import "./Profile.css";
 
 function ProfilePage() {
   const [showModal, setShowModal] = useState(false);
 //  const { register, handleSubmit } = useForm();
-  const { user, logout, statusChangeAuth } = useAuth();
+  const { user, logout, statusChangeAuth, isPrivate } = useAuth();
   const { deleteTorneoByJuez } = useAuthTorneo();
   const navigation = useNavigate();
   const handleOnClose = () => setShowModal(false);
@@ -34,8 +35,8 @@ function ProfilePage() {
       (currentDate - userCreatedAt) / (1000 * 60 * 60 * 24)
     );
 
-    if (userCreatedAt && diffInDays >= 2) {
-      const remainderDays = diffInDays % 2;
+    if (userCreatedAt && diffInDays >= 1) {
+      const remainderDays = diffInDays % 1;
       if (remainderDays === 0) {
         setShowModal(true);
       }
@@ -67,9 +68,18 @@ function ProfilePage() {
   //   data.email = user.email;
   //   updateUserPoints(data);
   // });
+
   const [checked, setChecked] = useState(false);
+
   const handleChange = (nextChecked) => {
     setChecked(nextChecked);
+    console.log(nextChecked);
+    const data = {
+      email: user.email,
+      isPrivate: nextChecked,
+    };
+    console.log(data);
+    isPrivateRequest(data.email, data.isPrivate);
   };
 
   const searchFriends = () => {

@@ -9,6 +9,7 @@ import {
   statusChangeRequest,
   changeToJugdeRequest,
   updateUserRankRequest,
+  isPrivateRequest,
 } from "../api/auth.js";
 import Cookies from "js-cookie";
 
@@ -177,6 +178,17 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  const isPrivate = async (email, isPrivate) => {
+    try {
+      const res = await isPrivateRequest(email, isPrivate);
+      console.log(res.data);
+      return res.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -188,6 +200,7 @@ export const AuthProvider = ({ children }) => {
         statusChangeAuth,
         changeToJugde,
         updateUserRank,
+        isPrivate,
         logout,
         loading,
         user,

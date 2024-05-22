@@ -43,7 +43,7 @@ function WaitRoom() {
   }, [getTorneoById]);
 
   useEffect(() => {
-    const socket = io("http://localhost:4000/join");
+    const socket = io(`${URL}/join`);
     setSocket(socket);
 
     socket.emit("user", user2);

@@ -5,7 +5,7 @@ import "./Aprendizaje.css";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { removeTokenRequest, renewTokenRequest } from "../api/auth";
+import { removeTokenRequest } from "../api/auth";
 import { useAuthTorneo } from "../context/TorneoContext";
 
 function AprendizajePage() {
@@ -13,14 +13,6 @@ function AprendizajePage() {
   const { deleteTorneoByJuez } = useAuthTorneo();
 
   useEffect(() => {
-    const renovarToken = async () => {
-      try {
-        await renewTokenRequest();
-      } catch (error) {
-        console.error("Error al renovar el token:", error);
-      }
-    };
-
     const eliminarToken = async () => {
       try {
         const data = {
@@ -36,9 +28,6 @@ function AprendizajePage() {
         console.error("Error al eliminar el token:", error);
       }
     };
-
-    renovarToken();
-
     const timeoutId = setTimeout(eliminarToken, 21600000);
 
     return () => clearTimeout(timeoutId);

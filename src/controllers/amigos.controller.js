@@ -1,5 +1,4 @@
 import Amigos from "../models/amigos.model.js";
-import User from "../models/user.model.js";
 
 export const addFriend = async (req, res) => {
   const { user1, user2 } = req.body;

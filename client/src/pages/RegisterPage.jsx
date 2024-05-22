@@ -41,10 +41,11 @@ function RegisterPage() {
   const { signup, isAuthenticated, errors: registerErrors } = useAuth();
   const navigation = useNavigate();
   useEffect(() => {
-    if (isAuthenticated) navigation("/login");
+    if (isAuthenticated) navigation("/profile");
   }, [isAuthenticated]);
 
   const onSubmit = handleSubmit(async (values) => {
+  
     await signup(values);
   });
 

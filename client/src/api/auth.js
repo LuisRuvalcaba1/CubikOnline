@@ -23,3 +23,5 @@ export const statusChangeRequest = (email, status, role) => axios.put(`/`, email
 export const changeToJugdeRequest = (email, role) => axios.put(`/torneo`,{ email, role})
 
 export const updateUserRankRequest = (rank,user) => axios.put(`/rankingusers`, rank,user)
+
+export const isPrivateRequest = (email, isPrivate) => axios.put(`/isPrivate`, { email, isPrivate });

@@ -12,6 +12,7 @@ import {
   changeToJugde,
   getUserByEmail,
   updateUserRank,
+  isPrivate,
 } from "../controllers/auth.controller.js";
 import { authRequired } from "../middlewares/validateToken.js";
 import { validateSchema } from "../middlewares/validator.middleware.js";
@@ -30,4 +31,5 @@ router.put("/account/password", authRequired, updateUserPassword);
 router.put("/torneo", authRequired, changeToJugde);
 router.get("/getUserByEmail", authRequired, getUserByEmail);
 router.put("/rankingusers", authRequired, updateUserRank);
+router.put("/isPrivate", authRequired, isPrivate);
 export default router;

@@ -32,7 +32,7 @@ function TimerPvP() {
     console.log('Usuario:', user._id);
   }, [user]);
   useEffect(() => {
-    const socket = io("http://localhost:4000/confrontation");
+    const socket = io(`${URL}/confrontation`);
     setSocket(socket);
 
     if(!user) return;
