@@ -7,41 +7,31 @@ import Encuesta from "../components/Encuesta";
 import Switch from "react-switch";
 import { isPrivateRequest } from "../api/auth";
 import { useNavigate } from "react-router-dom";
+import { getUserPrivateStatus } from "../api/auth";
+
 import "./Profile.css";
 
 function ProfilePage() {
   const [showModal, setShowModal] = useState(false);
-//  const { register, handleSubmit } = useForm();
-  const { user, logout, statusChangeAuth, isPrivate } = useAuth();
+  const { user, logout, statusChangeAuth } = useAuth();
   const { deleteTorneoByJuez } = useAuthTorneo();
   const navigation = useNavigate();
   const handleOnClose = () => setShowModal(false);
 
-  console.log(user._id);
-
-  const getTimestampFromObjectId = (objectId) => {
-    if (objectId) {
-      const timestamp = parseInt(objectId.toString().slice(0, 8), 16);
-      return new Date(timestamp * 1000);
-    }
-    return null; 
-  };
+  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    const userCreatedAt = user ? getTimestampFromObjectId(user._id) : null;
-    console.log(userCreatedAt);
-    const currentDate = new Date();
-    const diffInDays = Math.floor(
-      (currentDate - userCreatedAt) / (1000 * 60 * 60 * 24)
-    );
-
-    if (userCreatedAt && diffInDays >= 1) {
-      const remainderDays = diffInDays % 1;
-      if (remainderDays === 0) {
-        setShowModal(true);
+    const fetchPrivateStatus = async () => {
+      try {
+        const { data } = await getUserPrivateStatus(user.email);
+        setChecked(data.isPrivate);
+      } catch (error) {
+        console.error("Error fetching private status:", error);
       }
-    }
-  }, [user]);
+    };
+
+    fetchPrivateStatus();
+  }, [user.email]);
 
   useEffect(() => {
     const eliminarToken = async () => {
@@ -64,21 +54,12 @@ function ProfilePage() {
     return () => clearTimeout(timeoutId);
   }, [user, deleteTorneoByJuez, statusChangeAuth, logout]);
 
-  // const onSubmit = handleSubmit((data) => {
-  //   data.email = user.email;
-  //   updateUserPoints(data);
-  // });
-
-  const [checked, setChecked] = useState(false);
-
   const handleChange = (nextChecked) => {
     setChecked(nextChecked);
-    console.log(nextChecked);
     const data = {
       email: user.email,
       isPrivate: nextChecked,
     };
-    console.log(data);
     isPrivateRequest(data.email, data.isPrivate);
   };
 
@@ -92,10 +73,8 @@ function ProfilePage() {
       {user ? (
         <div className="contenedor">
           <p className="texto font-bold text-center">Nombre de usuario</p>
-          <p>
-            {user.username}
-          </p>
-          <p>Email:  {user.lastName} </p>
+          <p>{user.username}</p>
+          <p>Email: {user.lastName}</p>
           <p>ID: {user._id}</p>
           <p>Rango: {user.rank}</p>
           <p>Points: {user.points}</p>

@@ -29,7 +29,8 @@ import RankingUsers from "./pages/RankingUsers.jsx";
 import MetodoFriedrich from "./pages/Metodo3x3Page.jsx";
 import CategoryPage from "./pages/CategoryPage.jsx";
 import Amigos from "./pages/Amigos.jsx";
-import Notificaciones from "./pages/Notificaciones.jsx";
+import { AmigosProvider } from "./context/AmigosContext.jsx";
+
 export {
   BrowserRouter,
   Routes,
@@ -64,5 +65,5 @@ export {
   MetodoFriedrich,
   CategoryPage,
   Amigos,
-  Notificaciones,
+  AmigosProvider,
 };

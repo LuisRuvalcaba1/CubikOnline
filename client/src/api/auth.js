@@ -25,3 +25,5 @@ export const changeToJugdeRequest = (email, role) => axios.put(`/torneo`,{ email
 export const updateUserRankRequest = (rank,user) => axios.put(`/rankingusers`, rank,user)
 
 export const isPrivateRequest = (email, isPrivate) => axios.put(`/isPrivate`, { email, isPrivate });
+
+export const getUserPrivateStatus = (email) => axios.get(`/user/private/${email}`);

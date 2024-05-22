@@ -2,9 +2,6 @@ import { createContext, useContext } from "react";
 export const AuthTimerContext = createContext();
 import { timerRequest, getTimersRequest, deleteTimersBySession } from "../api/timer";
 
-
-//import axios from 'axios';
-
 export const useAuthTimer = () => {
   const context = useContext(AuthTimerContext);
   if (!context) {

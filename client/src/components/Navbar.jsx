@@ -10,7 +10,6 @@ const profileMenu = [
   { name: "Perfil", href: "/profile" },
   { name: "Cambiar contraseña", href: "/account/password" },
   {name: "Amigos", href: "/friends"},
-  {name: "Notificaciones", href: "/notifications"},
   { name: "Salir", href: "/" },
 ];
 

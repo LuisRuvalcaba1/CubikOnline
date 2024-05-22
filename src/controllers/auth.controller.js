@@ -177,6 +177,19 @@ export const isPrivate = async (req, res) => {
   }
 };
 
+export const getUserPrivateStatus = async (req, res) => {
+  const { email } = req.params;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json({ isPrivate: user.isPrivate });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const deleteUser = async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.user.id);

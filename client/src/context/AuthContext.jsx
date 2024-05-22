@@ -137,7 +137,6 @@ export const AuthProvider = ({ children }) => {
   const getUsersTable = async () => {
     try {
       const res = await getUsersRequest();
-      console.log(res.data);
       return res.data;
     } catch (error) {
       console.log(error);
