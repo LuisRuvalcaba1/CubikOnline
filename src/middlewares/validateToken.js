@@ -2,7 +2,14 @@ import jwt from "jsonwebtoken";
 import { DB } from "../config.js";
 
 export const authRequired = (req, res, next) => {
-  const { token } = req.cookies;
+  // Obtener el token del encabezado de autorización
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) return res.status(401).json({ message: "Unauthorized" });
+
+  // El encabezado de autorización debe tener el formato "Bearer <token>"
+  const token = authHeader.split(" ")[1];
+
   if (!token) return res.status(401).json({ message: "Unauthorized" });
 
   jwt.verify(token, DB, (err, user) => {
@@ -11,7 +18,6 @@ export const authRequired = (req, res, next) => {
     next();
   });
 };
-
 
 export const removeToken = (req, res) => {
   try {
@@ -24,16 +30,3 @@ export const removeToken = (req, res) => {
 
   res.status(200).json({ message: "Token removed and user inactivated" });
 };
-
-// export const renewToken = (req, res) => {
-//   const { token } = req.cookies;
-//   if (!token) return res.status(401).json({ message: 'Unauthorized' });
-
-//   jwt.verify(token, DB, (err, user) => {
-//     if (err) return res.status(401).json({ message: 'Invalid token' });
-
-//     const newToken = generateToken(user);
-//     setTokenCookie(res, newToken);
-//     res.status(200).json({ message: 'Token renewed' });
-//   });
-// };

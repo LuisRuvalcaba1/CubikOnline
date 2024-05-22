@@ -10,4 +10,22 @@ const instance = axios.create({
     withCredentials: true, 
 });
 
+const getToken = () => {
+    return localStorage.getItem('token');
+};
+
+// Middleware para agregar el token a las solicitudes autenticadas
+instance.interceptors.request.use(
+    config => {
+        const token = getToken();
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    error => {
+        return Promise.reject(error);
+    }
+);
+
 export default instance;

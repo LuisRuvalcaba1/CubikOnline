@@ -1,9 +1,9 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import {
-  addFriendRequest,
+
   getFriendsRequest,
-  acceptFriendRequest,
-  denyFriendRequest,
+  getYourFriendsRequest,
+  
 } from "../api/amigos.js";
 
 export const AmigosContext = createContext();
@@ -29,12 +29,20 @@ export const AmigosProvider = ({ children }) => {
     }
   };
 
-  
+  const yourFriends = async () => {
+    try {
+      const res = await getYourFriendsRequest();
+      console.log(res.data);
+      return res.data; // Asegúrate de devolver solo los datos, no el objeto completo de respuesta
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
 
   const value = {
     getFriends,
-    // handleAcceptFriend,
-    // handleDenyFriend,
+    yourFriends,
   };
 
   return (

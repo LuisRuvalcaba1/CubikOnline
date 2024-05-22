@@ -4,7 +4,8 @@ import { useAuth } from "../context/AuthContext";
 import { useForm } from "react-hook-form";
 import { useAuthTorneo } from "../context/TorneoContext";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
+import { verifyTokenRequest } from "../api/auth";
 
 const profileMenu = [
   { name: "Perfil", href: "/profile" },
@@ -26,17 +27,42 @@ export const Navbar = () => {
 
   const { user, logout, statusChangeAuth, isAuthenticated, isJuez } = useAuth();
   const { handleSubmit } = useForm();
+  const [currentUser, setCurrentUser] = useState(null);
   const { deleteTorneoByJuez } = useAuthTorneo();
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const { data } = await verifyTokenRequest();
+        setCurrentUser(data);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+    fetchUser();
+  }, [user]);
+  
   const onSubmit = handleSubmit((data) => {
-    data.email = user.email;
+    data.email = currentUser.email;
+    data._id = currentUser._id;
     data.status = "inactive";
     data.role = "user";
 
-    deleteTorneoByJuez(data._id);
+    //deleteTorneoByJuez(data._id);
     statusChangeAuth(data);
     logout();
   });
+
+  const onDeleteTournament = async (id) => {
+    try {
+      const res = await deleteTorneoByJuez(currentUser._id, id);
+      console.log(res);
+      statusChangeAuth(currentUser._id);
+      logout();
+    } catch (error) {
+      console.error("Error al eliminar torneo:", error);
+    }
+  }
 
   return (
     <Disclosure as="nav" className="bg-neutral-700">
@@ -97,10 +123,10 @@ export const Navbar = () => {
                 <Link
                   to="/"
                   replace
-                  onClick={onSubmit}
+                  onClick={onDeleteTournament}
                   className="text-white hover:bg-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  Logout
+                  Salir
                 </Link>
                 <Link
                   to="/yourtournament"

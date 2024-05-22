@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 import { useAuth } from "../context/AuthContext";
 import { useAuthTimerPvP } from '../context/TimerPvPContext';
+import { verifyTokenRequest } from '../api/auth';
 const URL = import.meta.env.VITE_BACKEND_URL
 
 function TimerPvP() {
@@ -13,6 +14,7 @@ function TimerPvP() {
   const [usuario, setUsuario] = useState('');
   const [milisegundos, setMilisegundos] = useState(0);
   const [segundos, setSegundos] = useState(0);
+  const [currentUser, setCurrentUser] = useState(null); 
   const [minutos, setMinutos] = useState(0);
   const [activo, setActivo] = useState(false);
   const [tiempoInicial, setTiempoInicial] = useState(null);
@@ -29,14 +31,24 @@ function TimerPvP() {
   // }, [user, navigate]);
 
   useEffect(() => {
-    console.log('Usuario:', user._id);
+    const fetchUser = async () => {
+      try {
+        const { data } = await verifyTokenRequest();
+        setCurrentUser(data);
+        console.log(currentUser)
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+    fetchUser();
   }, [user]);
+
   useEffect(() => {
     const socket = io(`${URL}/confrontation`);
     setSocket(socket);
 
-    if(!user) return;
-    socket.emit('user', JSON.stringify({ id: user._id}))
+    if(!currentUser) return;
+    socket.emit('user', JSON.stringify({ id: currentUser._id}))
     socket.on('user', (user) => {
       setUsuario(user)
     })

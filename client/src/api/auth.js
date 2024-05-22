@@ -10,8 +10,6 @@ export const loginRequest = user => axios.post(`/login`, user)
 
 export const verifyTokenRequest = () => axios.get(`/verify`)
 
-export const getUserByEmailRequest = email => axios.get(`/getUserByEmail`, email)
-
 export const updatePasswordRequest = (email, newPassword) => axios.put(`/account/password/`, email, newPassword)
 
 export const updateUserRequest = (email, points) => axios.put(`/profile/`, email ,points);
@@ -24,6 +22,8 @@ export const changeToJugdeRequest = (email, role) => axios.put(`/torneo`,{ email
 
 export const updateUserRankRequest = (rank,user) => axios.put(`/rankingusers`, rank,user)
 
-export const isPrivateRequest = (email, isPrivate) => axios.put(`/isPrivate`, { email, isPrivate });
+export const isPrivateRequest = (email, isPrivate) => axios.put(`/isPrivate`,{ email, isPrivate});
 
 export const getUserPrivateStatus = (email) => axios.get(`/user/private/${email}`);
+
+// export const profileRequest = () => axios.get(`/profile`);

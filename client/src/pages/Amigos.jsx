@@ -5,6 +5,7 @@ import {
   getFriendsRequest,
   acceptFriendRequest,
   denyFriendRequest,
+  getYourFriendsRequest,
 } from "../api/amigos";
 import { useAmigos } from "../context/AmigosContext";
 
@@ -16,22 +17,11 @@ function Amigos() {
   const [friends, setFriends] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [currentFriends, setCurrentFriends] = useState([]);
-
+  const [yourFriend, setYourFriend] = useState([]);
 
   useEffect(() => {
     setCurrentUser(user);
   }, [user]);
-
-  const hasActiveFriendRequest = (userId) => {
-    return friends.some(
-      (friend) => friend.user1._id === userId || friend.user2._id === userId
-    );
-  };
-
-  const isCurrentFriend = (userId) => {
-    return currentFriends.some((friend) => friend._id === userId);
-  };
-  
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -45,6 +35,12 @@ function Amigos() {
       setFriends(friendRequests);
     };
 
+    const fetchYourFriends = async () => {
+      const yourFriends = await value.yourFriends();
+      setYourFriend(yourFriends);
+      console.log("Amigos obtenidos:", yourFriends);
+    };
+
     // Agregar un evento de escucha de clic al documento
     const handleDocumentClick = () => {
       fetchFriends();
@@ -53,6 +49,7 @@ function Amigos() {
 
     document.addEventListener("click", handleDocumentClick);
 
+    fetchYourFriends();
     fetchFriends();
     fetchUsers();
 
@@ -60,7 +57,7 @@ function Amigos() {
     return () => {
       document.removeEventListener("click", handleDocumentClick);
     };
-  }, [getUsersTable, value.getFriends]);
+  }, [getUsersTable, value.getFriends, value.yourFriends]);
 
   const handleAddFriend = async (friendId) => {
     try {
@@ -82,22 +79,22 @@ function Amigos() {
   };
 
   let results = [];
-if (!search) {
-  results = users.filter(
-    (user) =>
-      !hasActiveFriendRequest(user._id) &&
-      user._id !== currentUser?._id &&
-      !isCurrentFriend(user._id)
-  );
-} else {
-  results = users.filter(
-    (user) =>
-      !hasActiveFriendRequest(user._id) &&
-      user.username.toLowerCase().includes(search.toLowerCase()) &&
-      user._id !== currentUser?._id &&
-      !isCurrentFriend(user._id)
-  );
-}
+
+  if (!search) {
+    results = users.filter(
+      (user) =>
+        user._id !== currentUser?._id &&
+        (user._id !== yourFriend?.user1 || user._id !== yourFriend?.user2)
+    );
+  } else {
+    results = users.filter(
+      (user) =>
+        user.username.toLowerCase().includes(search.toLowerCase()) &&
+        user._id !== currentUser?._id &&
+        (user._id !== yourFriend?.user1 || user._id !== yourFriend?.user2)
+    );
+  } 
+  
   return (
     <div>
       <h1>Amigos</h1>
@@ -136,7 +133,7 @@ if (!search) {
           <h2>Solicitudes de amistad</h2>
           {
             /* Hacer un console.log para ver si se estan recibiendo los datos */
-            console.log(friends)
+            console.log(yourFriend)
           }
           <table>
             <thead>

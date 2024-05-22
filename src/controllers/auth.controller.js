@@ -28,8 +28,8 @@ export const register = async (req, res) => {
 
     const userSaved = await newUser.save();
     const token = await createAccessToken({ id: userSaved._id });
-    res.cookie("token", token);
     res.json({
+      token,
       username: userSaved.username,
       email: userSaved.email,
     });
@@ -51,12 +51,13 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Incorrect password" });
 
     const token = await createAccessToken({ id: userFound._id });
-    res.cookie("token", token, {
-      sameSite: "none",
-      secure: true,
-      httpOnly: true,
-    });
+    // res.cookie("token", token, {
+    //   sameSite: "none",
+    //   secure: true,
+    //   httpOnly: true,
+    // });
     res.json({
+      token,
       _id: userFound._id,
       username: userFound.username,
       email: userFound.email,
@@ -130,8 +131,31 @@ export const profile = async (req, res) => {
   });
 };
 
+// export const verifyToken = async (req, res) => {
+//   const { token } = req.cookies;
+
+//   if (!token) return res.status(401).json({ message: "Unauthorized" });
+
+//   jwt.verify(token, DB, async (err, user) => {
+//     if (err) return res.status(401).json({ message: "Unauthorized" });
+
+//     const userFound = await User.findById(user.id);
+//     if (!userFound) return res.status(401).json({ message: "Unauthorized" });
+
+//     return res.json({
+//       _id: userFound._id,
+//       username: userFound.username,
+//       email: userFound.email,
+//     });
+//   });
+// };
+
 export const verifyToken = async (req, res) => {
-  const { token } = req.cookies;
+  const authHeader = req.headers.authorization; // Obteniendo el encabezado de autorización
+
+  if (!authHeader) return res.status(401).json({ message: "Unauthorized" });
+
+  const token = authHeader.split(" ")[1]; // Extrayendo el token del encabezado de autorización
 
   if (!token) return res.status(401).json({ message: "Unauthorized" });
 
@@ -145,6 +169,10 @@ export const verifyToken = async (req, res) => {
       _id: userFound._id,
       username: userFound.username,
       email: userFound.email,
+      points: userFound.points,
+      rank: userFound.rank,
+      status: userFound.status,
+      isPrivate: userFound.isPrivate,
     });
   });
 };

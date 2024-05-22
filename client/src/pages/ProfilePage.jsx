@@ -1,43 +1,46 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 //import { useForm } from "react-hook-form";
-import { removeTokenRequest } from "../api/auth";
+import { removeTokenRequest, verifyTokenRequest } from "../api/auth";
 import { useAuthTorneo } from "../context/TorneoContext";
 import Encuesta from "../components/Encuesta";
 import Switch from "react-switch";
 import { isPrivateRequest } from "../api/auth";
 import { useNavigate } from "react-router-dom";
-import { getUserPrivateStatus } from "../api/auth";
 
 import "./Profile.css";
 
 function ProfilePage() {
   const [showModal, setShowModal] = useState(false);
-  const { user, logout, statusChangeAuth } = useAuth();
+  const { user, logout, statusChangeAuth, isAuthenticated, isPrivate } =
+    useAuth();
   const { deleteTorneoByJuez } = useAuthTorneo();
+  const [currentUser, setCurrentUser] = useState(null);
   const navigation = useNavigate();
   const handleOnClose = () => setShowModal(false);
 
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    const fetchPrivateStatus = async () => {
+    const fetchUser = async () => {
       try {
-        const { data } = await getUserPrivateStatus(user.email);
-        setChecked(data.isPrivate);
+        const { data } = await verifyTokenRequest();
+        setCurrentUser(data);
       } catch (error) {
-        console.error("Error fetching private status:", error);
+        console.error("Error fetching user:", error);
       }
     };
+    fetchUser();
+  }, [user]);
 
-    fetchPrivateStatus();
-  }, [user.email]);
+  console.log("User:", isAuthenticated);
+  console.log("User:", currentUser);
 
   useEffect(() => {
     const eliminarToken = async () => {
       try {
         const data = {
-          email: user.email,
+          email: currentUser.email,
           status: "inactive",
           role: "user",
         };
@@ -57,7 +60,7 @@ function ProfilePage() {
   const handleChange = (nextChecked) => {
     setChecked(nextChecked);
     const data = {
-      email: user.email,
+      email: currentUser.email,
       isPrivate: nextChecked,
     };
     isPrivateRequest(data.email, data.isPrivate);
@@ -70,17 +73,17 @@ function ProfilePage() {
   return (
     <div className="contenedor" id="cont">
       <h1 className="titulo font-bold">Perfil</h1>
-      {user ? (
+      {currentUser ? (
         <div className="contenedor">
           <p className="texto font-bold text-center">Nombre de usuario</p>
-          <p>{user.username}</p>
-          <p>Email: {user.lastName}</p>
-          <p>ID: {user._id}</p>
-          <p>Rango: {user.rank}</p>
-          <p>Points: {user.points}</p>
+          <p>{currentUser.username}</p>
+          <p>Email: {currentUser.lastName}</p>
+          <p>ID: {currentUser._id}</p>
+          <p>Rango: {currentUser.rank}</p>
+          <p>Points: {currentUser.points}</p>
           <div>
             <p>Perfil privado</p>
-            <Switch onChange={handleChange} checked={checked}></Switch>
+            <Switch onChange={handleChange} checked={currentUser.isPrivate}></Switch>
           </div>
 
           <button onClick={searchFriends}>Buscar amigos</button>

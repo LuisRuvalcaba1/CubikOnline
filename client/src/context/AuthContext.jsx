@@ -1,4 +1,10 @@
-import { createContext, useState, useContext, useEffect } from "react";
+import {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  useCallback,
+} from "react";
 import {
   registerRequest,
   loginRequest,
@@ -10,8 +16,9 @@ import {
   changeToJugdeRequest,
   updateUserRankRequest,
   isPrivateRequest,
+  //profileRequest,
 } from "../api/auth.js";
-import Cookies from "js-cookie";
+//import Cookies from "js-cookie";
 
 export const AuthContext = createContext();
 
@@ -23,11 +30,10 @@ export const useAuth = () => {
   return context;
 };
 
-
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isJuez, setIsJuez] = useState(false)
+  const [isJuez, setIsJuez] = useState(false);
   const [errors, setErrors] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -50,6 +56,8 @@ export const AuthProvider = ({ children }) => {
       setUser(res.data);
       setIsAuthenticated(true);
       setLoading(false);
+      localStorage.setItem("token", res.data.token);
+
     } catch (error) {
       if (Array.isArray(error.response.data)) {
         return setErrors(error.response.data);
@@ -70,35 +78,58 @@ export const AuthProvider = ({ children }) => {
     }
   }, [errors]);
 
-  useEffect(() => {
-    async function checkLogin() {
-      const cookies = Cookies.get();
-
-      if (!cookies.token) {
-        setIsAuthenticated(false);
-        setLoading(false);
-        return setUser(null);
-      }
-      try {
-        const res = await verifyTokenRequest(cookies.token);
-        console.log(res.data);
-        if (!res.data) {
-          setIsAuthenticated(false);
-          setUser(null);
-          return;
-        }
-        setUser(res.data);
-        setIsAuthenticated(true);
-        setLoading(false);
-      } catch (error) {
-        console.log(error);
+  const checkLogin = useCallback(async () => {
+    // Obtener el token del localStorage
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setIsAuthenticated(false);
+      setLoading(false);
+      return setUser(null);
+    }
+    try {
+      // Verificar el token en el servidor
+      const res = await verifyTokenRequest(token);
+      console.log(res.data);
+      if (!res.data) {
         setIsAuthenticated(false);
         setUser(null);
+        return;
+      } else {
+        setUser(res.data.user); // Asumiendo que el usuario se almacena en res.data.user
+        setIsAuthenticated(true);
         setLoading(false);
       }
+    } catch (error) {
+      console.log(error);
+      setIsAuthenticated(false);
+      setUser(null);
+      setLoading(false);
     }
-    checkLogin();
   }, []);
+
+  useEffect(() => {
+    checkLogin();
+  }, [checkLogin]);
+
+  // Nuevo efecto para escuchar cambios en el token del localStorage
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setIsAuthenticated(false);
+        setUser(null);
+      } else {
+        // Verificar el token en el servidor cuando cambie
+        checkLogin();
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, [checkLogin]);
 
   const updatePassword = async (email, newPassword) => {
     try {
@@ -124,10 +155,11 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      Cookies.remove("token");
+      // Eliminar el token del localStorage
+      localStorage.removeItem("token");
       setUser(null);
       setIsAuthenticated(false);
-      setIsJuez(false)
+      setIsJuez(false);
     } catch (error) {
       console.log(error);
       throw error;
@@ -136,8 +168,15 @@ export const AuthProvider = ({ children }) => {
 
   const getUsersTable = async () => {
     try {
-      const res = await getUsersRequest();
-      return res.data;
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setIsAuthenticated(false);
+        setLoading(false);
+        return setUser(null);
+      } else {
+        const res = await getUsersRequest();
+        return res.data;
+      }
     } catch (error) {
       console.log(error);
       throw error;
@@ -147,18 +186,19 @@ export const AuthProvider = ({ children }) => {
   const statusChangeAuth = async (email, status, role) => {
     try {
       const res = await statusChangeRequest(email, status, role);
+      console.log(res.data);
       return res.data;
     } catch (error) {
       console.log(error);
       throw error;
     }
   };
-  
+
   const changeToJugde = async (userInfo) => {
     try {
       const res = await changeToJugdeRequest(userInfo.email, userInfo.role);
       console.log(res.data);
-      setIsJuez(true)
+      setIsJuez(true);
       return res.data;
     } catch (error) {
       console.log(error);
@@ -175,18 +215,43 @@ export const AuthProvider = ({ children }) => {
       console.log(error);
       throw error;
     }
-  }
+  };
 
   const isPrivate = async (email, isPrivate) => {
     try {
-      const res = await isPrivateRequest(email, isPrivate);
-      console.log(res.data);
-      return res.data;
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setIsAuthenticated(false);
+        setLoading(false);
+        return setUser(null);
+      } else {
+        const res = await isPrivateRequest(email, isPrivate);
+        console.log(res.data);
+        return res.data;
+      }
     } catch (error) {
       console.log(error);
       throw error;
     }
   };
+
+  // const profileUser = async () => {
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     if (!token) {
+  //       setIsAuthenticated(false);
+  //       setLoading(false);
+  //       return setUser(null);
+  //     } else {
+  //       const res = await profileRequest();
+  //       console.log(res.data);
+  //       return res.data;
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //     throw error;
+  //   }
+  // };
 
   return (
     <AuthContext.Provider
@@ -201,6 +266,7 @@ export const AuthProvider = ({ children }) => {
         updateUserRank,
         isPrivate,
         logout,
+        //profileUser,
         loading,
         user,
         isAuthenticated,
