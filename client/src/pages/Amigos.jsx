@@ -6,9 +6,11 @@ import {
   acceptFriendRequest,
   denyFriendRequest,
 } from "../api/amigos";
+import { useAmigos } from "../context/AmigosContext";
 
 function Amigos() {
   const { user, getUsersTable } = useAuth();
+  const { value } = useAmigos();
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [friends, setFriends] = useState([]);
@@ -20,13 +22,14 @@ function Amigos() {
     };
 
     const fetchFriends = async () => {
-      const friendRequests = await getFriendsRequest();
+      const friendRequests = await value.getFriends(); // Accede a getFriends a través del valor devuelto por useAmigos
+      console.log("Solicitudes de amistad obtenidas:", friendRequests);
       setFriends(friendRequests);
     };
 
     fetchFriends();
     fetchUsers();
-  }, [getUsersTable, getFriendsRequest]);
+  }, [getUsersTable, value.getFriends]);
 
   const handleAddFriend = async (friendId) => {
     try {
@@ -46,7 +49,7 @@ function Amigos() {
   const handleAcceptFriend = async (friendshipId) => {
     try {
       await acceptFriendRequest(friendshipId);
-      const updatedFriendRequests = await getFriendsRequest(user._id);
+      const updatedFriendRequests = await getFriendsRequest();
       setFriends(updatedFriendRequests);
     } catch (error) {
       console.error("Error al aceptar solicitud de amistad:", error);
@@ -56,7 +59,7 @@ function Amigos() {
   const handleDenyFriend = async (friendshipId) => {
     try {
       await denyFriendRequest(friendshipId);
-      const updatedFriendRequests = await getFriendsRequest(user._id);
+      const updatedFriendRequests = await getFriendsRequest();
       setFriends(updatedFriendRequests);
     } catch (error) {
       console.error("Error al rechazar solicitud de amistad:", error);
@@ -112,38 +115,39 @@ function Amigos() {
           </table>
 
           <h2>Solicitudes de amistad</h2>
-          {/*Hacer un console.log para ver si se estan recibiendo los datos */
-          console.log(friends)}
-          {friends.length > 0 ? (
-            <div>
-              {console.log(friends)}
-              <table>
-                <thead>
-                  <tr>
-                    <th>Nombre de usuario</th>
-                    <th>Acciones</th>
+          {
+            /* Hacer un console.log para ver si se estan recibiendo los datos */
+            console.log(friends)
+          }
+          <table>
+            <thead>
+              <tr>
+                <th>Usuario que envía la solicitud</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Array.isArray(friends) && friends.length > 0 ? (
+                friends.map((friend) => (
+                  <tr key={friend._id}>
+                    <td>{friend.user1.username}</td>
+                    <td>
+                      <button onClick={() => handleAcceptFriend(friend._id)}>
+                        Aceptar
+                      </button>
+                      <button onClick={() => handleDenyFriend(friend._id)}>
+                        Rechazar
+                      </button>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {friends.map((friend) => (
-                    <tr key={friend._id}>
-                      <td>{friend.user1.username}</td>
-                      <td>
-                        <button onClick={() => handleAcceptFriend(friend._id)}>
-                          Aceptar
-                        </button>
-                        <button onClick={() => handleDenyFriend(friend._id)}>
-                          Rechazar
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p>No hay solicitudes de amistad pendientes.</p>
-          )}
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="2">No hay solicitudes de amistad</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       ) : (
         <p>Loading...</p>

@@ -21,8 +21,8 @@ export const AmigosProvider = ({ children }) => {
   const getFriends = async () => {
     try {
       const res = await getFriendsRequest();
-      console.log(res);
-      return res;
+      console.log(res.data);
+      return res.data; // Asegúrate de devolver solo los datos, no el objeto completo de respuesta
     } catch (error) {
       console.log(error);
       throw error;
@@ -54,6 +54,7 @@ export const AmigosProvider = ({ children }) => {
     // handleAcceptFriend,
     // handleDenyFriend,
   };
+  
   return (
     <AmigosContext.Provider value={{ value }}>
       {children}

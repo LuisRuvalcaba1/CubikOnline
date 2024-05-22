@@ -55,7 +55,7 @@ export const acceptFriend = async (req, res) => {
 export const denyFriend = async (req, res) => {
   try {
     // Rechazar una solicitud de amistad
-    const friend = await Amigos.findByIdAndDelete(req.params.id);
+    const friend = await Amigos.findByIdAndDelete({user2: req.user.id});
 
     if (!friend) {
       return res.status(404).json({ message: "Solicitud de amistad no encontrada" });
