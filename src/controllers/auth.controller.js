@@ -51,11 +51,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Incorrect password" });
 
     const token = await createAccessToken({ id: userFound._id });
-    // res.cookie("token", token, {
-    //   sameSite: "none",
-    //   secure: true,
-    //   httpOnly: true,
-    // });
+
     res.json({
       token,
       _id: userFound._id,
@@ -130,25 +126,6 @@ export const profile = async (req, res) => {
     status: userFound.status,
   });
 };
-
-// export const verifyToken = async (req, res) => {
-//   const { token } = req.cookies;
-
-//   if (!token) return res.status(401).json({ message: "Unauthorized" });
-
-//   jwt.verify(token, DB, async (err, user) => {
-//     if (err) return res.status(401).json({ message: "Unauthorized" });
-
-//     const userFound = await User.findById(user.id);
-//     if (!userFound) return res.status(401).json({ message: "Unauthorized" });
-
-//     return res.json({
-//       _id: userFound._id,
-//       username: userFound.username,
-//       email: userFound.email,
-//     });
-//   });
-// };
 
 export const verifyToken = async (req, res) => {
   const authHeader = req.headers.authorization; // Obteniendo el encabezado de autorización

@@ -70,8 +70,8 @@ function ProfilePage() {
     );
     console.log("Diferencia en días:", diffInDays);
 
-    if (userCreatedAt && diffInDays >= 3) {
-      const remainderDays = diffInDays % 3;
+    if (userCreatedAt && diffInDays >= 2) {
+      const remainderDays = diffInDays % 2;
       if (remainderDays === 0) {
         // Verificar si el usuario ya tiene una encuesta registrada
         const hasUserEncuesta = userEncuestas.length > 0;

@@ -16,7 +16,6 @@ import {
   changeToJugdeRequest,
   updateUserRankRequest,
   isPrivateRequest,
-  //profileRequest,
 } from "../api/auth.js";
 //import Cookies from "js-cookie";
 
@@ -57,7 +56,6 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       setLoading(false);
       localStorage.setItem("token", res.data.token);
-
     } catch (error) {
       if (Array.isArray(error.response.data)) {
         return setErrors(error.response.data);
@@ -235,23 +233,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // const profileUser = async () => {
-  //   try {
-  //     const token = localStorage.getItem("token");
-  //     if (!token) {
-  //       setIsAuthenticated(false);
-  //       setLoading(false);
-  //       return setUser(null);
-  //     } else {
-  //       const res = await profileRequest();
-  //       console.log(res.data);
-  //       return res.data;
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //     throw error;
-  //   }
-  // };
 
   return (
     <AuthContext.Provider

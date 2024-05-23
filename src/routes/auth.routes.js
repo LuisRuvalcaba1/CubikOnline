@@ -14,6 +14,7 @@ import {
   updateUserRank,
   isPrivate,
   getUserPrivateStatus,
+  getUser
 } from "../controllers/auth.controller.js";
 import { authRequired } from "../middlewares/validateToken.js";
 import { validateSchema } from "../middlewares/validator.middleware.js";
@@ -34,4 +35,6 @@ router.get("/getUserByEmail", authRequired, getUserByEmail);
 router.put("/rankingusers", authRequired, updateUserRank);
 router.put("/isPrivate", authRequired, isPrivate);
 router.get('/user/private/:email', authRequired, getUserPrivateStatus);
+router.get('/users/:id', authRequired, getUser);
+
 export default router;

@@ -17,6 +17,8 @@ export const useAuthTimerPvP = () => {
 export const TimerPvPProvider = ({ children }) => {
   const [timerPvPs, setTimerPvPs] = useState([]);
   const [resultadoTimerPvP, setResultadoTimerPvP] = useState(null);
+  const [contrincante, setContrincante] = useState(null); // Nuevo estado para el contrincante
+
 
   const createTimerPvP = async (winner, loser) => {
     try {
@@ -40,6 +42,8 @@ export const TimerPvPProvider = ({ children }) => {
     resultadoTimerPvP,
     setResultadoCon,
     createTimerPvP,
+    setContrincante,
+    contrincante,
   };
 
   return (

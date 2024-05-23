@@ -4,7 +4,9 @@ import { useNavigate } from "react-router-dom";
 import io from "socket.io-client";
 import { useAuth } from "../context/AuthContext";
 import { useAuthTimerPvP } from "../context/TimerPvPContext";
-import { verifyTokenRequest } from "../api/auth";
+import { verifyTokenRequest, getUserRequest } from "../api/auth";
+import { set } from "mongoose";
+
 const URL = import.meta.env.VITE_BACKEND_URL;
 
 function TimerPvP() {
@@ -22,6 +24,7 @@ function TimerPvP() {
   const [socket, setSocket] = useState(""); // Estado para almacenar el socket
   const [resultado, setResultado] = useState(null);
   const { setResultadoCon } = useAuthTimerPvP();
+  const [contrincante, setContrincante] = useState(null);
 
   // useEffect(() => {
   //   if (user.rank === 0) {
@@ -41,19 +44,39 @@ function TimerPvP() {
     fetchUser();
   }, [user]);
 
+  const time = setTimeout(() => {
+    if (isPaired) {
+      navigate("/profile");
+    }
+  }, 120000);
+
+
   useEffect(() => {
     const socket = io(`${URL}/confrontation`);
     setSocket(socket);
 
     if (!currentUser) return;
     socket.emit("user", currentUser._id);
-    // socket.on("user", (user) => {
-    //   setCurrentUser(user);
-    // });
 
     socket.on("paired", () => {
       console.log("Emparejado");
       setIsPaired(true);
+    });
+
+    socket.on("contrincante", (contrincante) => {
+      console.log(contrincante);
+      if (contrincante) {
+        const fetchsContrincante = async () => {
+          try {
+            const { data } = await getUserRequest(contrincante);
+            console.log(data);
+            setContrincante(data);
+          } catch (error) {
+            console.error("Error fetching user:", error);
+          }
+        };
+        fetchsContrincante();
+      }
     });
 
     socket.on("scramble", (scramble) => {
@@ -77,8 +100,10 @@ function TimerPvP() {
       }
     });
 
+    // Efecto de limpieza para cerrar la conexión al socket cuando el componente se desmonte
     return () => {
       socket.disconnect();
+      clearTimeout(time)
     };
   }, [currentUser]);
 
@@ -181,6 +206,17 @@ function TimerPvP() {
                   ? `0${milisegundos}`
                   : milisegundos}
               </p>
+            </p>
+          </div>
+          {contrincante && (
+            <>
+              <p>Tu contrincante es: {contrincante.isPrivate ? "UsuarioX" : contrincante.username}</p>
+              <p>Rango: {contrincante.rank}</p>
+            </>
+          )}
+          <div>
+            <p>
+              Presiona la barra espaciadora para iniciar y detener el cronómetro
             </p>
           </div>
         </>

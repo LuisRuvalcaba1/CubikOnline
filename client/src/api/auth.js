@@ -8,6 +8,8 @@ export const renewTokenRequest = () => axios.get(`/renew-token`)
 
 export const loginRequest = user => axios.post(`/login`, user)
 
+export const getUserRequest = (id) => axios.get(`/users/${id}`)
+
 export const verifyTokenRequest = () => axios.get(`/verify`)
 
 export const updatePasswordRequest = (email, newPassword) => axios.put(`/account/password/`, email, newPassword)
@@ -25,5 +27,3 @@ export const updateUserRankRequest = (rank,user) => axios.put(`/rankingusers`, r
 export const isPrivateRequest = (email, isPrivate) => axios.put(`/isPrivate`,{ email, isPrivate});
 
 export const getUserPrivateStatus = (email) => axios.get(`/user/private/${email}`);
-
-// export const profileRequest = () => axios.get(`/profile`);

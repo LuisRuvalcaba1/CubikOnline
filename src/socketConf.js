@@ -23,6 +23,10 @@ export function handleConfrontationEvents(confrontationNS) {
         user1.emit("paired");
         user2.emit("paired");
 
+        //Enviar el id del contrincante a cada usuario
+        user1.emit("contrincante", user2.userId);
+        user2.emit("contrincante", user1.userId);
+
         const scramble = generarNuevoScramble();
         user1.emit("scramble", scramble);
         user2.emit("scramble", scramble);
