@@ -7,18 +7,20 @@ import Encuesta from "../components/Encuesta";
 import Switch from "react-switch";
 import { isPrivateRequest } from "../api/auth";
 import { useNavigate } from "react-router-dom";
-
+import { useEncuesta } from "../context/EncuestaContext";
 import "./Profile.css";
 
 function ProfilePage() {
   const [showModal, setShowModal] = useState(false);
-  const { user, logout, statusChangeAuth, isAuthenticated } =
-    useAuth();
+  const { user, logout, statusChangeAuth, isAuthenticated } = useAuth();
   const { deleteTorneoByJuez } = useAuthTorneo();
+  const {value} = useEncuesta();
   const [currentUser, setCurrentUser] = useState(null);
   const navigation = useNavigate();
   const handleOnClose = () => setShowModal(false);
   const [checked, setChecked] = useState(false);
+  const { getEncuestas } = value;
+  const [userEncuestas, setUserEncuestas] = useState([]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -32,8 +34,26 @@ function ProfilePage() {
     fetchUser();
   }, [user]);
 
-  console.log("User:", isAuthenticated);
-  console.log("User:", currentUser);
+  // console.log("User:", isAuthenticated);
+  // console.log("User:", currentUser);
+
+  useEffect(() => {
+    const fetchUserEncuestas = async () => {
+      if (currentUser) {
+        try {
+          const encuestas = await getEncuestas();
+          const userEncuestas = encuestas.filter(
+            (encuesta) => encuesta.user === currentUser._id
+          );
+          setUserEncuestas(userEncuestas);
+          console.log("Encuestas del usuario:", userEncuestas);
+        } catch (error) {
+          console.error("Error fetching user encuestas:", error);
+        }
+      }
+    };
+    fetchUserEncuestas();
+  }, [currentUser, getEncuestas]);
 
   const getTimestampFromObjectId = (objectId) => {
     const timestamp = parseInt(objectId.toString().slice(0, 8), 16);
@@ -41,20 +61,24 @@ function ProfilePage() {
   };
 
   useEffect(() => {
-    const userCreatedAt = currentUser ? getTimestampFromObjectId(currentUser._id) : null;
+    const userCreatedAt = currentUser
+      ? getTimestampFromObjectId(currentUser._id)
+      : null;
     const currentDate = new Date();
-    console.log("User created at:", userCreatedAt);
-    const diffInDays = Math.floor((currentDate - userCreatedAt) / (1000 * 60 * 60 * 24));
-    console.log("Diff in days:", diffInDays);
-    if (userCreatedAt && diffInDays >= 1) {
-      const remainderDays = diffInDays % 1;
+    const diffInDays = Math.floor(
+      (currentDate - userCreatedAt) / (1000 * 60 * 60 * 24)
+    );
+    console.log("Diferencia en días:", diffInDays);
+
+    if (userCreatedAt && diffInDays >= 3) {
+      const remainderDays = diffInDays % 3;
       if (remainderDays === 0) {
-        setShowModal(true);
+        // Verificar si el usuario ya tiene una encuesta registrada
+        const hasUserEncuesta = userEncuestas.length > 0;
+        setShowModal(!hasUserEncuesta);
       }
     }
-  }, [currentUser]);
-
-  
+  }, [currentUser, userEncuestas]);
 
   useEffect(() => {
     const eliminarToken = async () => {
@@ -82,7 +106,6 @@ function ProfilePage() {
       setChecked(currentUser.isPrivate);
     }
   }, [currentUser]);
-
 
   const handleChange = (nextChecked) => {
     setChecked(nextChecked);
@@ -112,9 +135,12 @@ function ProfilePage() {
             <p>Perfil privado</p>
             <Switch onChange={handleChange} checked={checked}></Switch>
           </div>
-
           <button onClick={searchFriends}>Buscar amigos</button>
-          <Encuesta onClose={handleOnClose} visible={showModal} />
+          <Encuesta
+            onClose={handleOnClose}
+            visible={showModal}
+            userEncuestas={userEncuestas}
+          />
         </div>
       ) : (
         <p>Loading...</p>

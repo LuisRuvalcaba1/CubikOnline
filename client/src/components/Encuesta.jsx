@@ -1,14 +1,49 @@
 import { useState } from "react";
-import React from "react";
+import { useAuth } from "../context/AuthContext";
+import { useEncuesta } from "../context/EncuestaContext";
+import { verifyTokenRequest } from "../api/auth.js";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 
-export default function Encuesta({ visible, onClose }) {
+export default function Encuesta({ visible, onClose, userEncuestas }) {
   const [showEncuesta, setShowEncuesta] = useState(false);
+  const { user } = useAuth();
+  const { value } = useEncuesta();
+  const { updateEncuesta, createEncuesta } = value;
+  const { register, handleSubmit } = useForm();
+  const [currentUser, setCurrentUser] = useState(null);
 
-  const handleOnCLose = (e) => {
-    if (e.target.id === "container") {
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const { data } = await verifyTokenRequest();
+        setCurrentUser(data);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+    fetchUser();
+  }, [user]);
+
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      data.user = currentUser._id;
+      if (userEncuestas.length > 0) {
+        // Si el usuario tiene una encuesta existente, actualizar
+        const encuestaId = userEncuestas[0]._id;
+        const res = await updateEncuesta(encuestaId, data);
+        console.log(res);
+      } else {
+        // Si el usuario no tiene una encuesta existente, crear una nueva
+        const res = await createEncuesta(data);
+        console.log(res);
+      }
       onClose();
+    } catch (error) {
+      console.error("Error al actualizar/crear la encuesta:", error);
     }
-  };
+  });
+
   if (!visible) return null;
 
   return (
@@ -16,7 +51,6 @@ export default function Encuesta({ visible, onClose }) {
       {!showEncuesta ? (
         <div
           id="container"
-          onClick={handleOnCLose}
           className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50"
         >
           <div className="bg-white p-6 rounded-lg shadow-lg">
@@ -40,9 +74,9 @@ export default function Encuesta({ visible, onClose }) {
           </div>
         </div>
       ) : (
-        <div
+        <form
           id="container"
-          onClick={handleOnCLose}
+          onSubmit={onSubmit}
           className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50 text-black"
         >
           <div className="bg-white p-6 rounded-lg shadow-lg ">
@@ -52,6 +86,7 @@ export default function Encuesta({ visible, onClose }) {
             <div className="mb-4">
               <select
                 name="situation"
+                {...register("statusCube")}
                 id="situation"
                 className="border border-gray-300 rounded-md py-2 px-3 w-full"
               >
@@ -68,6 +103,7 @@ export default function Encuesta({ visible, onClose }) {
             <div className="mb-4">
               <select
                 name="step"
+                {...register("phaseCube")}
                 id="step"
                 className="border border-gray-300 rounded-md py-2 px-3 w-full"
               >
@@ -82,6 +118,7 @@ export default function Encuesta({ visible, onClose }) {
             <div className="mb-4">
               <select
                 name="time"
+                {...register("timeCube")}
                 id="time"
                 className="border border-gray-300 rounded-md py-2 px-3 w-full"
               >
@@ -92,12 +129,15 @@ export default function Encuesta({ visible, onClose }) {
             </div>
 
             <div className="flex justify-center space-x-4">
-              <button className="bg-white-500 text-black py-2 px-4 rounded-md hover:bg-green-600 transition-colors duration-300 hover:text-white">
+              <button type="submit" className="bg-white-500 text-black py-2 px-4 rounded-md hover:bg-green-600 transition-colors duration-300 hover:text-white">
                 Enviar
+              </button>
+              <button onClick={onClose} className="bg-white-500 text-black py-2 px-4 rounded-md hover:bg-red-600 transition-colors duration-300 hover:text-white">
+                Cancelar
               </button>
             </div>
           </div>
-        </div>
+        </form>
       )}
     </>
   );

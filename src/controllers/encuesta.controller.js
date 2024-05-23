@@ -1,4 +1,4 @@
-import Encuesta from "../models/encuesta.model";
+import Encuesta from "../models/encuesta.model.js";
 
 export const createEncuesta = async (req, res) => {
   try {
