@@ -30,6 +30,7 @@ import MetodoFriedrich from "./pages/Metodo3x3Page.jsx";
 import CategoryPage from "./pages/CategoryPage.jsx";
 import Amigos from "./pages/Amigos.jsx";
 import { AmigosProvider } from "./context/AmigosContext.jsx";
+import { EncuestaProvider } from "./context/EncuestaContext.jsx";
 
 export {
   BrowserRouter,
@@ -66,4 +67,5 @@ export {
   CategoryPage,
   Amigos,
   AmigosProvider,
+  EncuestaProvider,
 };

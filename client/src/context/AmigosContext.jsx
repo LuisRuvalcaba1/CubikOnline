@@ -22,7 +22,7 @@ export const AmigosProvider = ({ children }) => {
     try {
       const res = await getFriendsRequest();
       console.log(res.data);
-      return res.data; // Asegúrate de devolver solo los datos, no el objeto completo de respuesta
+      return res.data;
     } catch (error) {
       console.log(error);
       throw error;
@@ -33,7 +33,7 @@ export const AmigosProvider = ({ children }) => {
     try {
       const res = await getYourFriendsRequest();
       console.log(res.data);
-      return res.data; // Asegúrate de devolver solo los datos, no el objeto completo de respuesta
+      return res.data;
     } catch (error) {
       console.log(error);
       throw error;

@@ -3,18 +3,13 @@ import User from "../models/user.model.js";
 
 export const addFriend = async (req, res) => {
   try {
-    // Crear una solicitud de amistad
     const { user1, user2 } = req.body;
-
-    // Verificar si los usuarios existen
     const userFound1 = await User.findById(user1);
     const userFound2 = await User.findById(user2);
 
     if (!userFound1 || !userFound2) {
       return res.status(400).json({ message: "Usuario no encontrado" });
     }
-
-    // Crear la solicitud de amistad
     const newFriend = new Amigos({ user1, user2 });
     const savedFriend = await newFriend.save();
 
@@ -26,10 +21,24 @@ export const addFriend = async (req, res) => {
 
 export const getYourFriends = async (req, res) => {
   try {
-    const friends = await Amigos.find(
-      { user1: req.user.id, status: true } || { user2: req.user.id, status: true}
-    ).populate("user2");
-    res.json(friends);
+    const friends = await Amigos.find({
+      $or: [
+        { user1: req.user.id, status: true },
+        { user2: req.user.id, status: true }
+      ]
+    })
+    .populate("user1", "username")
+    .populate("user2", "username");
+
+    const friendsList = friends.map(friend => {
+      if (friend.user1._id.toString() === req.user.id) {
+        return { username: friend.user2.username, _id: friend.user2._id };
+      } else {
+        return { username: friend.user1.username, _id: friend.user1._id };
+      }
+    });
+
+    res.json(friendsList);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

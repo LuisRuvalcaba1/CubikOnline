@@ -9,6 +9,7 @@ import {
 import { authRequired } from "../middlewares/validateToken.js";
 
 const router = Router();
+
 router.post("/addFriend", authRequired, addFriend);
 router.get("/getFriends", authRequired, getFriends);
 router.get("/getYourFriends", authRequired, getYourFriends);

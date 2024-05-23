@@ -12,13 +12,12 @@ import "./Profile.css";
 
 function ProfilePage() {
   const [showModal, setShowModal] = useState(false);
-  const { user, logout, statusChangeAuth, isAuthenticated, isPrivate } =
+  const { user, logout, statusChangeAuth, isAuthenticated } =
     useAuth();
   const { deleteTorneoByJuez } = useAuthTorneo();
   const [currentUser, setCurrentUser] = useState(null);
   const navigation = useNavigate();
   const handleOnClose = () => setShowModal(false);
-
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
@@ -35,6 +34,27 @@ function ProfilePage() {
 
   console.log("User:", isAuthenticated);
   console.log("User:", currentUser);
+
+  const getTimestampFromObjectId = (objectId) => {
+    const timestamp = parseInt(objectId.toString().slice(0, 8), 16);
+    return new Date(timestamp * 1000);
+  };
+
+  useEffect(() => {
+    const userCreatedAt = currentUser ? getTimestampFromObjectId(currentUser._id) : null;
+    const currentDate = new Date();
+    console.log("User created at:", userCreatedAt);
+    const diffInDays = Math.floor((currentDate - userCreatedAt) / (1000 * 60 * 60 * 24));
+    console.log("Diff in days:", diffInDays);
+    if (userCreatedAt && diffInDays >= 1) {
+      const remainderDays = diffInDays % 1;
+      if (remainderDays === 0) {
+        setShowModal(true);
+      }
+    }
+  }, [currentUser]);
+
+  
 
   useEffect(() => {
     const eliminarToken = async () => {
@@ -55,7 +75,14 @@ function ProfilePage() {
     const timeoutId = setTimeout(eliminarToken, 21600000);
 
     return () => clearTimeout(timeoutId);
-  }, [user, deleteTorneoByJuez, statusChangeAuth, logout]);
+  }, [currentUser, deleteTorneoByJuez, statusChangeAuth, logout]);
+
+  useEffect(() => {
+    if (currentUser) {
+      setChecked(currentUser.isPrivate);
+    }
+  }, [currentUser]);
+
 
   const handleChange = (nextChecked) => {
     setChecked(nextChecked);
@@ -83,7 +110,7 @@ function ProfilePage() {
           <p>Points: {currentUser.points}</p>
           <div>
             <p>Perfil privado</p>
-            <Switch onChange={handleChange} checked={currentUser.isPrivate}></Switch>
+            <Switch onChange={handleChange} checked={checked}></Switch>
           </div>
 
           <button onClick={searchFriends}>Buscar amigos</button>

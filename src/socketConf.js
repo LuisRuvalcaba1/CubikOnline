@@ -20,12 +20,16 @@ export function handleConfrontationEvents(confrontationNS) {
         const [user1, user2] = waitingClients.splice(0, 2); // Tomar los primeros dos clientes
         const pair = { user1, user2 };
         matchedPairs.push(pair);
-        user1.emit("paired", user2.userId);
-        user2.emit("paired", user1.userId);
+        user1.emit("paired");
+        user2.emit("paired");
 
         const scramble = generarNuevoScramble();
         user1.emit("scramble", scramble);
         user2.emit("scramble", scramble);
+
+        // Suscribir eventos después de emparejar
+        handleUserEvents(user1, pair, matchedPairs);
+        handleUserEvents(user2, pair, matchedPairs);
       }
     });
 
@@ -42,58 +46,55 @@ export function handleConfrontationEvents(confrontationNS) {
           pair.user2.userId !== socket.userId
       );
     });
+  });
+}
 
-    // Manejar evento de mensaje (tiempo de resolución)
-    socket.on("message", (data) => {
-      console.log(data);
-      const message = JSON.parse(data);
-      console.log("Tiempo: ", message.time);
+function handleUserEvents(socket, pair, matchedPairs) {
+  // Manejar evento de mensaje (tiempo de resolución)
+  socket.on("message", (data) => {
+    console.log(data);
+    const message = JSON.parse(data);
+    console.log("Tiempo: ", message.time);
 
-      const pair = matchedPairs.find(
-        (pair) =>
-          pair.user1.userId === socket.userId ||
-          pair.user2.userId === socket.userId
+    // Guardar el tiempo del usuario en el par
+    if (pair.user1.userId === socket.userId) {
+      pair.user1.tiempo = message.time;
+    } else {
+      pair.user2.tiempo = message.time;
+    }
+
+    // Si ambos usuarios han enviado sus tiempos, ordenar los tiempos y determinar al ganador
+    if (pair.user1.tiempo && pair.user2.tiempo) {
+      const tiempos = [pair.user1.tiempo, pair.user2.tiempo];
+      tiempos.sort();
+
+      const ganador =
+        pair.user1.tiempo === tiempos[0] ? pair.user1 : pair.user2;
+      const perdedor =
+        pair.user1.tiempo === tiempos[0] ? pair.user2 : pair.user1;
+
+      const winnerData = ganador.userId;
+      const loserData = perdedor.userId;
+
+      ganador.emit("resultado", {
+        ganador: true,
+        tiempo: ganador.tiempo,
+        winner: winnerData,
+        loser: loserData,
+      });
+      perdedor.emit("resultado", {
+        ganador: false,
+        tiempo: perdedor.tiempo,
+        winner: winnerData,
+        loser: loserData,
+      });
+      console.log(`Winner: ${ganador.userId}`);
+
+      // Eliminar el par de la lista de pares emparejados
+      matchedPairs = matchedPairs.filter(
+        (p) => p.user1.userId !== ganador.userId && p.user2.userId !== ganador.userId
       );
-      if (!pair) {
-        console.error("Pair not found");
-        return;
-      }
-
-      // Guardar el tiempo del usuario en el par
-      if (pair.user1.userId === socket.userId) {
-        pair.user1.tiempo = message.time;
-      } else {
-        pair.user2.tiempo = message.time;
-      }
-
-      // Si ambos usuarios han enviado sus tiempos, ordenar los tiempos y determinar al ganador
-      if (pair.user1.tiempo && pair.user2.tiempo) {
-        const tiempos = [pair.user1.tiempo, pair.user2.tiempo];
-        tiempos.sort();
-
-        const ganador =
-          pair.user1.tiempo === tiempos[0] ? pair.user1 : pair.user2;
-        const perdedor =
-          pair.user1.tiempo === tiempos[0] ? pair.user2 : pair.user1;
-
-        const winnerData = ganador.userId;
-        const loserData = perdedor.userId;
-
-        ganador.emit("resultado", {
-          ganador: true,
-          tiempo: ganador.tiempo,
-          winner: winnerData,
-          loser: loserData,
-        });
-        perdedor.emit("resultado", {
-          ganador: false,
-          tiempo: perdedor.tiempo,
-          winner: winnerData,
-          loser: loserData,
-        });
-        console.log(`Winner: ${ganador.userId}`);
-      }
-    });
+    }
   });
 }
 

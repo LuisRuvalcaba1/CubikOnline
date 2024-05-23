@@ -5,9 +5,9 @@ import {
   getFriendsRequest,
   acceptFriendRequest,
   denyFriendRequest,
-  getYourFriendsRequest,
 } from "../api/amigos";
 import { useAmigos } from "../context/AmigosContext";
+import { verifyTokenRequest } from "../api/auth";
 
 function Amigos() {
   const { user, getUsersTable } = useAuth();
@@ -16,11 +16,18 @@ function Amigos() {
   const [search, setSearch] = useState("");
   const [friends, setFriends] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
-  const [currentFriends, setCurrentFriends] = useState([]);
   const [yourFriend, setYourFriend] = useState([]);
 
   useEffect(() => {
-    setCurrentUser(user);
+    const fetchUser = async () => {
+      try {
+        const { data } = await verifyTokenRequest();
+        setCurrentUser(data);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+    fetchUser();
   }, [user]);
 
   useEffect(() => {
@@ -36,41 +43,60 @@ function Amigos() {
     };
 
     const fetchYourFriends = async () => {
-      const yourFriends = await value.yourFriends();
+      try {
+        const yourFriends = await value.yourFriends();
       setYourFriend(yourFriends);
       console.log("Amigos obtenidos:", yourFriends);
+      } catch (error) {
+        console.error("Error al obtener tus amigos:", error);
+      }
+      
     };
-
-    // Agregar un evento de escucha de clic al documento
-    const handleDocumentClick = () => {
-      fetchFriends();
-      fetchUsers();
-    };
-
-    document.addEventListener("click", handleDocumentClick);
 
     fetchYourFriends();
     fetchFriends();
     fetchUsers();
-
-    // Limpiar el evento de escucha en el desmontaje del componente
-    return () => {
-      document.removeEventListener("click", handleDocumentClick);
-    };
   }, [getUsersTable, value.getFriends, value.yourFriends]);
 
   const handleAddFriend = async (friendId) => {
     try {
+      console.log("Agregando amigo:", friendId);
+      console.log("Usuario actual:", currentUser);
       const data = {
-        user1: user._id,
+        user1: currentUser._id,
         user2: friendId,
       };
 
       await addFriendRequest(data);
-      const updatedFriendRequests = await getFriendsRequest(user._id);
+      const updatedFriendRequests = await getFriendsRequest(currentUser._id);
       setFriends(updatedFriendRequests);
+      window.location.reload();
     } catch (error) {
       console.error("Error al agregar amigo:", error);
+    }
+  };
+
+  const acceptFriend = async (friendId) => {
+    try {
+      console.log("Aceptando solicitud de amistad:", friendId);
+      await acceptFriendRequest(friendId);
+      const updatedFriendRequests = await getFriendsRequest(currentUser._id);
+      setFriends(updatedFriendRequests);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error al aceptar solicitud de amistad:", error);
+    }
+  };
+
+  const denyFriend = async (friendId) => {
+    try {
+      console.log("Rechazando solicitud de amistad:", friendId);
+      await denyFriendRequest(friendId);
+      const updatedFriendRequests = await getFriendsRequest(currentUser._id);
+      setFriends(updatedFriendRequests);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error al rechazar solicitud de amistad:", error);
     }
   };
 
@@ -93,11 +119,15 @@ function Amigos() {
         user._id !== currentUser?._id &&
         (user._id !== yourFriend?.user1 || user._id !== yourFriend?.user2)
     );
-  } 
-  
+  }
+
+  const refreshPage = () =>{
+    window.location.reload();
+  }
+
   return (
     <div>
-      <h1>Amigos</h1>
+      <h1 onClick={refreshPage}>Amigos</h1>
 
       {users.length > 0 ? (
         <div>
@@ -133,7 +163,7 @@ function Amigos() {
           <h2>Solicitudes de amistad</h2>
           {
             /* Hacer un console.log para ver si se estan recibiendo los datos */
-            console.log(yourFriend)
+            //console.log(currentUser)
           }
           <table>
             <thead>
@@ -148,10 +178,10 @@ function Amigos() {
                   <tr key={friend._id}>
                     <td>{friend.user1.username}</td>
                     <td>
-                      <button onClick={() => acceptFriendRequest(friend._id)}>
+                      <button onClick={() => acceptFriend(friend._id)}>
                         Aceptar
                       </button>
-                      <button onClick={() => denyFriendRequest(friend._id)}>
+                      <button onClick={() => denyFriend(friend._id)}>
                         Rechazar
                       </button>
                     </td>
