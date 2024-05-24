@@ -272,12 +272,12 @@ export const Navbar = () => {
                   Timer
                 </Link>
 
-                <Link
+                {/* <Link
                   to="/product"
                   className="text-white hover:bg-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Producto
-                </Link>
+                </Link> */}
 
                 <Link
                   to="/category"

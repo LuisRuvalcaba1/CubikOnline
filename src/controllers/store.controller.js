@@ -1,4 +1,3 @@
-import { request } from "express";
 import Store from "../models/store.model.js";
 
 export const createStore = async (req, res) => {

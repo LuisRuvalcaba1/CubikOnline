@@ -23,7 +23,6 @@ export const getTimers = async (req, res) => {
   try {
       const timers = await TimerModel.find({ user: req.user.id }).populate('user');
       res.status(200).json(timers);
-
   } catch (error) {
       res.status(500).json({ message: error.message });
   }

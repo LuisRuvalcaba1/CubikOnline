@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react";
 import { useAuthTimer } from "../context/TimerContext";
-import { removeTokenRequest } from "../api/auth";
 import { useAuth } from "../context/AuthContext";
 import { useAuthTorneo } from "../context/TorneoContext";
+import {
+  updateObjetiveRequest,
+  createObjetiveRequest,
+  getObjetivesRequest,
+} from "../api/objetives.js";
 import "./Timer.css";
+import { verifyTokenRequest, removeTokenRequest } from "../api/auth.js";
 
 function TimerUserLoged() {
   const { createNewTimer, getTimersContext } = useAuthTimer();
@@ -19,14 +24,44 @@ function TimerUserLoged() {
   const { deleteTorneoByJuez } = useAuthTorneo();
   const [categoria, setCategoria] = useState("3x3");
   const [expandedScramble, setExpandedScramble] = useState(null);
+  const [userObjetive, setUserObjetive] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
 
-  const handleTimeClick = (time, scramble) => {
+  const handleTimeClick = (scramble) => {
     if (expandedScramble === scramble) {
       setExpandedScramble(null);
     } else {
       setExpandedScramble(scramble);
     }
   };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const { data } = await verifyTokenRequest();
+        setCurrentUser(data);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+    fetchUser();
+  }, [user]);
+
+  useEffect(() => {
+    const fetchObjetive = async () => {
+      try {
+        const objetive = await getObjetivesRequest();
+        if (!objetive.data) {
+          return;
+        }
+        setUserObjetive(objetive.data);
+      } catch (error) {
+        console.error("Error fetching objetive:", error);
+      }
+    };
+  
+    fetchObjetive();
+  }, [getObjetivesRequest]);
 
   useEffect(() => {
     getTimersContext()
@@ -177,6 +212,15 @@ function TimerUserLoged() {
 
       setTiemposGuardados((prevTiempos) => {
         if (Array.isArray(prevTiempos)) {
+          const tiemposSesionActual = prevTiempos.filter(
+            (timer) => timer.session === session
+          );
+
+          // Verifica si hay al menos un elemento guardado en la sesión actual antes de llamar a handleNewBestTime
+          if (tiemposSesionActual.length > 0) {
+            handleNewBestTime(time);
+          }
+
           return [nuevoTiempo, ...prevTiempos];
         } else {
           console.error("prevTiempos no es un array:", prevTiempos);
@@ -205,6 +249,47 @@ function TimerUserLoged() {
         });
     }
   }
+
+  const isBetterThanBestTime = (newTime, tiempos, session) => {
+    const tiemposSesion = tiempos.filter((timer) => timer.session === session);
+    if (tiemposSesion.length === 0) return true;
+
+    const mejorTiempo = Math.min(
+      ...tiemposSesion.map((timer) =>
+        convertToMillisecondsFromString(timer.time)
+      )
+    );
+
+    return convertToMillisecondsFromString(newTime) < mejorTiempo;
+  };
+
+  const handleNewBestTime = async (newTime) => {
+    try {
+      const isBetter = isBetterThanBestTime(newTime, tiemposGuardados, session);
+
+      if (isBetter) {
+        // Buscar si ya existe un objetivo para el mejor tiempo de la sesión
+        const existingObjetive = await getObjetivesRequest(user);
+
+        if (existingObjetive.data) {
+          // Si existe, actualizar la cantidad de veces
+          const updatedObjetive = {
+            qty_times: existingObjetive.data.qty_times + 1,
+          };
+          await updateObjetiveRequest(updatedObjetive);
+        } else {
+          // Si no existe, crear un nuevo objetivo
+          const newObjetive = {
+            objective: 1,
+            qty_times: 1,
+          };
+          await createObjetiveRequest(newObjetive);
+        }
+      }
+    } catch (error) {
+      console.error("Error al manejar el nuevo mejor tiempo:", error);
+    }
+  };
 
   function getBestTime(tiempos, session) {
     const tiemposSesion = tiempos.filter((timer) => timer.session === session);
@@ -240,10 +325,16 @@ function TimerUserLoged() {
   function getAverageOf5(tiempos, session) {
     const tiemposSesion = tiempos.filter((timer) => timer.session === session);
     if (tiemposSesion.length < 5) return "N/A";
-  
-    const ultimosGrupo = tiemposSesion.slice(-5).sort((a, b) => convertToMillisecondsFromString(b.time) - convertToMillisecondsFromString(a.time));
+
+    const ultimosGrupo = tiemposSesion
+      .slice(-5)
+      .sort(
+        (a, b) =>
+          convertToMillisecondsFromString(b.time) -
+          convertToMillisecondsFromString(a.time)
+      );
     const tiemposFiltrados = ultimosGrupo.slice(1, 4);
-  
+
     if (tiemposFiltrados.length === 3) {
       const promedio =
         tiemposFiltrados.reduce(
@@ -252,17 +343,23 @@ function TimerUserLoged() {
         ) / 3;
       return convertToTimeFormat(promedio);
     }
-  
+
     return "N/A";
   }
-  
+
   function getAverageOf12(tiempos, session) {
     const tiemposSesion = tiempos.filter((timer) => timer.session === session);
     if (tiemposSesion.length < 12) return "N/A";
-  
-    const ultimosGrupo = tiemposSesion.slice(-12).sort((a, b) => convertToMillisecondsFromString(b.time) - convertToMillisecondsFromString(a.time));
+
+    const ultimosGrupo = tiemposSesion
+      .slice(-12)
+      .sort(
+        (a, b) =>
+          convertToMillisecondsFromString(b.time) -
+          convertToMillisecondsFromString(a.time)
+      );
     const tiemposFiltrados = ultimosGrupo.slice(1, 11);
-  
+
     if (tiemposFiltrados.length === 10) {
       const promedio =
         tiemposFiltrados.reduce(
@@ -271,7 +368,7 @@ function TimerUserLoged() {
         ) / 10;
       return convertToTimeFormat(promedio);
     }
-  
+
     return "N/A";
   }
 

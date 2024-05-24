@@ -149,3 +149,20 @@ Caso 39: R U' R' U R U2 R' U R U' R'
 Caso 40: (R U R' U') R U2 R' U' R U R'
 Caso 41: R U' R' U R' U' R F' U F
 Caso 42: F' U F U2 R U R' U R U' R'
+
+Lista de objetivos que pueden realizar los usuarios: (Solo se pueden realizar estos objetivos 4 veces en un mes)
+
+1- Conseguir un nuevo PB: Mejorar el mejor tiempo hecho en la sesion 
+100 pts
+
+2- Derrotar al contrincante (Confrontacion): cuando se haga el registro de quien es el ganador darle los puntos al usuario ganador
+10 pts
+
+3- Derrotar al contrincante en revancha: 
+20 pts
+
+Participacion en un torneo: dependiendo de la ronda se le dara un premio
+4- Ganar una ronda: 10pts
+5- Llegar a la semifinal 50 pts
+6- Ganar el torneo-200pts
+

@@ -110,14 +110,16 @@ function Amigos() {
     results = users.filter(
       (user) =>
         user._id !== currentUser?._id &&
-        (user._id !== yourFriend?.user1 || user._id !== yourFriend?.user2)
+        (user._id !== yourFriend?.user1 || user._id !== yourFriend?.user2) &&
+        user.isPrivate === false
     );
   } else {
     results = users.filter(
       (user) =>
         user.username.toLowerCase().includes(search.toLowerCase()) &&
         user._id !== currentUser?._id &&
-        (user._id !== yourFriend?.user1 || user._id !== yourFriend?.user2)
+        (user._id !== yourFriend?.user1 || user._id !== yourFriend?.user2) &&
+        user.isPrivate === false
     );
   }
 
