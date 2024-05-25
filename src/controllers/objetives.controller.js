@@ -1,17 +1,19 @@
-import Objectives from "../models/objectives.model.js";
+import Objetives from '../models/objectives.model.js';
 
 export const createObjetive = async (req, res) => {
     try {
-        const { objetive, qty_times } = req.body;
+        const { objective, qty_times } = req.body;
         const newObjetive = new Objetives({
-            objetive,
+            objective,
             qty_times,
             user: req.user.id,
         });
         const savedObjetive = await newObjetive.save();
+        console.log(savedObjetive);
         res.json(savedObjetive);
     } catch (error) {
         res.status(500).json({ message: error.message });
+        console.log(error);
     }
 }
 
@@ -38,20 +40,20 @@ export const getObjetive = async (req, res) => {
 
 export const updateObjetive = async (req, res) => {
     try {
-        const { qty_times } = req.body;
-        const updatedObjetive = await Objetives.findByIdAndUpdate(
-            req.params.id,
-            { qty_times },
-            { new: true }
-        );
-        if (!updatedObjetive) {
-            return res.status(404).json({ message: "Objetive not found" });
-        }
-        res.status(200).json(updatedObjetive);
+      const { qty_times } = req.body;
+      const updatedObjetive = await Objetives.findByIdAndUpdate(
+        req.params.id,
+        { qty_times },
+        { new: true }
+      );
+      if (!updatedObjetive) {
+        return res.status(404).json({ message: "Objetive not found" });
+      }
+      res.status(200).json(updatedObjetive);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+      res.status(500).json({ message: error.message });
     }
-}
+  };
 
 export const deleteObjetive = async (req, res) => {
     try {

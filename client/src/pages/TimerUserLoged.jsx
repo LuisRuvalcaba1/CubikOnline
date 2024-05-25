@@ -2,16 +2,13 @@ import { useEffect, useState } from "react";
 import { useAuthTimer } from "../context/TimerContext";
 import { useAuth } from "../context/AuthContext";
 import { useAuthTorneo } from "../context/TorneoContext";
-import {
-  updateObjetiveRequest,
-  createObjetiveRequest,
-  getObjetivesRequest,
-} from "../api/objetives.js";
+import { useObjetives } from "../context/ObjetivesContext.jsx";
 import "./Timer.css";
 import { verifyTokenRequest, removeTokenRequest } from "../api/auth.js";
 
 function TimerUserLoged() {
-  const { createNewTimer, getTimersContext } = useAuthTimer();
+  const { createNewTimer, getTimersContext, } = useAuthTimer();
+  const { getObjetivesContext, createNewObjetive, updateObjetive } = useObjetives();
   const [milisegundos, setMilisegundos] = useState(0);
   const [segundos, setSegundos] = useState(0);
   const [minutos, setMinutos] = useState(0);
@@ -26,6 +23,7 @@ function TimerUserLoged() {
   const [expandedScramble, setExpandedScramble] = useState(null);
   const [userObjetive, setUserObjetive] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const [alerta, setAlerta] = useState(false);
 
   const handleTimeClick = (scramble) => {
     if (expandedScramble === scramble) {
@@ -35,33 +33,31 @@ function TimerUserLoged() {
     }
   };
 
+
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const { data } = await verifyTokenRequest();
         setCurrentUser(data);
+        console.log(data);
       } catch (error) {
         console.error("Error fetching user:", error);
       }
     };
+
     fetchUser();
   }, [user]);
 
   useEffect(() => {
-    const fetchObjetive = async () => {
-      try {
-        const objetive = await getObjetivesRequest();
-        if (!objetive.data) {
-          return;
-        }
-        setUserObjetive(objetive.data);
-      } catch (error) {
-        console.error("Error fetching objetive:", error);
-      }
-    };
-  
-    fetchObjetive();
-  }, [getObjetivesRequest]);
+    getObjetivesContext()
+      .then((response) => {
+        setUserObjetive(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching objetives:", error);
+      });
+  }, []);
 
   useEffect(() => {
     getTimersContext()
@@ -190,7 +186,6 @@ function TimerUserLoged() {
       const tiempoMilisegundos = Math.floor(tiempoTranscurrido % 1000) - 3;
       const tiempoSegundos = Math.floor((tiempoTranscurrido / 1000) % 60);
       const tiempoMinutos = Math.floor((tiempoTranscurrido / (1000 * 60)) % 60);
-
       const nuevoTiempo = {
         tiempo: `${tiempoMinutos < 10 ? `0${tiempoMinutos}` : tiempoMinutos}:${
           tiempoSegundos < 10 ? `0${tiempoSegundos}` : tiempoSegundos
@@ -203,37 +198,24 @@ function TimerUserLoged() {
         }`,
         scramble: scramble,
       };
-
       const time = `${tiempoMinutos}:${
         tiempoSegundos < 10 ? "0" : ""
       }${tiempoSegundos}.${
         tiempoMilisegundos < 10 ? "00" : tiempoMilisegundos < 100 ? "0" : ""
       }${tiempoMilisegundos}`;
-
       setTiemposGuardados((prevTiempos) => {
         if (Array.isArray(prevTiempos)) {
-          const tiemposSesionActual = prevTiempos.filter(
-            (timer) => timer.session === session
-          );
-
-          // Verifica si hay al menos un elemento guardado en la sesión actual antes de llamar a handleNewBestTime
-          if (tiemposSesionActual.length > 0) {
-            handleNewBestTime(time);
-          }
-
           return [nuevoTiempo, ...prevTiempos];
         } else {
           console.error("prevTiempos no es un array:", prevTiempos);
           return [];
         }
       });
-
       const values = {
         time,
         scramble,
         session,
       };
-
       createNewTimer(values)
         .then(() => {
           getTimersContext()
@@ -247,59 +229,47 @@ function TimerUserLoged() {
         .catch((error) => {
           console.error("Error creating timer:", error);
         });
-    }
-  }
 
-  const isBetterThanBestTime = (newTime, tiempos, session) => {
-    const tiemposSesion = tiempos.filter((timer) => timer.session === session);
-    if (tiemposSesion.length === 0) return true;
-
-    const mejorTiempo = Math.min(
-      ...tiemposSesion.map((timer) =>
-        convertToMillisecondsFromString(timer.time)
-      )
-    );
-
-    return convertToMillisecondsFromString(newTime) < mejorTiempo;
-  };
-
-  const handleNewBestTime = async (newTime) => {
-    try {
-      const isBetter = isBetterThanBestTime(newTime, tiemposGuardados, session);
-
-      if (isBetter) {
-        // Buscar si ya existe un objetivo para el mejor tiempo de la sesión
-        const existingObjetive = await getObjetivesRequest(user);
-
-        if (existingObjetive.data) {
-          // Si existe, actualizar la cantidad de veces
-          const updatedObjetive = {
-            qty_times: existingObjetive.data.qty_times + 1,
+        if (userObjetive.length > 0 && userObjetive[0].objective === 1 && tiemposGuardados.length > 0) {
+          // Actualizar el objetivo existente
+          const objetiveId = userObjetive[0]._id;
+          const nuevaCantidadTiempos = userObjetive[0].qty_times + 1;
+          const data = {
+            qty_times: nuevaCantidadTiempos,
           };
-          await updateObjetiveRequest(updatedObjetive);
+          updateObjetive(objetiveId, data)
+            .then((response) => {
+              setUserObjetive([response.data]);
+              console.log("Objetivo actualizado:", response.data);
+            })
+            .catch((error) => {
+              console.error("Error al actualizar el objetivo:", error);
+            });
         } else {
-          // Si no existe, crear un nuevo objetivo
-          const newObjetive = {
+          const data = {
             objective: 1,
-            qty_times: 1,
+            qty_times: 0,
           };
-          await createObjetiveRequest(newObjetive);
-        }
+          createNewObjetive(data)
+            .then((response) => {
+              setUserObjetive(response.data);
+              console.log("Objetivo creado:", response.data);
+            })
+            .catch((error) => {
+              console.error("Error al crear el objetivo:", error);
+            });
+          }        
       }
-    } catch (error) {
-      console.error("Error al manejar el nuevo mejor tiempo:", error);
     }
-  };
+
 
   function getBestTime(tiempos, session) {
     const tiemposSesion = tiempos.filter((timer) => timer.session === session);
     if (tiemposSesion.length === 0) return "N/A";
-
     const tiemposEnMilisegundos = tiemposSesion.map((timer) =>
       convertToMillisecondsFromString(timer.time)
     );
     const mejorTiempo = Math.min(...tiemposEnMilisegundos);
-
     return convertToTimeFormat(mejorTiempo);
   }
 

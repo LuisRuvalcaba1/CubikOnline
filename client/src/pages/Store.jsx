@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useProductAuth } from "../context/ProductContext.jsx";
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { verifyTokenRequest } from "../api/auth.js";
 
 function Store() {
   const { createNewStore, getUserStores } = useStore();
@@ -11,6 +12,7 @@ function Store() {
   const { getProductsOnStore } = useProductAuth();
   const [products, setProducts] = useState([]);
   const [stores, setStores] = useState([]);
+  const [currentUser, setCurrentUser] = useState({});
 
   useEffect(() => {
     const fetchStoresAndProducts = async () => {
@@ -20,6 +22,20 @@ function Store() {
 
     fetchStoresAndProducts();
   }, []);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const { data } = await verifyTokenRequest();
+        setCurrentUser(data);
+        console.log(data);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+
+    fetchUser();
+  }, [user]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -50,7 +66,7 @@ function Store() {
                   value={product._id}
                   {...register("product")}
                 />
-                <input type="hidden" value={user._id} {...register("user")} />
+                <input type="hidden" value={currentUser._id} {...register("user")} />
                 <button type="submit">Buy</button>
               </form>
             </div>

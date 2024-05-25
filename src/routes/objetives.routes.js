@@ -4,10 +4,10 @@ import {createObjetive, getObjetives, getObjetive, updateObjetive, deleteObjetiv
 
 const router = Router();
 
-router.post('/createObjetive', authRequired, createObjetive);
-router.get('/getObjetives', authRequired, getObjetives);
+router.post('/createObjetive1', authRequired, createObjetive);
+router.get('/getObjetives1', authRequired, getObjetives);
 router.get('/getObjetive/:id', authRequired, getObjetive);
-router.put('/updateObjetive/:id', authRequired, updateObjetive);
+router.put('/updateObjetive1/:id', authRequired, updateObjetive);
 router.delete('/deleteObjetive/:id', authRequired, deleteObjetive);
 
 export default router;

@@ -34,6 +34,7 @@ import {
   Amigos,
   AmigosProvider,
   EncuestaProvider,
+  ObjetiveProvider,
 } from "./imports.js";
 
 function App() {
@@ -46,6 +47,7 @@ function App() {
               <TorneoProvider>
                 <AmigosProvider>
                   <EncuestaProvider>
+                    <ObjetiveProvider>
                     <BrowserRouter>
                       <Navbar />
                       <Routes>
@@ -100,6 +102,7 @@ function App() {
                         </Route>
                       </Routes>
                     </BrowserRouter>
+                    </ObjetiveProvider>
                   </EncuestaProvider>
                 </AmigosProvider>
               </TorneoProvider>
