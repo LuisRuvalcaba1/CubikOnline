@@ -25,7 +25,7 @@ export const TimerPvPProvider = ({ children }) => {
 
   const createTimerPvP = async (winner, loser) => {
     try {
-      const response = await timerPvPRequestFunction(winner, loser);
+      const response = await timerPvPRequestFunction({ winner, loser }); // Enviar un objeto con las propiedades
       console.log(response.data);
     } catch (error) {
       console.error('Error al crear TimerPvP:', error.response.data);

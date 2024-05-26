@@ -25,7 +25,7 @@ export function handleConfrontationEvents(confrontationNS) {
 
         //Enviar el id del contrincante a cada usuario
         user1.emit("contrincante", user2.userId);
-        user2.emit("contrincante", user1.userId);
+        user2.emit("contrincante",  user1.userId);
 
         const scramble = generarNuevoScramble();
         user1.emit("scramble", scramble);

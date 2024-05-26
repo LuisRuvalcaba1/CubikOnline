@@ -20,6 +20,7 @@ function TimerPvP() {
   const [tiempoInicial, setTiempoInicial] = useState(null);
   const [scramble, setScramble] = useState("");
   const [isPaired, setIsPaired] = useState(false);
+  //const [usuario, setUsuario] = useState(null);
   const [socket, setSocket] = useState(""); // Estado para almacenar el socket
   const [resultado, setResultado] = useState(null);
   const { setResultadoCon } = useAuthTimerPvP();
@@ -36,7 +37,7 @@ function TimerPvP() {
     const fetchUser = async () => {
       try {
         const { data } = await verifyTokenRequest();
-        setCurrentUser(data);
+        setCurrentUser(data);        
       } catch (error) {
         console.error("Error fetching user:", error);
       }
@@ -56,9 +57,9 @@ function TimerPvP() {
     const socket = io(`${URL}/confrontation`);
     setSocket(socket);
 
-    if (!currentUser) return;
-    socket.emit("user", currentUser._id);
-
+    if(!currentUser) return;
+    socket.emit('user', currentUser._id);
+    console.log("Usuario:", currentUser._id);
     socket.on("paired", () => {
       console.log("Emparejado");
       setIsPaired(true);
@@ -69,7 +70,7 @@ function TimerPvP() {
       if (contrincante) {
         const fetchsContrincante = async () => {
           try {
-            const { data } = await getUserRequest(contrincante);
+            const { data } = await getUserRequest(contrincante); // Aquí se envía el _id directamente
             console.log(data);
             setContrincante(data);
           } catch (error) {
@@ -94,10 +95,9 @@ function TimerPvP() {
       setResultadoCon(data.ganador);
       navigate("/confirmation");
       if (data.ganador) {
-
         console.log("Ganaste");
-        const winner = currentUser._id;
-        const loser = contrincante._id;
+        const winner = data.winner; // Aquí se envía el _id como cadena
+        const loser = data.loser; // Aquí se envía el _id como cadena
         createTimerPvP(winner, loser);
       }
     });
