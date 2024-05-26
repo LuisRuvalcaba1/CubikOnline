@@ -18,7 +18,6 @@ import Store from "./pages/Store.jsx";
 import ProductPage from "./pages/ProductPage.jsx";
 import TimerPvP from "./pages/TimerPvP.jsx";
 import { TimerPvPProvider } from "./context/TimerPvPContext.jsx";
-import Confirmation from "./pages/Confirmation.jsx";
 import TorneoPage from "./pages/TorneoPage.jsx";
 import { TorneoProvider } from "./context/TorneoContext.jsx";
 import TorneoGetPage from "./pages/TorneoGetPage.jsx";
@@ -56,7 +55,6 @@ export {
   ProductPage,
   TimerPvP,
   TimerPvPProvider,
-  Confirmation,
   TorneoPage,
   TorneoProvider,
   TorneoGetPage,

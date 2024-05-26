@@ -21,7 +21,6 @@ import {
   ProductPage,
   TimerPvP,
   TimerPvPProvider,
-  Confirmation,
   TorneoPage,
   TorneoProvider,
   TorneoGetPage,
@@ -76,10 +75,6 @@ function App() {
                             element={<Account />}
                           />
                           <Route path="/timerpvp" element={<TimerPvP />} />
-                          <Route
-                            path="/confirmation"
-                            element={<Confirmation />}
-                          />
                           <Route path="/friends" element={<Amigos />} />
                           <Route
                             path="/rankingusers"

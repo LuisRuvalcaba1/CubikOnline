@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { useAuthTimerPvP } from "../context/TimerPvPContext";
 import { verifyTokenRequest, getUserRequest } from "../api/auth";
 import { useObjetives } from "../context/ObjetivesContext";
+import Confirmation from "../components/Confirmation";
 const URL = import.meta.env.VITE_BACKEND_URL;
 
 function TimerPvP() {
@@ -20,12 +21,12 @@ function TimerPvP() {
   const [tiempoInicial, setTiempoInicial] = useState(null);
   const [scramble, setScramble] = useState("");
   const [isPaired, setIsPaired] = useState(false);
-  //const [usuario, setUsuario] = useState(null);
-  const [socket, setSocket] = useState(""); // Estado para almacenar el socket
+  const [socket, setSocket] = useState("");
   const [resultado, setResultado] = useState(null);
   const { setResultadoCon } = useAuthTimerPvP();
   const [contrincante, setContrincante] = useState(null);
-
+  const { getObjetivesContext, updateObjetive } = useObjetives();
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   // useEffect(() => {
   //   if (user.rank === 0) {
@@ -37,12 +38,12 @@ function TimerPvP() {
     const fetchUser = async () => {
       try {
         const { data } = await verifyTokenRequest();
-        setCurrentUser(data);        
+        setCurrentUser(data);
       } catch (error) {
         console.error("Error fetching user:", error);
       }
     };
-  
+
     fetchUser();
   }, [user]);
 
@@ -52,13 +53,12 @@ function TimerPvP() {
     }
   }, 120000);
 
-
   useEffect(() => {
     const socket = io(`${URL}/confrontation`);
     setSocket(socket);
 
-    if(!currentUser) return;
-    socket.emit('user', currentUser._id);
+    if (!currentUser) return;
+    socket.emit("user", currentUser._id);
     console.log("Usuario:", currentUser._id);
     socket.on("paired", () => {
       console.log("Emparejado");
@@ -93,19 +93,58 @@ function TimerPvP() {
       console.log(data);
       setResultado(data.ganador);
       setResultadoCon(data.ganador);
-      navigate("/confirmation");
+      setShowConfirmation(true);
       if (data.ganador) {
         console.log("Ganaste");
         const winner = data.winner; // Aquí se envía el _id como cadena
         const loser = data.loser; // Aquí se envía el _id como cadena
         createTimerPvP(winner, loser);
+
+        // Actualizar objetivo del usuario ganador
+        if (currentUser && currentUser._id === winner) {
+          const actualizarObjetivo = async () => {
+            try {
+              const objetivosResponse = await getObjetivesContext();
+              const objetivos = objetivosResponse.data;
+              const objetivoActual = objetivos.find(
+                (objetivo) => objetivo.objective === 2 && objetivo.qty_times < 5
+              );
+
+              if (objetivoActual) {
+                const nuevoQtyTimes = objetivoActual.qty_times + 1;
+                await updateObjetive(objetivoActual._id, {
+                  qty_times: nuevoQtyTimes,
+                });
+                console.log("Objetivo actualizado:", nuevoQtyTimes);
+                const newPoints = currentUser.points + 10;
+                updateUserPoints(currentUser._id, { points: newPoints })
+                  .then((updatedUser) => {
+                    setCurrentUser({
+                      ...currentUser,
+                      points: updatedUser.points,
+                    });
+                    console.log("Puntos actualizados:", updatedUser.points);
+                  })
+                  .catch((error) => {
+                    console.error("Error al actualizar los puntos:", error);
+                  });
+              } else {
+                console.log("No se encontró el objetivo");
+              }
+            } catch (error) {
+              console.error("Error al actualizar el objetivo:", error);
+            }
+          };
+
+          actualizarObjetivo();
+        }
       }
     });
 
     // Efecto de limpieza para cerrar la conexión al socket cuando el componente se desmonte
     return () => {
       socket.disconnect();
-      clearTimeout(time)
+      clearTimeout(time);
     };
   }, [currentUser]);
 
@@ -212,7 +251,10 @@ function TimerPvP() {
           </div>
           {contrincante && (
             <>
-              <p>Tu contrincante es: {contrincante.isPrivate ? "UsuarioX" : contrincante.username}</p>
+              <p>
+                Tu contrincante es:{" "}
+                {contrincante.isPrivate ? "UsuarioX" : contrincante.username}
+              </p>
               <p>Rango: {contrincante.rank}</p>
             </>
           )}
@@ -221,6 +263,10 @@ function TimerPvP() {
               Presiona la barra espaciadora para iniciar y detener el cronómetro
             </p>
           </div>
+          <Confirmation
+            visible={showConfirmation}
+            onClose={() => setShowConfirmation(false)}
+          />
         </>
       ) : (
         <h1>Esperando emparejamiento...</h1>

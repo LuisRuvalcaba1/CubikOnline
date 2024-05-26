@@ -8,19 +8,22 @@ import Switch from "react-switch";
 import { isPrivateRequest } from "../api/auth";
 import { useNavigate } from "react-router-dom";
 import { useEncuesta } from "../context/EncuestaContext";
+import { useObjetives } from "../context/ObjetivesContext";
 import "./Profile.css";
 
 function ProfilePage() {
   const [showModal, setShowModal] = useState(false);
   const { user, logout, statusChangeAuth } = useAuth();
   const { deleteTorneoByJuez } = useAuthTorneo();
-  const {value} = useEncuesta();
+  const { value } = useEncuesta();
   const [currentUser, setCurrentUser] = useState(null);
   const navigation = useNavigate();
   const handleOnClose = () => setShowModal(false);
   const [checked, setChecked] = useState(false);
   const { getEncuestas } = value;
   const [userEncuestas, setUserEncuestas] = useState([]);
+  const [userObjetives, setUserObjetives] = useState([]);
+  const { getObjetivesContext, createNewObjetive } = useObjetives();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -34,8 +37,59 @@ function ProfilePage() {
     fetchUser();
   }, [user]);
 
-  // console.log("User:", isAuthenticated);
-  // console.log("User:", currentUser);
+  useEffect(() => {
+    const fetchObjetivos = async () => {
+    try {
+      const [objetivoResponse] = await Promise.all([getObjetivesContext()]);
+      const objetivo = objetivoResponse.data;
+      setUserObjetives(objetivo);
+      console.log("Objetivos del usuario:", objetivo);
+
+      if(objetivo.length === 0) {
+        const data = {
+          objective: 1,
+          qty_times: 0,
+        };
+
+        const data2 = {
+          objective: 2,
+          qty_times: 0,
+        };
+        
+        const data3 = {
+          objective: 3,
+          qty_times: 0,
+        };
+        
+        const data4 = {
+          objective: 4,
+          qty_times: 0,
+        };
+        
+        const data5 = {
+          objective: 5,
+          qty_times: 0,
+        };
+        
+        const data6 = {
+          objective: 6,
+          qty_times: 0,
+        };
+
+        createNewObjetive(data);
+        createNewObjetive(data2);
+        createNewObjetive(data3);
+        createNewObjetive(data4);
+        createNewObjetive(data5);
+        createNewObjetive(data6);
+      }
+
+    } catch (error) {
+      console.error("Error fetching objetives:", error);
+    }
+  };
+  fetchObjetivos();
+  }, [getObjetivesContext]);
 
   useEffect(() => {
     const fetchUserEncuestas = async () => {
