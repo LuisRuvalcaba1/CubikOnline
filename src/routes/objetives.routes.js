@@ -1,4 +1,4 @@
-import e, {Router} from 'express';
+import {Router} from 'express';
 import {authRequired} from '../middlewares/validateToken.js';
 import {createObjetive, getObjetives, getObjetive, updateObjetive, deleteObjetive} from '../controllers/objetives.controller.js';
 

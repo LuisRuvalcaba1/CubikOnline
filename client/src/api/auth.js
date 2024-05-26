@@ -14,7 +14,7 @@ export const verifyTokenRequest = () => axios.get(`/verify`)
 
 export const updatePasswordRequest = (email, newPassword) => axios.put(`/account/password/`, email, newPassword)
 
-export const updateUserRequest = (email, points) => axios.put(`/profile/`, email ,points);
+export const updateUserRequest = (id, points) => axios.put(`/points/${id}` ,points);
 
 export const getUsersRequest = () => axios.get(`/`);
 

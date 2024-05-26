@@ -1,6 +1,9 @@
 import { createContext, useState, useContext } from "react";
 export const TimerPvPContext = createContext();
-import { timerPvPRequest as timerPvPRequestFunction } from "../api/timerpvp.js";
+import { timerPvPRequest as timerPvPRequestFunction ,
+  getTimerPvPRequest,
+  updateTimerPvPByIdRequest,
+ } from "../api/timerpvp.js";
 
 // Crea el contexto
 export const useAuthTimerPvP = () => {
@@ -22,26 +25,45 @@ export const TimerPvPProvider = ({ children }) => {
 
   const createTimerPvP = async (winner, loser) => {
     try {
-      const newTimerPvP = await timerPvPRequestFunction({
-        winner: winner.id,
-        loser: loser.id,
-      });
-      if (newTimerPvP.status === 201) {
-        setTimerPvPs([...timerPvPs, newTimerPvP.data]);
-      }
+      const response = await timerPvPRequestFunction(winner, loser);
+      console.log(response.data);
     } catch (error) {
-      console.error("Error al crear TimerPvP:", error);
+      console.error('Error al crear TimerPvP:', error.response.data);
+      // Manejo del error
     }
   };
+
+  const getTimerPvP = async () => {
+    try {
+      const response = await getTimerPvPRequest();
+      setTimerPvPs(response.data);
+      return response;
+    } catch (error) {
+      console.error("Error fetching TimerPvP:", error);
+    }
+  }
+
+  const updateTimerPvPById = async (id, timerPvP) => {
+    try {
+      const response = await updateTimerPvPByIdRequest(id, timerPvP);
+      console.log(response);
+    } catch (error) {
+      console.error("Error updating TimerPvP:", error);
+    }
+  }
 
   const setResultadoCon = (resultado) => {
     setResultadoTimerPvP(resultado);
   };
 
+  
+
   const contextValue = {
     resultadoTimerPvP,
     setResultadoCon,
     createTimerPvP,
+    getTimerPvP,
+    updateTimerPvPById,
     setContrincante,
     contrincante,
   };

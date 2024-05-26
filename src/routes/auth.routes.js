@@ -28,7 +28,7 @@ router.put("/", statusChange);
 router.get("/verify", verifyToken);
 router.get("/", getUsers);
 router.get("/profile", authRequired, profile);
-router.put("/profile", authRequired, updateUserPoints);
+router.put("/points/:id", authRequired, updateUserPoints);
 router.put("/account/password", authRequired, updateUserPassword);
 router.put("/torneo", authRequired, changeToJugde);
 router.get("/getUserByEmail", authRequired, getUserByEmail);

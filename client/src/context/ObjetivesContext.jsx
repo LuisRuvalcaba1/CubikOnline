@@ -7,6 +7,7 @@ import {
   updateObjetiveRequest,
   deleteObjetiveRequest,
 } from "../api/objetives.js";
+import { useState } from "react";
 
 export const useObjetives = () => {
     const context = useContext(ObjetiveContext);
@@ -17,11 +18,11 @@ export const useObjetives = () => {
 };
 
 export const ObjetiveProvider = ({ children }) => {
+    const [objetivo, setObjetivo] = useState(null);
 
     const getObjetivesContext = async () => {
         try {
             const response = await getObjetivesRequest();
-            console.log(response);
             return response;
         } catch (error) {
             throw new Error(`Error fetching objetives: ${error.message}`);
@@ -31,7 +32,7 @@ export const ObjetiveProvider = ({ children }) => {
     const createNewObjetive = async (objective) => {
         try {
             const response = await createObjetiveRequest(objective);
-            console.log(response);
+            setObjetivo(response.data);
         } catch (error) {
             console.error("Error creating objetive:", error);
         }
@@ -41,7 +42,6 @@ export const ObjetiveProvider = ({ children }) => {
         ) => {
         try {
             const response = await getObjetiveRequest(id);
-            console.log(response);
             return response;
         } catch (error) {
             throw new Error(`Error fetching objetive: ${error.message}`);
@@ -72,6 +72,7 @@ export const ObjetiveProvider = ({ children }) => {
         getObjetiveById,
         updateObjetive,
         deleteObjetive,
+        objetivo,
     };
 
     return (

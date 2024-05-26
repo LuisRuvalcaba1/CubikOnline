@@ -52,6 +52,7 @@ export const updateObjetive = async (req, res) => {
       res.status(200).json(updatedObjetive);
     } catch (error) {
       res.status(500).json({ message: error.message });
+      console.log(error)
     }
   };
 

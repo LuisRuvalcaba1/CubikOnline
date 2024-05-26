@@ -12,7 +12,7 @@ import "./Profile.css";
 
 function ProfilePage() {
   const [showModal, setShowModal] = useState(false);
-  const { user, logout, statusChangeAuth, isAuthenticated } = useAuth();
+  const { user, logout, statusChangeAuth } = useAuth();
   const { deleteTorneoByJuez } = useAuthTorneo();
   const {value} = useEncuesta();
   const [currentUser, setCurrentUser] = useState(null);
@@ -70,8 +70,8 @@ function ProfilePage() {
     );
     console.log("Diferencia en días:", diffInDays);
 
-    if (userCreatedAt && diffInDays >= 2) {
-      const remainderDays = diffInDays % 2;
+    if (userCreatedAt && diffInDays >= 4) {
+      const remainderDays = diffInDays % 4;
       if (remainderDays === 0) {
         // Verificar si el usuario ya tiene una encuesta registrada
         const hasUserEncuesta = userEncuestas.length > 0;

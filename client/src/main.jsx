@@ -18,9 +18,7 @@ const handleBeforeUnload = (event) => {
 };
 
 root.render(
-  <React.StrictMode>
     <App />
-  </React.StrictMode>
 );
 
 // Agregar el evento beforeunload al objeto window

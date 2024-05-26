@@ -206,12 +206,14 @@ export const deleteUser = async (req, res) => {
 };
 
 export const updateUserPoints = async (req, res) => {
-  const { points, email } = req.body;
+  const { points } = req.body;
   try {
-    const userFound = await User.findOne({ email });
+    const userFound = await User.findByIdAndUpdate(
+      req.params.id,
+      { points },
+      { new: true }
+    );
     if (!userFound) return res.status(404).json({ message: "User not found" });
-    userFound.points = points;
-    await userFound.save();
     res.json(userFound);
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -40,7 +40,6 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await registerRequest(user);
       console.log(res.data);
-      setUser(res.data);
       setIsAuthenticated(true);
     } catch (error) {
       console.log(error.response);
@@ -87,7 +86,6 @@ export const AuthProvider = ({ children }) => {
     try {
       // Verificar el token en el servidor
       const res = await verifyTokenRequest(token);
-      console.log(res.data);
       if (!res.data) {
         setIsAuthenticated(false);
         setUser(null);
@@ -247,7 +245,6 @@ export const AuthProvider = ({ children }) => {
         updateUserRank,
         isPrivate,
         logout,
-        //profileUser,
         loading,
         user,
         isAuthenticated,

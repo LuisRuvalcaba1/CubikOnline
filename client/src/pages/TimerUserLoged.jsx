@@ -7,8 +7,9 @@ import "./Timer.css";
 import { verifyTokenRequest, removeTokenRequest } from "../api/auth.js";
 
 function TimerUserLoged() {
-  const { createNewTimer, getTimersContext, } = useAuthTimer();
-  const { getObjetivesContext, createNewObjetive, updateObjetive } = useObjetives();
+  const { createNewTimer, getTimersContext } = useAuthTimer();
+  const { getObjetivesContext, createNewObjetive, updateObjetive, objetivo } =
+    useObjetives();
   const [milisegundos, setMilisegundos] = useState(0);
   const [segundos, setSegundos] = useState(0);
   const [minutos, setMinutos] = useState(0);
@@ -17,13 +18,12 @@ function TimerUserLoged() {
   const [scramble, setScramble] = useState("");
   const [tiemposGuardados, setTiemposGuardados] = useState([]);
   const [session, setSession] = useState(1);
-  const { user, logout, statusChangeAuth } = useAuth();
+  const { user, logout, statusChangeAuth, updateUserPoints } = useAuth();
   const { deleteTorneoByJuez } = useAuthTorneo();
   const [categoria, setCategoria] = useState("3x3");
   const [expandedScramble, setExpandedScramble] = useState(null);
   const [userObjetive, setUserObjetive] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
-  const [alerta, setAlerta] = useState(false);
 
   const handleTimeClick = (scramble) => {
     if (expandedScramble === scramble) {
@@ -33,31 +33,64 @@ function TimerUserLoged() {
     }
   };
 
-
-
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const { data } = await verifyTokenRequest();
         setCurrentUser(data);
-        console.log(data);
+        console.log("Usuario", data);
       } catch (error) {
         console.error("Error fetching user:", error);
       }
     };
 
+    const fetchObjectivo = async () => {
+      try {
+        const { data } = await getObjetivesContext();
+        setUserObjetive(data);
+        userObjetive.map((objetivo) => {
+          if (objetivo.objective === 1 && objetivo.qty_times < 5) {
+            console.log("Objetivo actual:", objetivo);
+          }
+        });
+      } catch (error) {
+        console.error("Error fetching objetives:", error);
+      }
+    };
+
+    fetchObjectivo();
     fetchUser();
   }, [user]);
 
   useEffect(() => {
-    getObjetivesContext()
-      .then((response) => {
-        setUserObjetive(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching objetives:", error);
-      });
-  }, []);
+    const fetchData = async () => {
+      try {
+        const [objetivesResponse, timersResponse] = await Promise.all([
+          getObjetivesContext(),
+          getTimersContext(),
+        ]);
+
+        const fetchedObjetives = objetivesResponse.data;
+        const fetchedTimers = timersResponse.data;
+
+        setUserObjetive(fetchedObjetives);
+        setTiemposGuardados(fetchedTimers);
+
+        if (fetchedObjetives.length === 0 && fetchedTimers.length === 0) {
+          const data = {
+            objective: 1,
+            qty_times: 0,
+          };
+
+          createNewObjetive(data);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [getObjetivesContext, getTimersContext]);
 
   useEffect(() => {
     getTimersContext()
@@ -179,6 +212,7 @@ function TimerUserLoged() {
     setScramble(nuevoScramble.trim());
   }
 
+  //console.log("Objetivo:", userObjetive.qty_times);
   function registrarTiempo() {
     if (tiempoInicial) {
       const tiempoFinal = performance.now();
@@ -211,6 +245,7 @@ function TimerUserLoged() {
           return [];
         }
       });
+
       const values = {
         time,
         scramble,
@@ -230,38 +265,58 @@ function TimerUserLoged() {
           console.error("Error creating timer:", error);
         });
 
-        if (userObjetive.length > 0 && userObjetive[0].objective === 1 && tiemposGuardados.length > 0) {
-          // Actualizar el objetivo existente
-          const objetiveId = userObjetive[0]._id;
-          const nuevaCantidadTiempos = userObjetive[0].qty_times + 1;
-          const data = {
-            qty_times: nuevaCantidadTiempos,
-          };
-          updateObjetive(objetiveId, data)
-            .then((response) => {
-              setUserObjetive([response.data]);
-              console.log("Objetivo actualizado:", response.data);
+      const mejorTiempoAnterior = getBestTime(tiemposGuardados, session);
+
+      console.log(mejorTiempoAnterior);
+      console.log(nuevoTiempo.tiempo);
+
+      if (
+        mejorTiempoAnterior === "N/A" ||
+        nuevoTiempo.tiempo < mejorTiempoAnterior
+      ) {
+        console.log("Objetivo actual:", userObjetive.qty_times);
+
+        const objetivoActual = userObjetive.find(
+          (objetivo) => objetivo.objective === 1 && objetivo.qty_times < 4
+        );
+
+        console.log("Objetivo actual:", objetivoActual);
+        if (objetivoActual) {
+          const nuevoQtyTimes = objetivoActual.qty_times + 1;
+          updateObjetive(objetivoActual._id, { qty_times: nuevoQtyTimes })
+            .then(() => {
+              setUserObjetive((prevObjetivos) =>
+                prevObjetivos.map((objetivo) =>
+                  objetivo._id === objetivoActual._id
+                    ? { ...objetivo, qty_times: nuevoQtyTimes }
+                    : objetivo
+                )
+              );
+              // Actualizar los puntos del usuario
+              if (currentUser) {
+                const newPoints = currentUser.points + 100;
+                updateUserPoints(currentUser._id, { points: newPoints })
+                  .then((updatedUser) => {
+                    setCurrentUser({
+                      ...currentUser,
+                      points: updatedUser.points,
+                    });
+                    console.log("Puntos actualizados:", updatedUser.points);
+                  })
+                  .catch((error) => {
+                    console.error("Error al actualizar los puntos:", error);
+                  });
+              }
             })
             .catch((error) => {
               console.error("Error al actualizar el objetivo:", error);
             });
         } else {
-          const data = {
-            objective: 1,
-            qty_times: 0,
-          };
-          createNewObjetive(data)
-            .then((response) => {
-              setUserObjetive(response.data);
-              console.log("Objetivo creado:", response.data);
-            })
-            .catch((error) => {
-              console.error("Error al crear el objetivo:", error);
-            });
-          }        
+          console.error("No se encontró el objetivo");
+        }
       }
     }
-
+  }
 
   function getBestTime(tiempos, session) {
     const tiemposSesion = tiempos.filter((timer) => timer.session === session);

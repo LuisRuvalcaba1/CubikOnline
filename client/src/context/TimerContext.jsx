@@ -15,7 +15,6 @@ export const TimerProvider = ({ children }) => {
   const getTimersContext = async () => {
     try {
       const response = await getTimersRequest();
-      console.log(response)
       return response;
     } catch (error) {
       throw new Error(`Error fetching timers: ${error.message}`);

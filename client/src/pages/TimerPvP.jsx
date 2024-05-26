@@ -5,14 +5,13 @@ import io from "socket.io-client";
 import { useAuth } from "../context/AuthContext";
 import { useAuthTimerPvP } from "../context/TimerPvPContext";
 import { verifyTokenRequest, getUserRequest } from "../api/auth";
-import { set } from "mongoose";
-
+import { useObjetives } from "../context/ObjetivesContext";
 const URL = import.meta.env.VITE_BACKEND_URL;
 
 function TimerPvP() {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { createTimerPvP } = useAuthTimerPvP();
+  const { user, updateUserPoints } = useAuth();
+  const { createTimerPvP, getTimerPvP } = useAuthTimerPvP();
   const [milisegundos, setMilisegundos] = useState(0);
   const [segundos, setSegundos] = useState(0);
   const [currentUser, setCurrentUser] = useState(null);
@@ -25,6 +24,7 @@ function TimerPvP() {
   const [resultado, setResultado] = useState(null);
   const { setResultadoCon } = useAuthTimerPvP();
   const [contrincante, setContrincante] = useState(null);
+
 
   // useEffect(() => {
   //   if (user.rank === 0) {
@@ -41,6 +41,7 @@ function TimerPvP() {
         console.error("Error fetching user:", error);
       }
     };
+  
     fetchUser();
   }, [user]);
 
@@ -93,9 +94,10 @@ function TimerPvP() {
       setResultadoCon(data.ganador);
       navigate("/confirmation");
       if (data.ganador) {
+
         console.log("Ganaste");
-        const winner = JSON.parse(data.winner);
-        const loser = JSON.parse(data.loser);
+        const winner = currentUser._id;
+        const loser = contrincante._id;
         createTimerPvP(winner, loser);
       }
     });
