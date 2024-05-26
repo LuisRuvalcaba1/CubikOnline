@@ -23,11 +23,12 @@ function TimerPvP() {
   const [isPaired, setIsPaired] = useState(false);
   const [socket, setSocket] = useState("");
   const [resultado, setResultado] = useState(null);
+  const [solicitarRevancha, setSolicitarRevancha] = useState(false);
   const { setResultadoCon } = useAuthTimerPvP();
   const [contrincante, setContrincante] = useState(null);
   const { getObjetivesContext, updateObjetive } = useObjetives();
   const [showConfirmation, setShowConfirmation] = useState(false);
-
+  const [revancha, setRevancha] = useState(false);
   // useEffect(() => {
   //   if (user.rank === 0) {
   //     navigate('/rankingusers');
@@ -52,10 +53,44 @@ function TimerPvP() {
       navigate("/profile");
     }
   }, 120000);
+  const resetTiempos = () => {
+    setMilisegundos(0);
+    setSegundos(0);
+    setMinutos(0);
+  };
+
+  const handleRevanchaClick = () => {
+    setRevancha(true);
+    setShowConfirmation(false);
+    resetTiempos();
+    if (socket) {
+      socket.emit("solicitarRevancha");
+    }
+  };
 
   useEffect(() => {
     const socket = io(`${URL}/confrontation`);
     setSocket(socket);
+
+    if (revancha && socket) {
+      socket.emit("revancha");
+    }
+
+    socket.on("nuevaConfrontacion", (nuevaConfrontacion) => {
+      if (!revancha) {
+        setScramble(nuevaConfrontacion.scramble);
+        setMilisegundos(0);
+        setSegundos(0);
+        setMinutos(0);
+      } else {
+        setRevancha(false);
+        // Lógica para iniciar una nueva confrontación
+        setScramble(nuevaConfrontacion.scramble);
+        setMilisegundos(0);
+        setSegundos(0);
+        setMinutos(0);
+      }
+    });
 
     if (!currentUser) return;
     socket.emit("user", currentUser._id);
@@ -87,6 +122,13 @@ function TimerPvP() {
 
     socket.on("message", (tiempoSocket) => {
       console.log(tiempoSocket);
+    });
+
+    socket.on("nuevaConfrontacion", (nuevaConfrontacion) => {
+      setScramble(nuevaConfrontacion.scramble);
+      setMilisegundos(0);
+      setSegundos(0);
+      setMinutos(0);
     });
 
     socket.on("resultado", (data) => {
@@ -178,16 +220,20 @@ function TimerPvP() {
       const tiempoMilisegundos = Math.floor(tiempoTranscurrido % 1000);
       const tiempoSegundos = Math.floor((tiempoTranscurrido / 1000) % 60);
       const tiempoMinutos = Math.floor((tiempoTranscurrido / (1000 * 60)) % 60);
-
+  
       const time = `${tiempoMinutos}:${
         tiempoSegundos < 10 ? "0" : ""
       }${tiempoSegundos}:${
         tiempoMilisegundos < 10 ? "00" : tiempoMilisegundos < 100 ? "0" : ""
       }${tiempoMilisegundos}`;
-
+  
       if (socket) {
         const message = JSON.stringify({ time: time });
-        socket.emit("message", message);
+        if (revancha) {
+          socket.emit("revancha", message);
+        } else {
+          socket.emit("message", message);
+        }
         console.log("Enviado:", message);
       }
     }
@@ -266,6 +312,7 @@ function TimerPvP() {
           <Confirmation
             visible={showConfirmation}
             onClose={() => setShowConfirmation(false)}
+            handleRevanchaClick={handleRevanchaClick}
           />
         </>
       ) : (
