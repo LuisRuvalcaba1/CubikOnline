@@ -7,6 +7,8 @@ import "./Torneo.css";
 import { removeTokenRequest } from "../api/auth";
 import { useNavigate } from "react-router-dom";
 import Modal from "react-modal";
+import { verifyTokenRequest } from "../api/auth";
+import { set } from "mongoose";
 const URL = import.meta.env.VITE_BACKEND_URL
 
 Modal.setAppElement("#root");
@@ -17,17 +19,29 @@ function YourTournament() {
   const { participantes } = useLocation().state;
   const [torneo, setTorneo] = useState([]);
   const [socket, setSocket] = useState(null);
-  const [juez, setJuez] = useState(null);
   const [grupos, setGrupos] = useState([]);
   const [grupoSeleccionado, setGrupoSeleccionado] = useState(null);
   const { user, logout, statusChangeAuth } = useAuth();
   const { deleteTorneoByJuez } = useAuthTorneo();
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const { data } = await verifyTokenRequest();
+        setCurrentUser(data);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+    fetchUser();
+  }, [user]);
 
   useEffect(() => {
     const eliminarToken = async () => {
       try {
         const data = {
-          email: user.email,
+          email: currentUser.email,
           status: "inactive",
           role: "user",
         };
@@ -42,17 +56,15 @@ function YourTournament() {
     const timeoutId = setTimeout(eliminarToken, 21600000);
 
     return () => clearTimeout(timeoutId);
-  }, [user, deleteTorneoByJuez, statusChangeAuth, logout]);
-
-  useEffect(() => {
-    setJuez(user._id);
-  }, [user]);
+  }, [currentUser, deleteTorneoByJuez, statusChangeAuth, logout]);
 
   useEffect(() => {
     const socket = io(`${URL}/join`);
     setSocket(socket);
-    socket.emit("juez", user._id);
-    socket.emit("n_participantes", participantes);
+    if(currentUser) {
+      socket.emit("juez", currentUser._id);    
+      socket.emit("n_participantes", participantes);
+    }
 
     socket.on("grupos", (gruposFormados) => {
       setGrupos(gruposFormados);
@@ -61,7 +73,7 @@ function YourTournament() {
     return () => {
       socket.disconnect();
     };
-  }, [user, participantes]);
+  }, [currentUser, participantes]);
 
   const onSubmit = (data) => {
     setGrupoSeleccionado(data);

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-//import { useForm } from "react-hook-form";
 import { removeTokenRequest, verifyTokenRequest } from "../api/auth";
 import { useAuthTorneo } from "../context/TorneoContext";
 import Encuesta from "../components/Encuesta";
@@ -9,6 +8,7 @@ import { isPrivateRequest } from "../api/auth";
 import { useNavigate } from "react-router-dom";
 import { useEncuesta } from "../context/EncuestaContext";
 import { useObjetives } from "../context/ObjetivesContext";
+import { getYourFriendsRequest } from "../api/amigos.js";
 import "./Profile.css";
 
 function ProfilePage() {
@@ -24,6 +24,8 @@ function ProfilePage() {
   const [userEncuestas, setUserEncuestas] = useState([]);
   const [userObjetives, setUserObjetives] = useState([]);
   const { getObjetivesContext, createNewObjetive } = useObjetives();
+  //const { value } = useAmigos();
+  const [yourFriends, setYourFriends] = useState([]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -39,57 +41,71 @@ function ProfilePage() {
 
   useEffect(() => {
     const fetchObjetivos = async () => {
-    try {
-      const [objetivoResponse] = await Promise.all([getObjetivesContext()]);
-      const objetivo = objetivoResponse.data;
-      setUserObjetives(objetivo);
-      console.log("Objetivos del usuario:", objetivo);
+      try {
+        const [objetivoResponse] = await Promise.all([getObjetivesContext()]);
+        const objetivo = objetivoResponse.data;
+        setUserObjetives(objetivo);
+        console.log("Objetivos del usuario:", objetivo);
 
-      if(objetivo.length === 0) {
-        const data = {
-          objective: 1,
-          qty_times: 0,
-        };
+        if (objetivo.length === 0) {
+          const data = {
+            objective: 1,
+            qty_times: 0,
+          };
 
-        const data2 = {
-          objective: 2,
-          qty_times: 0,
-        };
-        
-        const data3 = {
-          objective: 3,
-          qty_times: 0,
-        };
-        
-        const data4 = {
-          objective: 4,
-          qty_times: 0,
-        };
-        
-        const data5 = {
-          objective: 5,
-          qty_times: 0,
-        };
-        
-        const data6 = {
-          objective: 6,
-          qty_times: 0,
-        };
+          const data2 = {
+            objective: 2,
+            qty_times: 0,
+          };
 
-        createNewObjetive(data);
-        createNewObjetive(data2);
-        createNewObjetive(data3);
-        createNewObjetive(data4);
-        createNewObjetive(data5);
-        createNewObjetive(data6);
+          const data3 = {
+            objective: 3,
+            qty_times: 0,
+          };
+
+          const data4 = {
+            objective: 4,
+            qty_times: 0,
+          };
+
+          const data5 = {
+            objective: 5,
+            qty_times: 0,
+          };
+
+          const data6 = {
+            objective: 6,
+            qty_times: 0,
+          };
+
+          createNewObjetive(data);
+          createNewObjetive(data2);
+          createNewObjetive(data3);
+          createNewObjetive(data4);
+          createNewObjetive(data5);
+          createNewObjetive(data6);
+        }
+      } catch (error) {
+        console.error("Error fetching objetives:", error);
       }
-
-    } catch (error) {
-      console.error("Error fetching objetives:", error);
-    }
-  };
-  fetchObjetivos();
+    };
+    fetchObjetivos();
   }, [getObjetivesContext]);
+
+  useEffect(() => {
+    const fetchYourFriends = async () => {
+      try {
+        const friendsData = await getYourFriendsRequest();
+        setYourFriends(friendsData);
+        console.log("Amigos obtenidos:", friendsData);
+        console.log("Amigos obtenidos:", yourFriends.length)
+      } catch (error) {
+        console.error("Error al obtener tus amigos:", error);
+      }
+    };
+
+    fetchYourFriends();
+  }, []);
 
   useEffect(() => {
     const fetchUserEncuestas = async () => {
@@ -195,6 +211,20 @@ function ProfilePage() {
             visible={showModal}
             userEncuestas={userEncuestas}
           />
+
+          <div>
+            <h2>Tus amigos</h2>
+            {yourFriends.length > 0 ? (
+              <ul>
+                {yourFriends.map((friend) => (
+                  <li key={friend._id}>{friend.username}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>No tienes amigos aún.</p>
+            )}
+          </div>
+
         </div>
       ) : (
         <p>Loading...</p>

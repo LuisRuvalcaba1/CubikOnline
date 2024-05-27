@@ -3,12 +3,26 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useForm } from "react-hook-form";
+import { verifyTokenRequest } from "../api/auth";
 
 function TorneoGetPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { getTorneos } = useAuthTorneo();
   const [torneos, setTorneos] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const { data } = await verifyTokenRequest();
+        setCurrentUser(data);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+    fetchUser();
+  }, [user]);
 
   useEffect(() => {
     const fetchTorneos = async () => {
@@ -26,7 +40,7 @@ function TorneoGetPage() {
 
   const unirseTorneo = (data) => {
     data.torneo = data._id;
-    data.user2 = user._id;
+    data.user2 = currentUser._id;
     console.log(data);
     navigate('/waitroom', { state: data });
   };

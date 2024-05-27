@@ -34,6 +34,7 @@ import {
   AmigosProvider,
   EncuestaProvider,
   ObjetiveProvider,
+  Objetivos
 } from "./imports.js";
 
 function App() {
@@ -70,6 +71,7 @@ function App() {
                           <Route path="/store" element={<Store />} />
                           <Route path="/timerul" element={<TimerUserLoged />} />
                           <Route path="/profile" element={<ProfilePage />} />
+                          <Route path="/objetives" element={<Objetivos />} />
                           <Route
                             path="/account/password"
                             element={<Account />}

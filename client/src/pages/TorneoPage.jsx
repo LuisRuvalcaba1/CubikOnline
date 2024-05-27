@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { useAuthTorneo } from "../context/TorneoContext";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { verifyTokenRequest } from "../api/auth";
 
 function TorneoPage() {
   const { register, handleSubmit } = useForm();
@@ -10,6 +11,19 @@ function TorneoPage() {
   const { createTorneo } = useAuthTorneo();
   const navigation = useNavigate();
   const [participantes, setParticipantes] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const { data } = await verifyTokenRequest();
+        setCurrentUser(data);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+    fetchUser();
+  }, [user]);
 
   const onSubmit = async (data, event) => {
     event.preventDefault();
@@ -17,10 +31,10 @@ function TorneoPage() {
     setParticipantes(data.qty_participantes);
     try {
       const userInfo = {
-        email: user.email,
+        email: currentUser.email,
         role: "juez",
       };
-      data.juez = user._id;
+      data.juez = currentUser._id;
       await Promise.all([
         console.log(data),
         changeToJugde(userInfo),

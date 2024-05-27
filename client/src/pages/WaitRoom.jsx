@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useAuthTorneo } from "../context/TorneoContext";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-const URL = import.meta.env.VITE_BACKEND_URL
+import { verifyTokenRequest } from "../api/auth";
+const URL = import.meta.env.VITE_BACKEND_URL;
 
 function WaitRoom() {
   const { user } = useAuth();
@@ -23,11 +24,20 @@ function WaitRoom() {
   const [resultado, setResultado] = useState(null);
   const [ganador, setGanador] = useState(null);
   const [tiempos, setTiempos] = useState({});
+  const [currentUser, setCurrentUser] = useState(null);
   const [tiemposRegistrados, setTiemposRegistrados] = useState(0);
 
   useEffect(() => {
-    setUsuario(user2);
-  }, [user2]);
+    const fetchUser = async () => {
+      try {
+        const { data } = await verifyTokenRequest();
+        setCurrentUser(data);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+    fetchUser();
+  }, [user]);
 
   useEffect(() => {
     const fetchTorneo = async () => {
@@ -42,18 +52,23 @@ function WaitRoom() {
     fetchTorneo();
   }, [getTorneoById]);
 
+  //useEffect(() => {
+    console.log("user2", user2);
+
   useEffect(() => {
     const socket = io(`${URL}/join`);
     setSocket(socket);
 
-    socket.emit("user", user2);
-    socket.on("user", (user) => {
-      setUsuario(user);
-    });
+    if (currentUser) {
+      socket.emit("user", user2);
+      socket.on("user", (user) => {
+        setUsuario(user);
+      });
 
-    socket.on("paired", () => {
-      setIsPaired(true);
-    });
+      socket.on("paired", () => {
+        setIsPaired(true);
+      });
+    }
 
     socket.on("scramble", (nuevoScramble) => {
       setScramble(nuevoScramble);
@@ -78,7 +93,7 @@ function WaitRoom() {
         setIsPaired(true);
         setScramble(data.scramble);
         setActivo(false);
-        setMilisegundos(0); 
+        setMilisegundos(0);
         setSegundos(0);
         setMinutos(0);
       });
@@ -95,7 +110,7 @@ function WaitRoom() {
       setGanador(false);
       navigate("/");
     }
-  }, [resultado]);  
+  }, [resultado]);
 
   useEffect(() => {
     let interval;
@@ -118,23 +133,26 @@ function WaitRoom() {
     }
 
     return () => clearInterval(interval);
-  }, [activo, tiempoInicial]);  
+  }, [activo, tiempoInicial]);
 
   function registrarTiempo() {
-    if (tiemposRegistrados < 5) { // Agregar esta condición
+    if (tiemposRegistrados < 5) {
+      // Agregar esta condición
       if (tiempoInicial && isPaired) {
         const tiempoFinal = performance.now();
         const tiempoTranscurrido = tiempoFinal - tiempoInicial;
         const tiempoMilisegundos = Math.floor(tiempoTranscurrido % 1000);
         const tiempoSegundos = Math.floor((tiempoTranscurrido / 1000) % 60);
-        const tiempoMinutos = Math.floor((tiempoTranscurrido / (1000 * 60)) % 60);
-  
+        const tiempoMinutos = Math.floor(
+          (tiempoTranscurrido / (1000 * 60)) % 60
+        );
+
         const time = `${tiempoMinutos}:${
           tiempoSegundos < 10 ? "0" : ""
         }${tiempoSegundos}:${
           tiempoMilisegundos < 10 ? "00" : tiempoMilisegundos < 100 ? "0" : ""
         }${tiempoMilisegundos}`;
-  
+
         if (socket) {
           const message = JSON.stringify(time);
           socket.emit("times", message);
@@ -187,7 +205,7 @@ function WaitRoom() {
       ) : (
         <>
           <h1>Wait Room</h1>
-          <h2>{user.username}</h2>
+          {/* <h2>{currentUser._id}</h2> */}
           <h2>{torneo}</h2>
         </>
       )}

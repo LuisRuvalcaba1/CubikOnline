@@ -1,6 +1,7 @@
 export function handleConfrontationEvents(confrontationNS) {
   let waitingClients = [];
   let matchedPairs = [];
+  let revanchaPairs = [];
 
   confrontationNS.on("connection", (socket) => {
     console.log("Nueva conexión en el namespace de confrontación");
@@ -17,8 +18,8 @@ export function handleConfrontationEvents(confrontationNS) {
       console.log(waitingClients.length);
       // Emparejar a los usuarios si hay al menos dos esperando
       if (waitingClients.length >= 2) {
-        const [user1, user2] = waitingClients.splice(0, 2);
-        const pair = { user1, user2, isRevancha: false }; // Agregamos la propiedad isRevancha
+        const [user1, user2] = waitingClients.splice(0, 2); // Tomar los primeros dos clientes
+        const pair = { user1, user2 };
         matchedPairs.push(pair);
         user1.emit("paired");
         user2.emit("paired");
@@ -32,8 +33,8 @@ export function handleConfrontationEvents(confrontationNS) {
         user2.emit("scramble", scramble);
 
         // Suscribir eventos después de emparejar
-        handleUserEvents(user1, pair, matchedPairs);
-        handleUserEvents(user2, pair, matchedPairs);
+        handleUserEvents(user1, pair, matchedPairs, revanchaPairs);
+        handleUserEvents(user2, pair, matchedPairs, revanchaPairs);
       }
     });
 
@@ -49,63 +50,16 @@ export function handleConfrontationEvents(confrontationNS) {
           pair.user1.userId !== socket.userId &&
           pair.user2.userId !== socket.userId
       );
-   
+      revanchaPairs = revanchaPairs.filter(
+        (pair) =>
+          pair.user1.userId !== socket.userId &&
+          pair.user2.userId !== socket.userId
+      );
     });
   });
 }
 
-function handleUserEvents(socket, pair, matchedPairs) {
-  // Manejar evento de revancha
-  socket.on("revancha", (data) => {
-    if (pair.isRevancha) {
-      const message = JSON.parse(data);
-      console.log("Tiempo de revancha: ", message.time);
-
-      if (pair.user1.userId === socket.userId) {
-        pair.user1.tiempoRevancha = message.time;
-      } else {
-        pair.user2.tiempoRevancha = message.time;
-      }
-
-      // Si ambos usuarios han enviado sus tiempos de revancha, ordenar los tiempos y determinar al ganador
-      if (pair.user1.tiempoRevancha && pair.user2.tiempoRevancha) {
-        const tiemposRevancha = [pair.user1.tiempoRevancha, pair.user2.tiempoRevancha];
-        tiemposRevancha.sort();
-
-        const ganadorRevancha =
-          pair.user1.tiempoRevancha === tiemposRevancha[0] ? pair.user1 : pair.user2;
-        const perdedorRevancha =
-          pair.user1.tiempoRevancha === tiemposRevancha[0] ? pair.user2 : pair.user1;
-
-        const winnerData = ganadorRevancha.userId;
-        const loserData = perdedorRevancha.userId;
-
-        ganadorRevancha.emit("resultado", {
-          ganador: true,
-          tiempo: ganadorRevancha.tiempoRevancha,
-          winner: winnerData,
-          loser: loserData,
-        });
-        perdedorRevancha.emit("resultado", {
-          ganador: false,
-          tiempo: perdedorRevancha.tiempoRevancha,
-          winner: winnerData,
-          loser: loserData,
-        });
-        console.log(`Winner de revancha: ${ganadorRevancha.userId}`);
-
-        // Reiniciar isRevancha para futuras confrontaciones
-        pair.isRevancha = false;
-
-        matchedPairs = matchedPairs.filter(
-          (p) =>
-            p.user1.userId !== ganadorRevancha.userId &&
-            p.user2.userId !== ganadorRevancha.userId
-        );
-      }
-    }
-  });
-
+function handleUserEvents(socket, pair, matchedPairs, revanchaPairs) {
   // Manejar evento de mensaje (tiempo de resolución)
   socket.on("message", (data) => {
     console.log(data);
@@ -146,6 +100,7 @@ function handleUserEvents(socket, pair, matchedPairs) {
       });
       console.log(`Winner: ${ganador.userId}`);
 
+      // Eliminar el par de la lista de pares emparejados
       matchedPairs = matchedPairs.filter(
         (p) =>
           p.user1.userId !== ganador.userId && p.user2.userId !== ganador.userId
@@ -153,11 +108,64 @@ function handleUserEvents(socket, pair, matchedPairs) {
     }
   });
 
+  socket.on("respuestaRevancha", (respuesta) => {
+    const pair = revanchaPairs.find(
+      (p) =>
+        p.user1.userId === socket.userId || p.user2.userId === socket.userId
+    );
+  
+    if (pair) {
+      const otherUser =
+        pair.user1.userId === socket.userId ? pair.user2 : pair.user1;
+      otherUser.emit("respuestaRevancha", respuesta);
+  
+      if (respuesta) {
+        // Iniciar la revancha
+        revanchaPairs = revanchaPairs.filter((p) => p !== pair);
+        const scramble = generarNuevoScramble();
+        pair.user1.emit("revancha", scramble);
+        pair.user2.emit("revancha", scramble);
+  
+        handleUserEvents(pair.user1, pair, matchedPairs, revanchaPairs);
+        handleUserEvents(pair.user2, pair, matchedPairs, revanchaPairs);
+      } else {
+        // Eliminar el par del arreglo revanchaPairs
+        revanchaPairs = revanchaPairs.filter((p) => p !== pair);
+      }
+    }
+  });
+
   // Manejar evento de solicitud de revancha
   socket.on("solicitarRevancha", () => {
-    pair.isRevancha = true;
-    socket.broadcast.to(pair.user1.userId).emit("revancha");
-    socket.broadcast.to(pair.user2.userId).emit("revancha");
+    const pair = matchedPairs.find(
+      (p) =>
+        p.user1.userId === socket.userId || p.user2.userId === socket.userId
+    );
+
+    if (pair) {
+      revanchaPairs.push(pair);
+      const otherUser =
+        pair.user1.userId === socket.userId ? pair.user2 : pair.user1;
+      otherUser.emit("solicitarRevancha");
+    }
+  });
+
+  // Manejar evento de aceptación de revancha
+  socket.on("aceptarRevancha", () => {
+    const pair = revanchaPairs.find(
+      (p) =>
+        p.user1.userId === socket.userId || p.user2.userId === socket.userId
+    );
+
+    if (pair) {
+      revanchaPairs = revanchaPairs.filter((p) => p !== pair);
+      const scramble = generarNuevoScramble();
+      pair.user1.emit("revancha", scramble);
+      pair.user2.emit("revancha", scramble);
+
+      handleUserEvents(pair.user1, pair, matchedPairs, revanchaPairs);
+      handleUserEvents(pair.user2, pair, matchedPairs, revanchaPairs);
+    }
   });
 }
 

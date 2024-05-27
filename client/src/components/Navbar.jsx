@@ -6,11 +6,13 @@ import { useAuthTorneo } from "../context/TorneoContext";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
 import { verifyTokenRequest } from "../api/auth";
+import { useNavigate } from "react-router-dom";
 
 const profileMenu = [
   { name: "Perfil", href: "/profile" },
   { name: "Cambiar contraseña", href: "/account/password" },
   {name: "Amigos", href: "/friends"},
+  { name: "Objetivos", href: "/objetives"},
   { name: "Salir", href: "/" },
 ];
 
@@ -29,6 +31,7 @@ export const Navbar = () => {
   const { handleSubmit } = useForm();
   const [currentUser, setCurrentUser] = useState(null);
   const { deleteTorneoByJuez } = useAuthTorneo();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -55,10 +58,12 @@ export const Navbar = () => {
 
   const onDeleteTournament = async (id) => {
     try {
+      
       const res = await deleteTorneoByJuez(currentUser._id, id);
       console.log(res);
-      statusChangeAuth(currentUser._id);
-      logout();
+      statusChangeAuth({email:currentUser.email, _id:currentUser._id, status:"active", role:"user"});
+      window.location.reload();
+      navigate("/");
     } catch (error) {
       console.error("Error al eliminar torneo:", error);
     }
