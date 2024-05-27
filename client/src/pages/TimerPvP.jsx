@@ -8,7 +8,6 @@ import { verifyTokenRequest, getUserRequest } from "../api/auth";
 import { useObjetives } from "../context/ObjetivesContext";
 import Confirmation from "../components/Confirmation";
 const URL = import.meta.env.VITE_BACKEND_URL;
-let socket;
 
 function TimerPvP() {
   const navigate = useNavigate();
@@ -49,34 +48,17 @@ function TimerPvP() {
     fetchUser();
   }, [user]);
 
+  
+
+useEffect(() => {
+
   const time = setTimeout(() => {
     if (isPaired) {
       navigate("/profile");
     }
   }, 120000);
-
-  const resetTiempos = () => {
-    setMilisegundos(0);
-    setSegundos(0);
-    setMinutos(0);
-  };
-
-  const handleRevanchaClick = () => {
-    setRevancha(true);
-    setShowConfirmation(false);
-    resetTiempos();
-    if (socket) {
-      socket.emit("solicitarRevancha");
-    }
-  };
-
-  useEffect(() => {
     const socket = io(`${URL}/confrontation`);
     setSocket(socket);
-
-    if (revancha && socket) {
-      socket.emit("revancha");
-    }
 
     if (!currentUser) return;
     socket.emit("user", currentUser._id);
@@ -105,30 +87,34 @@ function TimerPvP() {
     socket.on("scramble", (scramble) => {
       setScramble(scramble);
     });
-
+  
     socket.on("message", (tiempoSocket) => {
       console.log(tiempoSocket);
     });
+  
+    // socket.on("revancha", (tiempoSocket) => {
+    //   console.log(tiempoSocket);
+    //   console.log("Revancha")
+    //   // Aquí puedes agregar lógica adicional para manejar la revancha si es necesario
+    // });
 
     socket.on("resultado", (data) => {
       console.log(data);
       setResultado(data.ganador);
       setResultadoCon(data.ganador);
       setShowConfirmation(true);
-
-      const winner = data.winner;
-      const loser = data.loser;
-      createTimerPvP(winner, loser); // Llamar a createTimerPvP
-
       if (data.ganador) {
-        // Actualizar objetivo y puntos del usuario ganador
+        console.log("Ganaste");
+        const winner = data.winner; // Aquí se envía el _id como cadena
+        const loser = data.loser; // Aquí se envía el _id como cadena
+        createTimerPvP(winner, loser);
+
+        // Actualizar objetivo del usuario ganador
         if (currentUser && currentUser._id === winner) {
           const actualizarObjetivo = async () => {
             try {
               const objetivosResponse = await getObjetivesContext();
               const objetivos = objetivosResponse.data;
-
-              // Si no es una revancha, actualizar objetivo 2 y sumar 10 puntos
               const objetivoActual = objetivos.find(
                 (objetivo) => objetivo.objective === 2 && objetivo.qty_times < 5
               );
@@ -138,21 +124,22 @@ function TimerPvP() {
                 await updateObjetive(objetivoActual._id, {
                   qty_times: nuevoQtyTimes,
                 });
-                console.log("Objetivo 2 actualizado:", nuevoQtyTimes);
-              }
-
-              const newPoints = currentUser.points + 10;
-              updateUserPoints(currentUser._id, { points: newPoints })
-                .then((updatedUser) => {
-                  setCurrentUser({
-                    ...currentUser,
-                    points: updatedUser.points,
+                console.log("Objetivo actualizado:", nuevoQtyTimes);
+                const newPoints = currentUser.points + 10;
+                updateUserPoints(currentUser._id, { points: newPoints })
+                  .then((updatedUser) => {
+                    setCurrentUser({
+                      ...currentUser,
+                      points: updatedUser.points,
+                    });
+                    console.log("Puntos actualizados:", updatedUser.points);
+                  })
+                  .catch((error) => {
+                    console.error("Error al actualizar los puntos:", error);
                   });
-                  console.log("Puntos actualizados:", updatedUser.points);
-                })
-                .catch((error) => {
-                  console.error("Error al actualizar los puntos:", error);
-                });
+              } else {
+                console.log("No se encontró el objetivo");
+              }
             } catch (error) {
               console.error("Error al actualizar el objetivo:", error);
             }
@@ -200,20 +187,16 @@ function TimerPvP() {
       const tiempoMilisegundos = Math.floor(tiempoTranscurrido % 1000);
       const tiempoSegundos = Math.floor((tiempoTranscurrido / 1000) % 60);
       const tiempoMinutos = Math.floor((tiempoTranscurrido / (1000 * 60)) % 60);
-
+  
       const time = `${tiempoMinutos}:${
         tiempoSegundos < 10 ? "0" : ""
       }${tiempoSegundos}:${
         tiempoMilisegundos < 10 ? "00" : tiempoMilisegundos < 100 ? "0" : ""
       }${tiempoMilisegundos}`;
-
+  
       if (socket) {
         const message = JSON.stringify({ time: time });
-        if (revancha) {
-          socket.emit("revancha", message);
-        } else {
-          socket.emit("message", message);
-        }
+        socket.emit("message", message);
         console.log("Enviado:", message);
       }
     }
@@ -292,7 +275,6 @@ function TimerPvP() {
           <Confirmation
             visible={showConfirmation}
             onClose={() => setShowConfirmation(false)}
-            handleRevanchaClick={handleRevanchaClick}
           />
         </>
       ) : (

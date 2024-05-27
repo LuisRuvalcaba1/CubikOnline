@@ -1,7 +1,9 @@
+let waitingClients = [];
+let matchedPairs = [];
+let tiemposRegistrados = [];
+
 export function handleConfrontationEvents(confrontationNS) {
-  let waitingClients = [];
-  let matchedPairs = [];
-  let revanchaPairs = [];
+
 
   confrontationNS.on("connection", (socket) => {
     console.log("Nueva conexión en el namespace de confrontación");
@@ -33,8 +35,8 @@ export function handleConfrontationEvents(confrontationNS) {
         user2.emit("scramble", scramble);
 
         // Suscribir eventos después de emparejar
-        handleUserEvents(user1, pair, matchedPairs, revanchaPairs);
-        handleUserEvents(user2, pair, matchedPairs, revanchaPairs);
+        handleUserEvents(user1, pair, matchedPairs);
+        handleUserEvents(user2, pair, matchedPairs);
       }
     });
 
@@ -50,123 +52,99 @@ export function handleConfrontationEvents(confrontationNS) {
           pair.user1.userId !== socket.userId &&
           pair.user2.userId !== socket.userId
       );
-      revanchaPairs = revanchaPairs.filter(
-        (pair) =>
-          pair.user1.userId !== socket.userId &&
-          pair.user2.userId !== socket.userId
-      );
     });
   });
 }
 
-function handleUserEvents(socket, pair, matchedPairs, revanchaPairs) {
+function handleUserEvents(socket, pair, matchedPairs) {
   // Manejar evento de mensaje (tiempo de resolución)
   socket.on("message", (data) => {
     console.log(data);
     const message = JSON.parse(data);
     console.log("Tiempo: ", message.time);
 
-    // Guardar el tiempo del usuario en el par
+    handleTimerData(socket, pair, matchedPairs, message.time);
+    message.time = null;
+  });
+
+  // Manejar evento de revancha (tiempo de resolución)
+  socket.on("revancha", (data) => {
+    console.log(data);
+    const message = JSON.parse(data);
+    console.log("Tiempo (revancha): ", message.time);
+    console.log("Revancha");
+    handleTimerData(socket, pair, matchedPairs, message.time);
+    message.time = null;
+  });
+
+  // Manejar evento de resetTiempos (eliminar tiempos registrados)
+  socket.on("resetTiempos", () => {
+    console.log("Resetear tiempos");
     if (pair.user1.userId === socket.userId) {
-      pair.user1.tiempo = message.time;
+      pair.user1.tiempo = null;
     } else {
-      pair.user2.tiempo = message.time;
+      pair.user2.tiempo = null;
     }
-
-    // Si ambos usuarios han enviado sus tiempos, ordenar los tiempos y determinar al ganador
-    if (pair.user1.tiempo && pair.user2.tiempo) {
-      const tiempos = [pair.user1.tiempo, pair.user2.tiempo];
-      tiempos.sort();
-
-      const ganador =
-        pair.user1.tiempo === tiempos[0] ? pair.user1 : pair.user2;
-      const perdedor =
-        pair.user1.tiempo === tiempos[0] ? pair.user2 : pair.user1;
-
-      const winnerData = ganador.userId;
-      const loserData = perdedor.userId;
-
-      ganador.emit("resultado", {
-        ganador: true,
-        tiempo: ganador.tiempo,
-        winner: winnerData,
-        loser: loserData,
-      });
-      perdedor.emit("resultado", {
-        ganador: false,
-        tiempo: perdedor.tiempo,
-        winner: winnerData,
-        loser: loserData,
-      });
-      console.log(`Winner: ${ganador.userId}`);
-
-      // Eliminar el par de la lista de pares emparejados
-      matchedPairs = matchedPairs.filter(
-        (p) =>
-          p.user1.userId !== ganador.userId && p.user2.userId !== ganador.userId
-      );
-    }
+  
+    // Vaciar el arreglo tiemposRegistrados
+    vaciarTiemposRegistrados();
   });
+}
 
-  socket.on("respuestaRevancha", (respuesta) => {
-    const pair = revanchaPairs.find(
-      (p) =>
-        p.user1.userId === socket.userId || p.user2.userId === socket.userId
-    );
-  
-    if (pair) {
-      const otherUser =
-        pair.user1.userId === socket.userId ? pair.user2 : pair.user1;
-      otherUser.emit("respuestaRevancha", respuesta);
-  
-      if (respuesta) {
-        // Iniciar la revancha
-        revanchaPairs = revanchaPairs.filter((p) => p !== pair);
-        const scramble = generarNuevoScramble();
-        pair.user1.emit("revancha", scramble);
-        pair.user2.emit("revancha", scramble);
-  
-        handleUserEvents(pair.user1, pair, matchedPairs, revanchaPairs);
-        handleUserEvents(pair.user2, pair, matchedPairs, revanchaPairs);
-      } else {
-        // Eliminar el par del arreglo revanchaPairs
-        revanchaPairs = revanchaPairs.filter((p) => p !== pair);
-      }
-    }
-  });
+function handleTimerData(socket, pair, matchedPairs, tiempo) {
+  // Guardar el tiempo del usuario en el par
+  if (pair.user1.userId === socket.userId) {
+    pair.user1.tiempo = tiempo;
+  } else {
+    pair.user2.tiempo = tiempo;
+  }
 
-  // Manejar evento de solicitud de revancha
-  socket.on("solicitarRevancha", () => {
-    const pair = matchedPairs.find(
+  // Si ambos usuarios han enviado sus tiempos, ordenar los tiempos y determinar al ganador
+  if (pair.user1.tiempo && pair.user2.tiempo) {
+    tiemposRegistrados = [ pair.user1.tiempo, pair.user2.tiempo ];
+    tiemposRegistrados.sort();
+
+    const ganador =
+      pair.user1.tiempo === tiemposRegistrados[0] ? pair.user1 : pair.user2;
+    const perdedor =
+      pair.user1.tiempo === tiemposRegistrados[0] ? pair.user2 : pair.user1;
+
+    const winnerData = ganador.userId;
+    const loserData = perdedor.userId;
+
+    ganador.emit("resultado", {
+      ganador: true,
+      tiempo: ganador.tiempo,
+      winner: winnerData,
+      loser: loserData,
+    });
+    perdedor.emit("resultado", {
+      ganador: false,
+      tiempo: perdedor.tiempo,
+      winner: winnerData,
+      loser: loserData,
+    });
+    console.log(`Winner: ${ganador.userId}`);
+    console.log(`Loser: ${perdedor.userId}`);
+    //consoel.log("Tiempos registrados: ", tiemposRegistrados);
+    // Eliminar el par de la lista de pares emparejados
+    matchedPairs = matchedPairs.filter(
       (p) =>
-        p.user1.userId === socket.userId || p.user2.userId === socket.userId
+        p.user1.userId !== ganador.userId && p.user2.userId !== ganador.userId
     );
 
-    if (pair) {
-      revanchaPairs.push(pair);
-      const otherUser =
-        pair.user1.userId === socket.userId ? pair.user2 : pair.user1;
-      otherUser.emit("solicitarRevancha");
-    }
-  });
+    // Vaciar el arreglo tiemposRegistrados
+    vaciarTiemposRegistrados();
+  }
+}
 
-  // Manejar evento de aceptación de revancha
-  socket.on("aceptarRevancha", () => {
-    const pair = revanchaPairs.find(
-      (p) =>
-        p.user1.userId === socket.userId || p.user2.userId === socket.userId
-    );
+function vaciarTiemposRegistrados() {
+  console.log("Tiempos registrados:", tiemposRegistrados);
+  while (tiemposRegistrados.length > 0) {
+    tiemposRegistrados.pop();
+  }
 
-    if (pair) {
-      revanchaPairs = revanchaPairs.filter((p) => p !== pair);
-      const scramble = generarNuevoScramble();
-      pair.user1.emit("revancha", scramble);
-      pair.user2.emit("revancha", scramble);
-
-      handleUserEvents(pair.user1, pair, matchedPairs, revanchaPairs);
-      handleUserEvents(pair.user2, pair, matchedPairs, revanchaPairs);
-    }
-  });
+  console.log("Tiempos registrados vaciados", tiemposRegistrados);
 }
 
 function generarNuevoScramble() {

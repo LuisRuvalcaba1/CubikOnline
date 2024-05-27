@@ -1,47 +1,34 @@
 import { Link } from "react-router-dom";
 import { useAuthTimerPvP } from "../context/TimerPvPContext";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import "./Confirmation.css";
 import io from "socket.io-client";
 const URL = import.meta.env.VITE_BACKEND_URL;
 
-export default function Confirmation({ visible, onClose, handleRevanchaClick }) {
+export default function Confirmation({ visible, onClose }) {
   const { resultadoTimerPvP } = useAuthTimerPvP();
-  const [showRevanchaModal, setShowRevanchaModal] = useState(false);
-  const [socket, setSocket] = useState(null);
+  const [solicitarRevancha, setSolicitarRevancha] = useState(false);
+  const [socket, setSocket] = useState("");
+  //
+  useEffect(() => {
+    const socket = io(`${URL}/confrontation`);
+    setSocket(socket);
+  }, []);
 
-  const solicitarRevancha = () => {
-    if (socket) {
-      socket.emit("solicitarRevancha");
-      setShowRevanchaModal(true);
-    }
-  };
-
+  if (!visible) return null;
   const refreshPage = () => {
     window.location.reload();
   };
 
-  useEffect(() => {
-    const newSocket = io(`${URL}/confrontation`);
-    setSocket(newSocket);
-  
-    // Lógica para manejar la respuesta del contrincante
-    newSocket.on("respuestaRevancha", (respuesta) => {
-      if (respuesta) {
-        // El contrincante aceptó la revancha
-        handleRevanchaClick();
-      } else {
-        // El contrincante rechazó la revancha
-        setShowRevanchaModal(false);
-      }
-    });
-  
-    return () => {
-      newSocket.disconnect();
-    };
-  }, []);
+  const handleRevancha = () => {
+  setSolicitarRevancha(true);
+  // Emitir el evento "resetTiempos" al servidor
+  socket.emit("resetTiempos");
+  // Emitir el evento "revancha" al servidor
+  socket.emit("revancha");
+  onClose();
+};
 
-  if (!visible) return;
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg">
@@ -65,7 +52,7 @@ export default function Confirmation({ visible, onClose, handleRevanchaClick }) 
               Sí
             </button>
             <button
-              onClick={solicitarRevancha}
+              onClick={handleRevancha}
               className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors duration-300"
             >
               Revancha
@@ -78,11 +65,6 @@ export default function Confirmation({ visible, onClose, handleRevanchaClick }) 
             </Link>
           </div>
         </div>
-        {showRevanchaModal && (
-          <div className="text-2xl font-bold mb-4 text-black">
-            <p>Esperando respuesta del contrincante...</p>
-          </div>
-        )}
       </div>
     </div>
   );
