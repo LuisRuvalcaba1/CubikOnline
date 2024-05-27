@@ -32,6 +32,9 @@ import { AmigosProvider } from "./context/AmigosContext.jsx";
 import { EncuestaProvider } from "./context/EncuestaContext.jsx";
 import { ObjetiveProvider } from "./context/ObjetivesContext.jsx";
 import Objetivos from "./pages/Objetivos.jsx";
+import Metodo2x2 from "./pages/Metodo2x2Page.jsx";
+import Metodo4x4 from "./pages/Metodo4x4Page.jsx";
+import Metodo5x5 from "./pages/Metodo5x5Page.jsx";
 
 export {
   BrowserRouter,
@@ -70,4 +73,7 @@ export {
   EncuestaProvider,
   ObjetiveProvider,
   Objetivos,
+  Metodo2x2,
+  Metodo4x4,
+  Metodo5x5,
 };

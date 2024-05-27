@@ -52,9 +52,6 @@ function WaitRoom() {
     fetchTorneo();
   }, [getTorneoById]);
 
-  //useEffect(() => {
-    console.log("user2", user2);
-
   useEffect(() => {
     const socket = io(`${URL}/join`);
     setSocket(socket);
@@ -68,20 +65,18 @@ function WaitRoom() {
       socket.on("paired", () => {
         setIsPaired(true);
       });
+      socket.on("scramble", (nuevoScramble) => {
+        setScramble(nuevoScramble);
+      });
+  
+      socket.on("resultado", (data) => {
+        setResultado(
+          `${data.ganador ? "Ganaste" : "Perdiste"} con un promedio de ${
+            data.promedio
+          }. El promedio de tu oponente fue ${data.promedioOponente}.`
+        );
+      });
     }
-
-    socket.on("scramble", (nuevoScramble) => {
-      setScramble(nuevoScramble);
-    });
-
-    socket.on("resultado", (data) => {
-      setResultado(
-        `${data.ganador ? "Ganaste" : "Perdiste"} con un promedio de ${
-          data.promedio
-        }. El promedio de tu oponente fue ${data.promedioOponente}.`
-      );
-    });
-
     return () => {
       socket.disconnect();
     };

@@ -34,7 +34,10 @@ import {
   AmigosProvider,
   EncuestaProvider,
   ObjetiveProvider,
-  Objetivos
+  Objetivos,
+  Metodo2x2,
+  Metodo4x4,
+  Metodo5x5,
 } from "./imports.js";
 
 function App() {
@@ -66,6 +69,10 @@ function App() {
                         ></Route>
                         <Route path="/timer" element={<Timer />}></Route>
                         <Route path="/product" element={<ProductPage />} />
+                        <Route path="/metodo2x2" element={<Metodo2x2 />} />
+                        <Route path="/metodo4x4" element={<Metodo4x4 />} />
+                        <Route path="/metodo5x5" element={<Metodo5x5 />} />
+                        <Route path="/metodop" element={<MetodoP />} />
 
                         <Route element={<ProtectedRoute />}>
                           <Route path="/store" element={<Store />} />
