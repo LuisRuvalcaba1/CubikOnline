@@ -7,7 +7,6 @@ export const authRequired = (req, res, next) => {
 
   if (!authHeader) return res.status(401).json({ message: "Unauthorized" });
 
-  // El encabezado de autorización debe tener el formato "Bearer <token>"
   const token = authHeader.split(" ")[1];
 
   if (!token) return res.status(401).json({ message: "Unauthorized" });

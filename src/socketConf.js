@@ -59,7 +59,6 @@ export function handleConfrontationEvents(confrontationNS) {
 function handleUserEvents(socket, pair, matchedPairs) {
   // Manejar evento de mensaje (tiempo de resolución)
   socket.on("message", (data) => {
-    console.log(data);
     const message = JSON.parse(data);
     console.log("Tiempo: ", message.time);
 

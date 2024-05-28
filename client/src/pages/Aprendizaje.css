@@ -1,4 +1,3 @@
-
 .contenedor#cont {
   width: 73%;
   max-width: 1000px;
@@ -49,6 +48,7 @@
   align-items: center;
   margin-bottom: 2%;
 }
+
 .fila-item1 {
   background: #a6a6a6;
   text-align: center;
@@ -81,4 +81,20 @@
   justify-items: center;
   align-items: center;
   margin-bottom: 2%;
+}
+
+.video-container {
+  position: relative;
+  width: 140%;
+  padding-top: 56.25%; /* Proporción 16:9 */
+  text-align: center;
+}
+
+.video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 200px;
+  width: 132%; /* El video ocupará todo el ancho del contenedor */
+  height: 185%; /* El video ocupará todo el alto del contenedor */
+  border-radius: 20px; /* Se aplica el borde redondeado */
 }

@@ -14,7 +14,6 @@ import {
   deleteTorneoByJuezRequest,
 } from "../api/torneo.js";
 
-
 export const useAuthTorneo = () => {
   const context = useContext(TorneoContext);
   if (!context) {
@@ -28,8 +27,10 @@ export const TorneoProvider = ({ children }) => {
 
   const getTorneos = async () => {
     try {
-      const res = await getTorneosRequest();
-      return res.data;
+    
+        const res = await getTorneosRequest();
+        return res.data;
+      
     } catch (error) {
       console.error("Error al obtener torneos:", error);
     }
@@ -37,8 +38,10 @@ export const TorneoProvider = ({ children }) => {
 
   const getTorneoById = async () => {
     try {
-      const torneo = await getTorneoByIdRequest();
-      return torneo.data;
+      
+        const torneo = await getTorneoByIdRequest();
+        return torneo.data;
+      
     } catch (error) {
       console.error("Error al obtener torneo por id:", error);
     }
@@ -65,10 +68,6 @@ export const TorneoProvider = ({ children }) => {
 
   const deleteTorneoByJuez = async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        return;
-      }
       const res = await deleteTorneoByJuezRequest();
       console.log(res);
     } catch (error) {
@@ -83,8 +82,6 @@ export const TorneoProvider = ({ children }) => {
     createTorneo,
     deleteTorneoByJuez,
     deleteTorneo,
-   
-
   };
 
   return (

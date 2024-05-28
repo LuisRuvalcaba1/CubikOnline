@@ -7,6 +7,9 @@ export function initializeWebSocket(httpServer) {
   const io = new WebSocketServer(httpServer, {
     cors: {
       origin: CLIENT,
+      methods: ["GET", "POST"],
+      allowedHeaders: ["Content-Type"],
+      credentials: true,
     },
   });
 

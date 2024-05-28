@@ -1,19 +1,3 @@
-import stringify from "json-stringify-safe";
-import { Server } from "socket.io";
-import pako from "pako";
-let torneoFinalizado = false;
-
-const seen = new WeakSet();
-function replacer(key, value) {
-  if (typeof value === "object" && value !== null) {
-    if (seen.has(value)) {
-      return;
-    }
-    seen.add(value);
-  }
-  return value;
-}
-
 export function handleJoinTournament(joinNS) {
   let participantes = [];
   let juezID = [];
@@ -104,13 +88,9 @@ export function handleJoinTournament(joinNS) {
       const userId = socket.userId;
       console.log(`Tiempo de ${userId} : `, time);
 
-      const timeMilliseconds = convertTimeToMilliseconds(time);
-
       if (!participantesData[userId]) {
         participantesData[userId] = []; // Inicializar con un arreglo vacío
       }
-
-      participantesData[userId].push(timeMilliseconds); // Agregar el tiempo como número al arreglo
 
       const pair = roundParticipants.find(
         (pair) => pair.user1.userId === userId || pair.user2.userId === userId
@@ -121,14 +101,14 @@ export function handleJoinTournament(joinNS) {
         return;
       }
 
+      participantesData[userId].push(time); // Agregar el tiempo al arreglo
+      console.log(participantesData[userId]);
+
       if (pair.user1.userId === socket.userId) {
         pair.user1.tiempos = participantesData[userId];
       } else {
         pair.user2.tiempos = participantesData[userId];
       }
-
-      const serializedMessage = JSON.stringify(time, replacer);
-      socket.emit("times", serializedMessage);
 
       const tiemposPorGrupo = {};
 
@@ -170,6 +150,9 @@ export function handleJoinTournament(joinNS) {
             const ganador = promedio1 < promedio2 ? pair.user1 : pair.user2;
             const perdedor = promedio1 < promedio2 ? pair.user2 : pair.user1;
 
+            console.log(`Ganador: ${ganador.userId}`);
+            console.log(`Perdedor: ${perdedor.userId}`);
+
             ganador.emit("resultado", {
               ganador: true,
               promedio: promedio1,
@@ -181,12 +164,14 @@ export function handleJoinTournament(joinNS) {
               promedioOponente: promedio1,
             });
 
-            juezID.forEach((juez) => {
-              juez.emit("finalizarGrupo", pair);
-            });
-
             ganadores.push(ganador);
             console.log(`Winner: ${ganador.userId}`);
+
+            // juezID.forEach((juez) => {
+            //   juez.emit("finalizarGrupo", pair);
+            // });
+
+            console.log("Ganadores:", ganadores.map((s) => s.userId));
           }
         }
       });
@@ -257,44 +242,35 @@ export function handleJoinTournament(joinNS) {
       return groups;
     }
 
-    function convertTimeToMilliseconds(time) {
-      if (typeof time === "string") {
-        const [minutes, seconds, milliseconds] = time.split(":").map(Number);
-        return minutes * 60 * 1000 + seconds * 1000 + milliseconds;
-      } else if (typeof time === "number") {
-        return time;
-      } else {
-        console.error("Formato de tiempo inválido:", time);
-        return 0;
-      }
+    function convertTimeToMilliseconds(timeString) {
+      const [minutes, seconds, milliseconds] = timeString
+        .split(":")
+        .map(Number);
+      return minutes * 60 * 1000 + seconds * 1000 + milliseconds;
     }
 
     function reiniciarRonda(nuevosGrupos) {
-      if (!torneoFinalizado) {
-        // No reiniciar roundParticipants ni participantesData si el torneo no ha finalizado
-        nuevosGrupos.forEach((grupo, index) => {
-          if (grupo.length === 2) {
-            const [user1, user2] = grupo;
-            roundParticipants.push({ user1, user2 });
-            console.log(`Par ${index}:`, {
-              user1: user1.userId,
-              user2: user2.userId,
-            });
-          }
-        });
-        console.log(
-          "roundParticipants:",
-          roundParticipants.map((p) => ({
-            user1: p.user1.userId,
-            user2: p.user2.userId,
-          }))
-        );
-      } else {
-        // Si el torneo ha finalizado, reinicia las variables
-        roundParticipants = [];
-        participantesData = {};
-        console.log("participantesData reiniciado:", participantesData);
-      }
+      roundParticipants = [];
+      participantesData = {};
+      console.log("participantesData reiniciado:", participantesData);
+
+      nuevosGrupos.forEach((grupo, index) => {
+        if (grupo.length >= 2 && grupo.length % 2 === 0) {
+          const [user1, user2] = grupo;
+          roundParticipants.push({ user1, user2 });
+          console.log(`Par ${index}:`, {
+            user1: user1.userId,
+            user2: user2.userId,
+          });
+        }
+      });
+      console.log(
+        "roundParticipants:",
+        roundParticipants.map((p) => ({
+          user1: p.user1.userId,
+          user2: p.user2.userId,
+        }))
+      );
     }
   });
 }

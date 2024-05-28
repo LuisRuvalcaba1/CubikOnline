@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useAuthTorneo } from "../context/TorneoContext";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { verifyTokenRequest } from "../api/auth";
 const URL = import.meta.env.VITE_BACKEND_URL;
+import { verifyTokenRequest } from "../api/auth";
+import Confirmation from "../components/Confirmation";
 
 function WaitRoom() {
   const { user } = useAuth();
@@ -13,6 +14,7 @@ function WaitRoom() {
   const { user2, torneo } = useLocation().state;
   const { getTorneoById } = useAuthTorneo();
   const [usuario, setUsuario] = useState("");
+  const [solveCount, setSolveCount] = useState(0);
   const [isPaired, setIsPaired] = useState(false);
   const [milisegundos, setMilisegundos] = useState(0);
   const [segundos, setSegundos] = useState(0);
@@ -26,6 +28,8 @@ function WaitRoom() {
   const [tiempos, setTiempos] = useState({});
   const [currentUser, setCurrentUser] = useState(null);
   const [tiemposRegistrados, setTiemposRegistrados] = useState(0);
+  const[boton,setBoton] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -40,18 +44,6 @@ function WaitRoom() {
   }, [user]);
 
   useEffect(() => {
-    if (resultado && resultado.includes("Ganaste")) {
-      setGanador(true);
-      if (socket) {
-        socket.emit("finalRound");
-      }
-    } else if (resultado && resultado.includes("Perdiste")) {
-      setGanador(false);
-      navigate("/profile"); // Redirigir al perfil en lugar de desconectar
-    }
-  }, [resultado]);
-
-  useEffect(() => {
     const fetchTorneo = async () => {
       try {
         const torneo = await getTorneoById();
@@ -62,37 +54,48 @@ function WaitRoom() {
     };
 
     fetchTorneo();
-  }, [getTorneoById]);
+  }, []);
 
   useEffect(() => {
     const socket = io(`${URL}/join`);
     setSocket(socket);
 
-    if (user2) {
-      socket.emit("user", user2._id);
-      socket.on("user", (user) => {
-        setUsuario(user);
-      });
+    socket.emit("user", user2._id);
+    socket.on("user", (user) => {
+      setUsuario(user);
+    });
 
-      socket.on("paired", () => {
-        setIsPaired(true);
-      });
-      socket.on("scramble", (nuevoScramble) => {
-        setScramble(nuevoScramble);
-      });
+    socket.on("paired", () => {
+      setIsPaired(true);
+    });
 
-      socket.on("resultado", (data) => {
-        setResultado(
-          `${data.ganador ? "Ganaste" : "Perdiste"} con un promedio de ${
-            data.promedio
-          }. El promedio de tu oponente fue ${data.promedioOponente}.`
-        );
-      });
-    }
+    socket.on("scramble", (nuevoScramble) => {
+      setScramble(nuevoScramble);
+    });
+
+    socket.on("resultado", (data) => {
+      setResultado(
+        `${data.ganador ? "Ganaste" : "Perdiste"} con un promedio de ${
+          data.promedio
+        }. El promedio de tu oponente fue ${data.promedioOponente}.`
+      );
+    });
+
+    // if (currentUser) {
+    //   if (resultado && resultado.includes("Ganaste")) {
+    //     setGanador(true);
+    //     if (socket) {
+    //       socket.emit("finalRound");
+    //     }
+    //   } else if (resultado && resultado.includes("Perdiste")) {
+    //     setGanador(false);
+    //     navigate("/");
+    //   }
+    // }
     return () => {
       socket.disconnect();
     };
-  }, [user2]);
+  }, []);
 
   useEffect(() => {
     if (socket) {
@@ -117,7 +120,7 @@ function WaitRoom() {
       setGanador(false);
       navigate("/");
     }
-  }, [resultado]);
+  }, [resultado]);  
 
   useEffect(() => {
     let interval;
@@ -207,17 +210,17 @@ function WaitRoom() {
                 : milisegundos}
             </p>
           </div>
-          {resultado && <p>{resultado}</p>}
-          {ganador && (
-            <button onClick={() => navigate("/profile")}>Ir al perfil</button>
-          )}
+          {/* {resultado.ganador && <p>{resultado.ganador}</p>} */}
+          <Confirmation
+            visible={showConfirmation}
+            onClose={() => setShowConfirmation(false)}
+          />
         </>
       ) : (
         <>
           <h1>Wait Room</h1>
-          {/* <h2>{currentUser._id}</h2> */}
+          <h2>{user2.username}</h2>
           <h2>{torneo}</h2>
-          <h2>{user2._id}</h2>
         </>
       )}
     </div>
