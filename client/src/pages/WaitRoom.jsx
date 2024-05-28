@@ -40,6 +40,18 @@ function WaitRoom() {
   }, [user]);
 
   useEffect(() => {
+    if (resultado && resultado.includes("Ganaste")) {
+      setGanador(true);
+      if (socket) {
+        socket.emit("finalRound");
+      }
+    } else if (resultado && resultado.includes("Perdiste")) {
+      setGanador(false);
+      navigate("/profile"); // Redirigir al perfil en lugar de desconectar
+    }
+  }, [resultado]);
+
+  useEffect(() => {
     const fetchTorneo = async () => {
       try {
         const torneo = await getTorneoById();
@@ -56,8 +68,8 @@ function WaitRoom() {
     const socket = io(`${URL}/join`);
     setSocket(socket);
 
-    if (currentUser) {
-      socket.emit("user", user2);
+    if (user2) {
+      socket.emit("user", user2._id);
       socket.on("user", (user) => {
         setUsuario(user);
       });
@@ -68,7 +80,7 @@ function WaitRoom() {
       socket.on("scramble", (nuevoScramble) => {
         setScramble(nuevoScramble);
       });
-  
+
       socket.on("resultado", (data) => {
         setResultado(
           `${data.ganador ? "Ganaste" : "Perdiste"} con un promedio de ${
@@ -80,7 +92,7 @@ function WaitRoom() {
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [user2]);
 
   useEffect(() => {
     if (socket) {
@@ -196,12 +208,16 @@ function WaitRoom() {
             </p>
           </div>
           {resultado && <p>{resultado}</p>}
+          {ganador && (
+            <button onClick={() => navigate("/profile")}>Ir al perfil</button>
+          )}
         </>
       ) : (
         <>
           <h1>Wait Room</h1>
           {/* <h2>{currentUser._id}</h2> */}
           <h2>{torneo}</h2>
+          <h2>{user2._id}</h2>
         </>
       )}
     </div>

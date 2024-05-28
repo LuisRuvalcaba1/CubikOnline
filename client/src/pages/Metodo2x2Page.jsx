@@ -18,12 +18,12 @@ function Metodo2x2() {
           lleve un apóstrofe (U&apos;) el giro será antihorario. Podemos
           encontrarnos con las siguientes:
           <ul className="list-disc pl-6">
-            <li>U (Up): Capa Superior</li>
-            <li>D (Down): Capa Inferior</li>
-            <li>R (Right): Capa Derecha</li>
-            <li>L (Left): Capa Izquierda</li>
-            <li>F (Front): Capa Frontal</li>
-            <li>B (Back): Capa Trasera</li>
+            <li className="texto font-bold">U (Up): Capa Superior</li>
+            <li className="texto font-bold">D (Down): Capa Inferior</li>
+            <li className="texto font-bold">R (Right): Capa Derecha</li>
+            <li className="texto font-bold">L (Left): Capa Izquierda</li>
+            <li className="texto font-bold">F (Front): Capa Frontal</li>
+            <li className="texto font-bold">B (Back): Capa Trasera</li>
           </ul>
         </p>
         <h2 className="titulo font-bold">Parte superior del cubo 2x2</h2>
@@ -88,10 +88,10 @@ function Metodo2x2() {
           casos pero tendríamos que aplicarlo cinco veces.
         </p>
 
-        <h2>Resolver la ultima capa</h2>
-        <h3>Orientar las piezas</h3>
+        <h2 className="titulo font-bold">Resolver la ultima capa</h2>
+        <h3 className="titulo font-bold">Orientar las piezas</h3>
 
-        <p>
+        <p className="texto font-bold">
           Para resolver la última capa del cubo 2x2 primero deberemos poner toda
           la capa del mismo color utilizando un sencillo algoritmo. Si la
           primera capa que hemos hecho es la blanca, la capa que ahora
@@ -99,7 +99,7 @@ function Metodo2x2() {
           amarilla. Deberemos colocar la capa ya hecha (la blanca) mirando hacia
           abajo y la amarilla, que es la que ahora queremos hacer, hacia arriba.
         </p>
-        <p>
+        <p className="texto font-bold">
           Para colocar todas las piezas, con la cara amarilla mirando hacia
           arriba, tendremos que aplicar el siguiente algoritmo tantas veces como
           sea necesario para que la pieza amarilla se sitúe mirando hacia
@@ -107,7 +107,7 @@ function Metodo2x2() {
           último movimiento (D).
         </p>
 
-        <p>
+        <p className="texto font-bold">
           Cuando la pieza amarilla esté mirando hacia arriba, giramos la capa
           superior en sentido horario (U) y volvemos a realizar el algoritmo
           anterior para volver a colocar la siguiente pieza. Así lo haremos con
@@ -115,36 +115,34 @@ function Metodo2x2() {
           girar la capa superior en sentido horario (U).
         </p>
 
-        <h3>Resolucion final</h3>
-        <ul>
-          <li>
-            Primer caso: el cubo se ha resuelto. ¡Enhorabuena, ya has terminado!
-          </li>
-          <li>
-            Segundo caso: nos aparecerán dos piezas adyacentes, bien colocadas y
-            otras dos mal, tal y como se muestra en la siguiente imagen. Para
-            solucionarlo deberemos colocar las piezas correctas a nuestra
-            izquierda, como vemos en la imagen superior y aplicar el siguiente
-            algoritmo: R U2 R&apos; U&apos; R U2 L&apos; U R&apos; U&apos; L
-          </li>
-          <li>
-            Tercer caso: en esta ocasión, tendremos dos esquinas bien
-            posicionadas y otras dos mal, como podemos ver a continuación:
-          </li>
-          <li>
-            Para solucionar este último paso podemos utilizar el mismo algoritmo
-            que antes dos veces, pero entre una y otra vez deberemos de girar
-            las capa superior dos veces. Si solo nos queremos aprender un
-            algoritmo de momento, podemos usar el algoritmo anterior. Lo
-            utilizaremos una primera vez y como resultado obtendremos el Caso 2.
-            Deberemos de girar la capa superior dos veces para colocar las
-            piezas que se han ordenado en su correcta posición. Ahora volvemos a
-            realizar el mismo algoritmo porque, en este punto estamos en el caso
-            2. El algoritmo es el siguiente: (R U2 R&apos; U&apos; R U2 L&apos;
-            U R&apos; U&apos; L) U2 (R U2 R&apos; U&apos; R U2 L&apos; U R&apos;
-            U&apos; L)
-          </li>
-        </ul>
+        <h3 className="titulo font-bold">Resolucion final</h3>
+
+        <p className="texto font-bold">
+          Primer caso: el cubo se ha resuelto. ¡Enhorabuena, ya has terminado!
+        </p>
+        <p className="texto font-bold">
+          Segundo caso: nos aparecerán dos piezas adyacentes, bien colocadas y
+          otras dos mal, tal y como se muestra en la siguiente imagen. Para
+          solucionarlo deberemos colocar las piezas correctas a nuestra
+          izquierda, como vemos en la imagen superior y aplicar el siguiente
+          algoritmo: R U2 R&apos; U&apos; R U2 L&apos; U R&apos; U&apos; L
+        </p>
+        <p className="texto font-bold">
+          Tercer caso: en esta ocasión, tendremos dos esquinas bien posicionadas
+          y otras dos mal, como podemos ver a continuación:
+        </p>
+        <p className="texto font-bold">
+          Para solucionar este último paso podemos utilizar el mismo algoritmo
+          que antes dos veces, pero entre una y otra vez deberemos de girar la
+          capa superior dos veces. Si solo nos queremos aprender un algoritmo de
+          momento, podemos usar el algoritmo anterior. Lo utilizaremos una
+          primera vez y como resultado obtendremos el Caso 2. Deberemos de girar
+          la capa superior dos veces para colocar las piezas que se han ordenado
+          en su correcta posición. Ahora volvemos a realizar el mismo algoritmo
+          porque, en este punto estamos en el caso 2. El algoritmo es el
+          siguiente: (R U2 R&apos; U&apos; R U2 L&apos; U R&apos; U&apos; L) U2
+          (R U2 R&apos; U&apos; R U2 L&apos; U R&apos; U&apos; L)
+        </p>
       </div>
     </div>
   );

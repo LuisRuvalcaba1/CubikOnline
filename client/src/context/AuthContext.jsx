@@ -164,15 +164,8 @@ export const AuthProvider = ({ children }) => {
 
   const getUsersTable = async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setIsAuthenticated(false);
-        setLoading(false);
-        return setUser(null);
-      } else {
-        const res = await getUsersRequest();
-        return res.data;
-      }
+      const res = await getUsersRequest();
+      return res.data;
     } catch (error) {
       console.log(error);
       throw error;
@@ -230,7 +223,6 @@ export const AuthProvider = ({ children }) => {
       throw error;
     }
   };
-
 
   return (
     <AuthContext.Provider
