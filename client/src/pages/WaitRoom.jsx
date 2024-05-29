@@ -6,10 +6,12 @@ import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 const URL = import.meta.env.VITE_BACKEND_URL;
 import { verifyTokenRequest } from "../api/auth";
+import { useObjetives } from "../context/ObjetivesContext";
 import Confirmation from "../components/Confirmation";
 
 function WaitRoom() {
-  const { user } = useAuth();
+  const { user, updateUserPoints } = useAuth();
+  const { getObjetivesContext, updateObjetive } = useObjetives();
   const navigate = useNavigate();
   const { user2, torneo } = useLocation().state;
   const { getTorneoById } = useAuthTorneo();
@@ -79,19 +81,47 @@ function WaitRoom() {
           data.promedio
         }. El promedio de tu oponente fue ${data.promedioOponente}.`
       );
+      if(data.ganador){
+        if(user2){
+          const actualizarObjetivo = async () => {
+            try {
+              const objetivosResponse = await getObjetivesContext();
+              const objetivos = objetivosResponse.data;
+              const objetivoActual = objetivos.find(
+                (objetivo) => objetivo.objective === 4 && objetivo.qty_times < 5
+              );
+              if (objetivoActual) {
+                const nuevoQtyTimes = objetivoActual.qty_times + 1;
+                await updateObjetive(objetivoActual._id, {
+                  qty_times: nuevoQtyTimes,
+                });
+                console.log("Objetivo actualizado:", nuevoQtyTimes);
+                const newPoints = user2.points + 10;
+                updateUserPoints(user2._id, { points: newPoints })
+                  .then((updatedUser) => {
+                    setCurrentUser({
+                      ...user2,
+                      points: updatedUser.points,
+                    });
+                    console.log("Puntos actualizados:", updatedUser.points);
+                  })
+                  .catch((error) => {
+                    console.error("Error al actualizar los puntos:", error);
+                  });
+              } else {
+                console.log("No se encontró el objetivo");
+              }
+            } catch (error) {
+              console.error("Error al actualizar el objetivo:", error);
+            }
+          };
+
+          actualizarObjetivo();
+
+        }
+      }
     });
 
-    // if (currentUser) {
-    //   if (resultado && resultado.includes("Ganaste")) {
-    //     setGanador(true);
-    //     if (socket) {
-    //       socket.emit("finalRound");
-    //     }
-    //   } else if (resultado && resultado.includes("Perdiste")) {
-    //     setGanador(false);
-    //     navigate("/");
-    //   }
-    // }
     return () => {
       socket.disconnect();
     };
@@ -106,6 +136,7 @@ function WaitRoom() {
         setMilisegundos(0);
         setSegundos(0);
         setMinutos(0);
+        setTiemposRegistrados(0);
       });
     }
   }, [socket]);
@@ -113,6 +144,7 @@ function WaitRoom() {
   useEffect(() => {
     if (resultado && resultado.includes("Ganaste")) {
       setGanador(true);
+
       if (socket) {
         socket.emit("finalRound");
       }
@@ -210,6 +242,7 @@ function WaitRoom() {
                 : milisegundos}
             </p>
           </div>
+          <p>{user2._id}</p>
           {/* {resultado.ganador && <p>{resultado.ganador}</p>} */}
           <Confirmation
             visible={showConfirmation}

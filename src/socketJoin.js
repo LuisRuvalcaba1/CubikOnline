@@ -5,6 +5,7 @@ export function handleJoinTournament(joinNS) {
   let ganadores = [];
   let roundParticipants = [];
   let participantesData = {};
+  let usuariosData = {};
 
   joinNS.on("connection", (socket) => {
     console.log("Conectado al espacio de nombres de torneos");
@@ -25,17 +26,18 @@ export function handleJoinTournament(joinNS) {
     });
 
     socket.on("user", (user) => {
+      // Borra los datos anteriores del usuario
+      usuariosData[user] = [];
+
       socket.userId = user;
       socket.emit("user", user);
-      participantes.push(socket);
+      participantes.push(socket); // Agrega el socket a participantes
       console.log(`User connected: ${socket.userId}`);
       console.log(
         "Participantes:",
         participantes.map((s) => s.userId)
       );
 
-      console.log(participantes.length);
-      console.log("Usuarios faltantes", n_p - participantes.length);
       if (participantes.length === n_p) {
         const groups = groupParticipants(participantes, 2);
         groups.forEach((group) => {
@@ -88,9 +90,12 @@ export function handleJoinTournament(joinNS) {
       const userId = socket.userId;
       console.log(`Tiempo de ${userId} : `, time);
 
-      if (!participantesData[userId]) {
-        participantesData[userId] = []; // Inicializar con un arreglo vacío
+      if (!usuariosData[userId]) {
+        usuariosData[userId] = []; // Inicializar con un arreglo vacío
       }
+
+      usuariosData[userId].push(time); // Agregar el tiempo al arreglo
+      console.log(usuariosData[userId]);
 
       const pair = roundParticipants.find(
         (pair) => pair.user1.userId === userId || pair.user2.userId === userId
@@ -101,13 +106,10 @@ export function handleJoinTournament(joinNS) {
         return;
       }
 
-      participantesData[userId].push(time); // Agregar el tiempo al arreglo
-      console.log(participantesData[userId]);
-
       if (pair.user1.userId === socket.userId) {
-        pair.user1.tiempos = participantesData[userId];
+        pair.user1.tiempos = usuariosData[userId];
       } else {
-        pair.user2.tiempos = participantesData[userId];
+        pair.user2.tiempos = usuariosData[userId];
       }
 
       const tiemposPorGrupo = {};
@@ -127,7 +129,7 @@ export function handleJoinTournament(joinNS) {
           },
         };
 
-        if (participantesData[userId].length === 5) {
+        if (usuariosData[userId].length === 5) {
           if (
             pair.user1 &&
             pair.user2 &&
@@ -150,9 +152,6 @@ export function handleJoinTournament(joinNS) {
             const ganador = promedio1 < promedio2 ? pair.user1 : pair.user2;
             const perdedor = promedio1 < promedio2 ? pair.user2 : pair.user1;
 
-            console.log(`Ganador: ${ganador.userId}`);
-            console.log(`Perdedor: ${perdedor.userId}`);
-
             ganador.emit("resultado", {
               ganador: true,
               promedio: promedio1,
@@ -164,14 +163,18 @@ export function handleJoinTournament(joinNS) {
               promedioOponente: promedio1,
             });
 
-            ganadores.push(ganador);
-            console.log(`Winner: ${ganador.userId}`);
+            if (!ganadores.includes(ganador)) {
+              ganadores.push(ganador);
+              console.log(`Winner: ${ganador.userId}`);
+              console.log(
+                "Ganadores:",
+                ganadores.map((s) => s.userId)
+              );
+            }
 
-            // juezID.forEach((juez) => {
-            //   juez.emit("finalizarGrupo", pair);
-            // });
-
-            console.log("Ganadores:", ganadores.map((s) => s.userId));
+            // Reiniciar los tiempos de los usuarios después de registrar los 5 tiempos
+            usuariosData[pair.user1.userId] = [];
+            usuariosData[pair.user2.userId] = [];
           }
         }
       });
@@ -182,7 +185,7 @@ export function handleJoinTournament(joinNS) {
 
       socket.on("nextScramble", () => {
         const userId = socket.userId;
-        const participanteData = participantesData[userId];
+        const participanteData = usuariosData[userId];
 
         if (!participanteData) {
           console.error("Datos del participante no encontrados");
@@ -210,7 +213,7 @@ export function handleJoinTournament(joinNS) {
 
         if (groupSize === 2) {
           const [user1, user2] = group;
-          roundParticipants.push({ user1, user2 });
+          roundParticipants.push({ user1, user2, promedio1: 0, promedio2: 0 }); // Agregar las nuevas propiedades
           console.log(`Par ${groupIndex}:`, {
             user1: user1.userId,
             user2: user2.userId,
@@ -252,12 +255,15 @@ export function handleJoinTournament(joinNS) {
     function reiniciarRonda(nuevosGrupos) {
       roundParticipants = [];
       participantesData = {};
+      ganadores = [];
       console.log("participantesData reiniciado:", participantesData);
 
       nuevosGrupos.forEach((grupo, index) => {
-        if (grupo.length >= 2 && grupo.length % 2 === 0) {
+        if (grupo.length === 2) {
           const [user1, user2] = grupo;
-          roundParticipants.push({ user1, user2 });
+          participantesData[user1.userId] = [];
+          participantesData[user2.userId] = [];
+          roundParticipants.push({ user1, user2, promedio1: 0, promedio2: 0 }); // Reiniciar los promedios
           console.log(`Par ${index}:`, {
             user1: user1.userId,
             user2: user2.userId,
