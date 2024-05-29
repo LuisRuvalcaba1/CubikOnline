@@ -5,6 +5,7 @@ import {
   getFriendsRequest,
   acceptFriendRequest,
   denyFriendRequest,
+  getYourFriendsRequest,
 } from "../api/amigos";
 import { useAmigos } from "../context/AmigosContext";
 import { verifyTokenRequest } from "../api/auth";
@@ -16,7 +17,8 @@ function Amigos() {
   const [search, setSearch] = useState("");
   const [friends, setFriends] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
-  const [yourFriend, setYourFriend] = useState([]);
+  const [yourFriends, setYourFriends] = useState([]);
+  const friendIds = yourFriends.map((friend) => friend._id);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -44,19 +46,22 @@ function Amigos() {
 
     const fetchYourFriends = async () => {
       try {
-        const yourFriends = await value.yourFriends();
-      setYourFriend(yourFriends);
-      console.log("Amigos obtenidos:", yourFriends);
+        const { data } = await getYourFriendsRequest();
+        setYourFriends(data);
+        console.log("Amigos obtenidos:", data);
+        console.log(
+          "Amigos obtenidos:",
+          yourFriends.map((friend) => friend.username)
+        );
       } catch (error) {
         console.error("Error al obtener tus amigos:", error);
       }
-      
     };
 
     fetchYourFriends();
     fetchFriends();
     fetchUsers();
-  }, [getUsersTable, value.getFriends, value.yourFriends]);
+  }, [getUsersTable, value.getFriends]);
 
   const handleAddFriend = async (friendId) => {
     try {
@@ -110,7 +115,7 @@ function Amigos() {
     results = users.filter(
       (user) =>
         user._id !== currentUser?._id &&
-        (user._id !== yourFriend?.user1 || user._id !== yourFriend?.user2) &&
+        !friendIds.includes(user._id) &&
         user.isPrivate === false
     );
   } else {
@@ -118,14 +123,14 @@ function Amigos() {
       (user) =>
         user.username.toLowerCase().includes(search.toLowerCase()) &&
         user._id !== currentUser?._id &&
-        (user._id !== yourFriend?.user1 || user._id !== yourFriend?.user2) &&
+        !friendIds.includes(user._id) &&
         user.isPrivate === false
     );
   }
 
-  const refreshPage = () =>{
+  const refreshPage = () => {
     window.location.reload();
-  }
+  };
 
   return (
     <div>

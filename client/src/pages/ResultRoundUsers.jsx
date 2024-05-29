@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import io from "socket.io-client";
 import { useAuth } from "../context/AuthContext";
+import { verifyTokenRequest } from "../api/auth";
 const URL = import.meta.env.VITE_BACKEND_URL;
 function ResultRoundUsers() {
   const navigate = useNavigate();
@@ -17,7 +18,16 @@ function ResultRoundUsers() {
   const [tiemposUsuarios, setTiemposUsuarios] = useState({});
 
   useEffect(() => {
-    setJuez2(user._id);
+    const fetchUser = async () => {
+      try {
+        const { data } = await verifyTokenRequest();
+        setJuez2(data);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+
+    fetchUser();
   }, [user]);
 
   useEffect(() => {

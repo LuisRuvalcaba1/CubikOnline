@@ -95,10 +95,10 @@ function ProfilePage() {
   useEffect(() => {
     const fetchYourFriends = async () => {
       try {
-        const friendsData = await getYourFriendsRequest();
-        setYourFriends(friendsData);
-        console.log("Amigos obtenidos:", friendsData);
-        console.log("Amigos obtenidos:", yourFriends.length)
+        const {data} = await getYourFriendsRequest();
+        setYourFriends(data);
+        console.log("Amigos obtenidos:", data);
+        console.log("Amigos obtenidos:", yourFriends.map((friend) => friend.username));
       } catch (error) {
         console.error("Error al obtener tus amigos:", error);
       }
@@ -218,7 +218,7 @@ function ProfilePage() {
               <ul>
                 {yourFriends.map((friend) => (
                   <li key={friend._id}>{friend.username}</li>
-                ))}
+                ))} {console.log("Amigos obtenidos:", yourFriends.length)}
               </ul>
             ) : (
               <p>No tienes amigos aún.</p>

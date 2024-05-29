@@ -172,7 +172,6 @@ export function handleJoinTournament(joinNS) {
               );
             }
 
-            // Reiniciar los tiempos de los usuarios después de registrar los 5 tiempos
             usuariosData[pair.user1.userId] = [];
             usuariosData[pair.user2.userId] = [];
           }
