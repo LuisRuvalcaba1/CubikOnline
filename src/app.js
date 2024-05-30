@@ -14,6 +14,7 @@ import amigosRoutes from './routes/amigos.routes.js'
 import encuestaRoutes from './routes/encuesta.routes.js'
 import objetivesRoutes from './routes/objetives.routes.js'
 import rankRoutes from './routes/rank.routes.js'
+import userPvPRoutes from './routes/userpvp.routes.js'
 import cookieParser from "cookie-parser";
 const app = express();
 
@@ -42,5 +43,6 @@ app.use('/api', timerPvPRoutes);
 app.use('/api', torneoRoutes);
 app.use('/api', rankRoutes);
 app.use('/api', tokenRoutes);
+app.use('/api', userPvPRoutes);
 
 export default app;

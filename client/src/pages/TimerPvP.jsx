@@ -9,6 +9,11 @@ import { useObjetives } from "../context/ObjetivesContext";
 import Confirmation from "../components/Confirmation";
 const URL = import.meta.env.VITE_BACKEND_URL;
 import { getRankByUserRequest } from "../api/rank";
+import {
+  createUserPvPRequest,
+  getUserPvPByUserRequest,
+  updateUserPvPByIdRequest,
+} from "../api/userpvp";
 
 function TimerPvP() {
   const navigate = useNavigate();
@@ -30,8 +35,30 @@ function TimerPvP() {
   const { getObjetivesContext, updateObjetive } = useObjetives();
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [revancha, setRevancha] = useState(false);
-  
+  const [userPvP, setUserPvP] = useState(null);
 
+  // useEffect(() => {
+  //   const fetchUserPvP = async () => {
+  //     try {
+  //       const { data } = await getUserPvPByUserRequest(currentUser._id);
+
+  //       setUserPvP(data);
+  //       console.log("UserPvP:", data)
+  //       if (!data) {
+  //         const updatedQtyPvP = data.qty_pvp + 1;
+  //         await updateUserPvPByIdRequest(data._id, {
+  //           qty_pvp: updatedQtyPvP,
+  //         });
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching userPvP:", error);
+  //     }
+  //   };
+
+  //   if (currentUser && contrincante) {
+  //     fetchUserPvP();
+  //   }
+  // }, [currentUser, contrincante]);
 
   useEffect(() => {
     const checkUserRank = async () => {
@@ -39,13 +66,13 @@ function TimerPvP() {
         const { data } = await getRankByUserRequest(currentUser._id);
         if (data.length === 0) {
           // El usuario no tiene rango, redirigir a RankingUsers
-          navigate('/rankingusers');
+          navigate("/rankingusers");
         }
       } catch (error) {
-        console.error('Error fetching user rank:', error);
+        console.error("Error fetching user rank:", error);
       }
     };
-  
+
     if (currentUser) {
       checkUserRank();
     }
@@ -89,6 +116,8 @@ function TimerPvP() {
             const { data } = await getUserRequest(contrincante); // Aquí se envía el _id directamente
             console.log(data);
             setContrincante(data);
+            console.log("Contrincante:", contrincante);
+            socket.emit("contrincante", data._id);
           } catch (error) {
             console.error("Error fetching user:", error);
           }
@@ -116,6 +145,7 @@ function TimerPvP() {
       setResultado(data.ganador);
       setResultadoCon(data.ganador);
       setShowConfirmation(true);
+      console.log("Contrincante:", data.loser);
       if (data.ganador) {
         console.log("Ganaste");
         const winner = data.winner; // Aquí se envía el _id como cadena
@@ -124,6 +154,22 @@ function TimerPvP() {
 
         // Actualizar objetivo del usuario ganador
         if (currentUser && currentUser._id === winner) {
+          const fetchUserPvP = async () => {
+            try {
+              const { data } = await getUserPvPByUserRequest(currentUser._id);
+              setUserPvP(data);
+              console.log("UserPvP:", data);
+              if (!data) {
+                createUserPvPRequest({
+                  user: currentUser._id,
+                  userPvP: loser,
+                  qty_pvp: 0,
+                });
+              }
+            } catch (error) {
+              console.error("Error fetching userPvP:", error);
+            }
+          };
           const actualizarObjetivo = async () => {
             try {
               const objetivosResponse = await getObjetivesContext();
@@ -159,6 +205,7 @@ function TimerPvP() {
           };
 
           actualizarObjetivo();
+          fetchUserPvP();
         }
       }
     });

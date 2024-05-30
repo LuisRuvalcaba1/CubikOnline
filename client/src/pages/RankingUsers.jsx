@@ -238,9 +238,9 @@ const RankingUsers = () => {
       const tiempoEnMilisegundos = minutos * 60 * 1000 + segundos * 1000 + milisegundos;
   
       let calculatedRank;
-      if (tiempoEnMilisegundos >= 50 && tiempoEnMilisegundos <= 1000) {
+      if (tiempoEnMilisegundos >= 50 && tiempoEnMilisegundos <= 10000) {
         calculatedRank = 1; // Gold
-      } else if (tiempoEnMilisegundos >= 1100 && tiempoEnMilisegundos <= 15000) {
+      } else if (tiempoEnMilisegundos >= 11000 && tiempoEnMilisegundos <= 15000) {
         calculatedRank = 2; // Silver
       } else if (tiempoEnMilisegundos >= 16000 && tiempoEnMilisegundos <= 20000) {
         calculatedRank = 3; // Bronze
