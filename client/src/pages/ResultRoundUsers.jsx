@@ -6,17 +6,20 @@ import io from "socket.io-client";
 import { useAuth } from "../context/AuthContext";
 import { verifyTokenRequest } from "../api/auth";
 const URL = import.meta.env.VITE_BACKEND_URL;
+
 function ResultRoundUsers() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { grupo } = useLocation().state;
+  const { grupo, grupoActual, participantes } = useLocation().state;
   const { getTorneoById } = useAuthTorneo();
   const [torneo, setTorneo] = useState([]);
   const [socket, setSocket] = useState(null);
   const [resultados, setResultados] = useState([]);
   const [juez2, setJuez2] = useState(null);
   const [tiemposUsuarios, setTiemposUsuarios] = useState({});
-
+  const [tiemposVistos, setTiemposVistos] = useState(false);
+  const [ganador, setGanador] = useState(null);
+  const [participante, setParticipante] = useState([]);
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -35,7 +38,9 @@ function ResultRoundUsers() {
       try {
         const torneo = await getTorneoById();
         setTorneo(torneo);
+        setParticipante(torneo.qty_participantes);
         console.log(torneo);
+        console.log("Participantes:", participantes);
       } catch (error) {
         console.error("Error al obtener el torneo:", error);
       }
@@ -56,20 +61,43 @@ function ResultRoundUsers() {
     });
 
     socket.on("tiemposUsuarios", (tiemposPorGrupo) => {
-      const grupoId = grupo.join("-"); 
+      const grupoId = grupo.join("-");
       const tiemposGrupo = tiemposPorGrupo[grupoId] || {};
 
       setTiemposUsuarios(tiemposGrupo);
     });
 
-    socket.on("finalizarGrupo", () => {
-      navigate("/yourtournament");
+    socket.on("tiemposVistos", (tiemposGrupo) => {
+      setTiemposUsuarios(tiemposGrupo);
+      // Aquí puedes agregar la lógica para permitir el registro de los tiempos
+    });
+
+    socket.on("ganadorRegistrado", (grupoId) => {
+      const grupoIndex = grupo.findIndex((g) => g.join("-") === grupoId);
+      const siguienteGrupo = grupo[grupoIndex + 1];
+
+      if (siguienteGrupo) {
+        setGrupoActual(siguienteGrupo);
+        navigate("/resultroundusers", { state: { grupo: siguienteGrupo, grupoActual: siguienteGrupo } });
+      } else {
+        navigate("/yourtournament");
+      }
     });
 
     return () => {
       socket.disconnect();
     };
-  }, [grupo, juez2]);
+  }, [grupo, juez2, navigate]);
+
+  const handleTiemposVistos = () => {
+    setTiemposVistos(true);
+    socket.emit("tiemposVistos", grupo);
+  };
+
+  const handleMarcarGanador = (userId) => {
+    setGanador(userId);
+    socket.emit("marcarGanador", { grupo: grupoActual, ganador: userId });
+  };
 
   return (
     <div>
@@ -84,11 +112,16 @@ function ResultRoundUsers() {
                 <li key={index}>{tiempo}</li>
               ))}
             </ul>
+            <button onClick={() => handleMarcarGanador(datosUsuario.userId)} disabled={ganador !== null}>
+              {ganador === datosUsuario.userId ? "Ganador" : "Marcar como ganador"}
+            </button>
           </div>
         ))}
       </div>
+      <button onClick={handleTiemposVistos} disabled={tiemposVistos}>
+        {tiemposVistos ? "Tiempos vistos" : "Ver tiempos"}
+      </button>
     </div>
   );
 }
-
 export default ResultRoundUsers;

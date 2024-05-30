@@ -6,9 +6,42 @@ export function handleJoinTournament(joinNS) {
   let roundParticipants = [];
   let participantesData = {};
   let usuariosData = {};
+  let juecesViendoTiempos = [];
+
+  function reiniciarTorneo() {
+    participantes = [];
+    juezID = [];
+    n_p = undefined;
+    ganadores = [];
+    roundParticipants = [];
+    participantesData = {};
+    usuariosData = {};
+  }
 
   joinNS.on("connection", (socket) => {
     console.log("Conectado al espacio de nombres de torneos");
+
+    socket.on("tiemposVistos", (grupo) => {
+      const juezEnGrupo = juecesViendoTiempos.find(
+        (juez) => juez.userId === socket.userId
+      );
+
+      if (juezEnGrupo) {
+        const grupoId = grupo.join("-");
+        juecesViendoTiempos.push({ grupoId, juezId: socket.userId });
+
+        const tiemposGrupo = tiemposPorGrupo[grupoId] || {};
+
+        juezEnGrupo.emit("tiemposVistos", tiemposGrupo);
+      } else {
+        console.log("El juez no está en este grupo");
+      }
+    });
+
+    socket.on("reiniciarTorneo", () => {
+      reiniciarTorneo();
+      console.log("Torneo reiniciado");
+    });
 
     socket.on("n_participantes", (n) => {
       socket.n_p = n;
@@ -71,6 +104,33 @@ export function handleJoinTournament(joinNS) {
       }
     });
 
+    socket.on("marcarGanador", ({ grupo, ganador }) => {
+      const grupoId = grupo.join("-");
+      const juezEnGrupo = juecesGrupo.find(
+        (juez) => juez.userId === socket.userId
+      );
+
+      if (juezEnGrupo) {
+        const tiemposGrupo = tiemposPorGrupo[grupoId] || {};
+        const usuarioGanador = Object.entries(tiemposGrupo).find(
+          ([userId]) => userId === ganador
+        );
+
+        if (usuarioGanador) {
+          const [userId, datosUsuario] = usuarioGanador;
+          console.log(`Ganador del grupo ${grupoId}: ${userId}`);
+          ganadores.push({ userId, datosUsuario });
+        } else {
+          console.log("Usuario ganador no encontrado");
+        }
+
+        // Emitir un evento al cliente para indicar que se registró el ganador
+        juezEnGrupo.emit("ganadorRegistrado", grupoId);
+      } else {
+        console.log("El juez no está en este grupo");
+      }
+    });
+
     socket.on("getTiemposUsuarios", () => {
       juezID.forEach((juez) => {
         juez.emit("tiemposUsuarios", participantesData);
@@ -117,63 +177,75 @@ export function handleJoinTournament(joinNS) {
       // Agrupar los tiempos de los usuarios por grupo
       roundParticipants.forEach((pair) => {
         const grupoId = `${pair.user1.userId}-${pair.user2.userId}`;
+        const juezViendoTiempos = juecesViendoTiempos.find(
+          (juez) => juez.grupoId === grupoId && juez.juezId === socket.userId
+        );
 
-        tiemposPorGrupo[grupoId] = {
-          user1: {
-            userId: pair.user1.userId,
-            tiempos: pair.user1.tiempos || [],
-          },
-          user2: {
-            userId: pair.user2.userId,
-            tiempos: pair.user2.tiempos || [],
-          },
-        };
+        if (!juezViendoTiempos) {
+          console.log("El juez no ha visto los tiempos de este grupo");
+          return;
+        } else {
+          tiemposPorGrupo[grupoId] = {
+            user1: {
+              userId: pair.user1.userId,
+              tiempos: pair.user1.tiempos || [],
+            },
+            user2: {
+              userId: pair.user2.userId,
+              tiempos: pair.user2.tiempos || [],
+            },
+          };
 
-        if (usuariosData[userId].length === 5) {
-          if (
-            pair.user1 &&
-            pair.user2 &&
-            Array.isArray(pair.user1.tiempos) &&
-            Array.isArray(pair.user2.tiempos) &&
-            pair.user1.tiempos.length === 5 &&
-            pair.user2.tiempos.length === 5
-          ) {
-            const tiempos1 = pair.user1.tiempos.map(convertTimeToMilliseconds);
-            const tiempos2 = pair.user2.tiempos.map(convertTimeToMilliseconds);
-
-            const promedio1 =
-              tiempos1.reduce((a, b) => a + b, 0) / tiempos1.length;
-            const promedio2 =
-              tiempos2.reduce((a, b) => a + b, 0) / tiempos2.length;
-
-            console.log(`Promedio de ${pair.user1.userId}: ${promedio1}`);
-            console.log(`Promedio de ${pair.user2.userId}: ${promedio2}`);
-
-            const ganador = promedio1 < promedio2 ? pair.user1 : pair.user2;
-            const perdedor = promedio1 < promedio2 ? pair.user2 : pair.user1;
-
-            ganador.emit("resultado", {
-              ganador: true,
-              promedio: promedio1,
-              promedioOponente: promedio2,
-            });
-            perdedor.emit("resultado", {
-              ganador: false,
-              promedio: promedio2,
-              promedioOponente: promedio1,
-            });
-
-            if (!ganadores.includes(ganador)) {
-              ganadores.push(ganador);
-              console.log(`Winner: ${ganador.userId}`);
-              console.log(
-                "Ganadores:",
-                ganadores.map((s) => s.userId)
+          if (usuariosData[userId].length === 5) {
+            if (
+              pair.user1 &&
+              pair.user2 &&
+              Array.isArray(pair.user1.tiempos) &&
+              Array.isArray(pair.user2.tiempos) &&
+              pair.user1.tiempos.length === 5 &&
+              pair.user2.tiempos.length === 5
+            ) {
+              const tiempos1 = pair.user1.tiempos.map(
+                convertTimeToMilliseconds
               );
-            }
+              const tiempos2 = pair.user2.tiempos.map(
+                convertTimeToMilliseconds
+              );
 
-            usuariosData[pair.user1.userId] = [];
-            usuariosData[pair.user2.userId] = [];
+              const promedio1 =
+                tiempos1.reduce((a, b) => a + b, 0) / tiempos1.length;
+              const promedio2 =
+                tiempos2.reduce((a, b) => a + b, 0) / tiempos2.length;
+
+              console.log(`Promedio de ${pair.user1.userId}: ${promedio1}`);
+              console.log(`Promedio de ${pair.user2.userId}: ${promedio2}`);
+
+              const ganador = promedio1 < promedio2 ? pair.user1 : pair.user2;
+              const perdedor = promedio1 < promedio2 ? pair.user2 : pair.user1;
+
+              ganador.emit("resultado", {
+                ganador: true,
+                promedio: promedio1,
+                promedioOponente: promedio2,
+              });
+              perdedor.emit("resultado", {
+                ganador: false,
+                promedio: promedio2,
+                promedioOponente: promedio1,
+              });
+
+              if (!ganadores.includes(ganador)) {
+                ganadores.push(ganador);
+                console.log(`Winner: ${ganador.userId}`);
+                console.log(
+                  "Ganadores:",
+                  ganadores.map((s) => s.userId)
+                );
+              }
+
+              usuariosData[pair.user1.userId] = [];
+              usuariosData[pair.user2.userId] = [];
+            }
           }
         }
       });

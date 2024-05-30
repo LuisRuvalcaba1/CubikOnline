@@ -48,15 +48,12 @@ function TimerPvP() {
     fetchUser();
   }, [user]);
 
-  
-
-useEffect(() => {
-
-  const time = setTimeout(() => {
-    if (isPaired) {
-      navigate("/profile");
-    }
-  }, 120000);
+  useEffect(() => {
+    const time = setTimeout(() => {
+      if (isPaired) {
+        navigate("/profile");
+      }
+    }, 120000);
     const socket = io(`${URL}/confrontation`);
     setSocket(socket);
 
@@ -87,11 +84,11 @@ useEffect(() => {
     socket.on("scramble", (scramble) => {
       setScramble(scramble);
     });
-  
+
     socket.on("message", (tiempoSocket) => {
       console.log(tiempoSocket);
     });
-  
+
     // socket.on("revancha", (tiempoSocket) => {
     //   console.log(tiempoSocket);
     //   console.log("Revancha")
@@ -116,7 +113,7 @@ useEffect(() => {
               const objetivosResponse = await getObjetivesContext();
               const objetivos = objetivosResponse.data;
               const objetivoActual = objetivos.find(
-                (objetivo) => objetivo.objective === 2 && objetivo.qty_times < 5
+                (objetivo) => objetivo.objective === 2
               );
 
               if (objetivoActual) {
@@ -187,13 +184,13 @@ useEffect(() => {
       const tiempoMilisegundos = Math.floor(tiempoTranscurrido % 1000);
       const tiempoSegundos = Math.floor((tiempoTranscurrido / 1000) % 60);
       const tiempoMinutos = Math.floor((tiempoTranscurrido / (1000 * 60)) % 60);
-  
+
       const time = `${tiempoMinutos}:${
         tiempoSegundos < 10 ? "0" : ""
       }${tiempoSegundos}:${
         tiempoMilisegundos < 10 ? "00" : tiempoMilisegundos < 100 ? "0" : ""
       }${tiempoMilisegundos}`;
-  
+
       if (socket) {
         const message = JSON.stringify({ time: time });
         socket.emit("message", message);

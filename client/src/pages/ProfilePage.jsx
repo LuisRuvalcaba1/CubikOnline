@@ -10,6 +10,7 @@ import { useEncuesta } from "../context/EncuestaContext";
 import { useObjetives } from "../context/ObjetivesContext";
 import { getYourFriendsRequest } from "../api/amigos.js";
 import "./Profile.css";
+import { getUserRequest } from "../api/auth";
 
 function ProfilePage() {
   const [showModal, setShowModal] = useState(false);
@@ -24,6 +25,7 @@ function ProfilePage() {
   const [userEncuestas, setUserEncuestas] = useState([]);
   const [userObjetives, setUserObjetives] = useState([]);
   const { getObjetivesContext, createNewObjetive } = useObjetives();
+  const [infoUsuario, setInfoUsuario] = useState(null);
   //const { value } = useAmigos();
   const [yourFriends, setYourFriends] = useState([]);
 
@@ -95,10 +97,13 @@ function ProfilePage() {
   useEffect(() => {
     const fetchYourFriends = async () => {
       try {
-        const {data} = await getYourFriendsRequest();
+        const { data } = await getYourFriendsRequest();
         setYourFriends(data);
         console.log("Amigos obtenidos:", data);
-        console.log("Amigos obtenidos:", yourFriends.map((friend) => friend.username));
+        console.log(
+          "Amigos obtenidos:",
+          yourFriends.map((friend) => friend.username)
+        );
       } catch (error) {
         console.error("Error al obtener tus amigos:", error);
       }
@@ -186,6 +191,25 @@ function ProfilePage() {
     isPrivateRequest(data.email, data.isPrivate);
   };
 
+  const infoUser = (e) => {
+    const username = e.target.innerText;
+    yourFriends.map((friend) => {
+      if (friend.username === username) {
+        setInfoUsuario(friend);
+        const fetchAmigo = async () => {
+          try {
+            const { data } = await getUserRequest(friend._id);
+            console.log("Usuario completo:", data);
+            setInfoUsuario(data);
+          } catch (error) {
+            console.error("Error al obtener el usuario:", error);
+          }
+        };
+        fetchAmigo();
+      }
+    });
+  };
+
   const searchFriends = () => {
     navigation("/friends");
   };
@@ -217,14 +241,24 @@ function ProfilePage() {
             {yourFriends.length > 0 ? (
               <ul>
                 {yourFriends.map((friend) => (
-                  <li key={friend._id}>{friend.username}</li>
-                ))} {console.log("Amigos obtenidos:", yourFriends.length)}
+                  <li onClick={infoUser} key={friend._id}>
+                    {friend.username}
+                  </li>
+                ))}
+                {console.log("Amigos obtenidos:", yourFriends.length)}
               </ul>
             ) : (
               <p>No tienes amigos aún.</p>
             )}
           </div>
-
+          {infoUsuario !== null && (
+            <div>
+              <p>Nombre de usuario: {infoUsuario.username}</p>
+              <p>Email: {infoUsuario.email}</p>
+              <p>Rango: {infoUsuario.rank}</p>
+              <p>Points: {infoUsuario.points}</p>
+            </div>
+          )}
         </div>
       ) : (
         <p>Loading...</p>

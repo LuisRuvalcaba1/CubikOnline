@@ -32,6 +32,8 @@ export const Navbar = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const { deleteTorneoByJuez } = useAuthTorneo();
   const navigate = useNavigate();
+  const { getTorneoById } = useAuthTorneo();
+
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -56,9 +58,16 @@ export const Navbar = () => {
     logout();
   });
 
+  // const onJuezBack = async () => {
+  //   try {
+  //     //navigate("/yourtournament", { state: { participantes } });
+  //   } catch (error) {
+  //     console.error("Error al eliminar torneo:", error);
+  //   }
+  // }
+
   const onDeleteTournament = async (id) => {
     try {
-      
       const res = await deleteTorneoByJuez(currentUser._id, id);
       console.log(res);
       statusChangeAuth({email:currentUser.email, _id:currentUser._id, status:"active", role:"user"});

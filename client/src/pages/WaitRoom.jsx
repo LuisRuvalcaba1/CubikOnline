@@ -61,7 +61,7 @@ function WaitRoom() {
   useEffect(() => {
     const socket = io(`${URL}/join`);
     setSocket(socket);
-
+    console.log("Socket creado:", socket);
     socket.emit("user", user2._id);
     socket.on("user", (user) => {
       setUsuario(user);
@@ -123,6 +123,7 @@ function WaitRoom() {
     });
 
     return () => {
+      socket.emit("reiniciarTorneo");
       socket.disconnect();
     };
   }, []);
@@ -137,6 +138,7 @@ function WaitRoom() {
         setSegundos(0);
         setMinutos(0);
         setTiemposRegistrados(0);
+       //setGanador(null);
       });
     }
   }, [socket]);

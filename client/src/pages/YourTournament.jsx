@@ -8,19 +8,21 @@ import { removeTokenRequest } from "../api/auth";
 import { useNavigate } from "react-router-dom";
 import Modal from "react-modal";
 import { verifyTokenRequest } from "../api/auth";
-import { set } from "mongoose";
-const URL = import.meta.env.VITE_BACKEND_URL
+
+const URL = import.meta.env.VITE_BACKEND_URL;
 
 Modal.setAppElement("#root");
 
 function YourTournament() {
   const navigate = useNavigate();
   const { getTorneoById, deleteTorneo } = useAuthTorneo();
-  const { participantes } = useLocation().state;
+  const location = useLocation();
+  const [participantes, setParticipantes] = useState(null);
   const [torneo, setTorneo] = useState([]);
   const [socket, setSocket] = useState(null);
   const [grupos, setGrupos] = useState([]);
   const [grupoSeleccionado, setGrupoSeleccionado] = useState(null);
+  const [grupoActual, setGrupoActual] = useState(null);
   const { user, logout, statusChangeAuth } = useAuth();
   const { deleteTorneoByJuez } = useAuthTorneo();
   const [currentUser, setCurrentUser] = useState(null);
@@ -36,6 +38,8 @@ function YourTournament() {
     };
     fetchUser();
   }, [user]);
+
+  
 
   useEffect(() => {
     const eliminarToken = async () => {
@@ -61,8 +65,9 @@ function YourTournament() {
   useEffect(() => {
     const socket = io(`${URL}/join`);
     setSocket(socket);
-    if(currentUser) {
-      socket.emit("juez", currentUser._id);    
+    console.log("Socket del juez creado:", socket);
+    if (currentUser) {
+      socket.emit("juez", currentUser._id);
       socket.emit("n_participantes", participantes);
     }
 
@@ -77,8 +82,8 @@ function YourTournament() {
 
   const onSubmit = (data) => {
     setGrupoSeleccionado(data);
-
-    navigate("/resultroundusers", { state: { grupo: data } });
+    setGrupoActual(data);
+    navigate("/resultroundusers", { state: { grupo: data, grupoActual: data, participantes } });
   };
 
   useEffect(() => {
@@ -94,6 +99,12 @@ function YourTournament() {
 
     fetchTorneo();
   }, [getTorneoById]);
+
+  useEffect(() => {
+    if (location.state && location.state.participantes) {
+      setParticipantes(location.state.participantes);
+    }
+  }, [location.state]);
 
   return (
     <div>
