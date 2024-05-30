@@ -3,11 +3,13 @@ import { useAuthTimer } from "../context/TimerContext";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { addRankRequest } from "../api/rank.js";
+import { verifyTokenRequest } from "../api/auth.js";
 
 const RankingUsers = () => {
   const { createNewTimer, getTimersContext, deleteTimerBySession } =
     useAuthTimer();
-  const { user, updateUserRank } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [session] = useState(200);
   const [scramble, setScramble] = useState("");
@@ -19,7 +21,9 @@ const RankingUsers = () => {
   const [activo, setActivo] = useState(false);
   const [tiempoInicial, setTiempoInicial] = useState(null);
   const [tiemposGuardados, setTiemposGuardados] = useState([{}]);
-  const [tiempoAverage, setTiempoAverage] = useState("");
+  const [tiempoAverage, setTiempoAverage] = useState("N/A");
+  const [currentUser, setCurrentUser] = useState(null);
+  const [hasRegisteredRank, setHasRegisteredRank] = useState(false);
 
   useEffect(() => {
     generateNewScramble();
@@ -34,6 +38,19 @@ const RankingUsers = () => {
         console.error("Error fetching timers:", error);
       });
   }, []);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const { data } = await verifyTokenRequest();
+        setCurrentUser(data);
+        console.log("Usuario actual:", currentUser);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+    fetchUser();
+  }, [user]);
 
   const generateNewScramble = () => {
     const movimientos = ["R", "L", "U", "D", "F", "B"];
@@ -81,55 +98,33 @@ const RankingUsers = () => {
     return () => clearInterval(interval);
   }, [activo, tiempoInicial]);
 
-  useEffect(() => {
-    function handleKeyPress(event) {
-      if (event.keyCode === 32) {
-        setActivo((prevActivo) => !prevActivo);
-        if (!activo) {
-          setTiempoInicial(performance.now());
-        } else {
-          registrarTiempo();
-          console.log("registrando tiempo", tiemposGuardados);
-          generarNuevoScramble();
-        }
-      }
-    }
+  function generarNuevoScramble() {
+    const movimientos = ["R", "L", "U", "D", "F", "B"];
+    const modificadores = ["", "'", "2"];
 
-    function generarNuevoScramble() {
-      const movimientos = ["R", "L", "U", "D", "F", "B"];
-      const modificadores = ["", "'", "2"];
+    let nuevoScramble = "";
+    let ultimoMovimiento = "";
 
-      let nuevoScramble = "";
-      let ultimoMovimiento = "";
+    for (let i = 0; i < 20; i++) {
+      let movimientoAleatorio =
+        movimientos[Math.floor(Math.random() * movimientos.length)];
+      let modificadorAleatorio =
+        modificadores[Math.floor(Math.random() * modificadores.length)];
 
-      for (let i = 0; i < 20; i++) {
-        let movimientoAleatorio =
+      while (movimientoAleatorio === ultimoMovimiento) {
+        movimientoAleatorio =
           movimientos[Math.floor(Math.random() * movimientos.length)];
-        let modificadorAleatorio =
-          modificadores[Math.floor(Math.random() * modificadores.length)];
-
-        while (movimientoAleatorio === ultimoMovimiento) {
-          movimientoAleatorio =
-            movimientos[Math.floor(Math.random() * movimientos.length)];
-        }
-
-        nuevoScramble += movimientoAleatorio + modificadorAleatorio + " ";
-        ultimoMovimiento = movimientoAleatorio;
       }
 
-      setScramble(nuevoScramble.trim());
+      nuevoScramble += movimientoAleatorio + modificadorAleatorio + " ";
+      ultimoMovimiento = movimientoAleatorio;
     }
 
-    window.addEventListener("keydown", handleKeyPress);
+    setScramble(nuevoScramble.trim());
+  }
 
-    return () => {
-      window.removeEventListener("keydown", handleKeyPress);
-    };
-  }, [activo, registrarTiempo, tiemposGuardados]);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   function registrarTiempo() {
-    if (tiempoInicial) {
+    if (tiempoInicial && !hasRegisteredRank) {
       const tiempoFinal = performance.now();
       const tiempoTranscurrido = tiempoFinal - tiempoInicial;
       const tiempoMilisegundos = Math.floor(tiempoTranscurrido % 1000) - 3;
@@ -235,49 +230,74 @@ const RankingUsers = () => {
 
   useEffect(() => {
     if (tiemposGuardados.length === 12) {
-      setTiempoAverage(getAverageOf12(tiemposGuardados, session));
-      console.log("Promedio", tiempoAverage);
-      const [minutos, segundos, milisegundos] = tiempoAverage.split(":").map(Number);
-      const tiempoEnMilisegundos = (minutos * 60 * 1000) + (segundos * 1000) + milisegundos;
-      if (tiempoEnMilisegundos >= 500 && tiempoEnMilisegundos <= 1000) {
-        setRank(1); // Gold
+      const calculatedAverage = getAverageOf12(tiemposGuardados, session);
+      setTiempoAverage(calculatedAverage);
+      console.log("Promedio", calculatedAverage);
+  
+      const [minutos, segundos, milisegundos] = calculatedAverage.split(":").map(Number);
+      const tiempoEnMilisegundos = minutos * 60 * 1000 + segundos * 1000 + milisegundos;
+  
+      let calculatedRank;
+      if (tiempoEnMilisegundos >= 50 && tiempoEnMilisegundos <= 1000) {
+        calculatedRank = 1; // Gold
       } else if (tiempoEnMilisegundos >= 1100 && tiempoEnMilisegundos <= 15000) {
-        setRank(2); // Silver
+        calculatedRank = 2; // Silver
       } else if (tiempoEnMilisegundos >= 16000 && tiempoEnMilisegundos <= 20000) {
-        setRank(3); // Bronze
+        calculatedRank = 3; // Bronze
       } else if (tiempoEnMilisegundos >= 21000 && tiempoEnMilisegundos <= 25000) {
-        setRank(4); // Coal
+        calculatedRank = 4; // Coal
       } else if (tiempoEnMilisegundos >= 26000 && tiempoEnMilisegundos <= 30000) {
-        setRank(5); // Wood
+        calculatedRank = 5; // Wood
       } else if (tiempoEnMilisegundos >= 31000 && tiempoEnMilisegundos <= 35000) {
-        setRank(6); // Plastic
+        calculatedRank = 6; // Plastic
       } else if (tiempoEnMilisegundos >= 36000 && tiempoEnMilisegundos <= 180000) {
-        setRank(7); // Junior
+        calculatedRank = 7; // Junior
       } else {
-        setRank(0); // N/A
+        calculatedRank = 0; // N/A
       }
-      
-      const data = {
-        email: user.email,
-        rank: rank,
-      };
-      updateUserRank(data);
-      deleteTimerBySession(session);
-      navigate("/profile");
+  
+      setRank(calculatedRank);
+  
+      if (calculatedAverage !== "N/A") {
+        addRank(calculatedRank, calculatedAverage);
+        setHasRegisteredRank(true);
 
-      console.log("Rango", rank);
+      }
     }
-  }, [tiemposGuardados, getAverageOf12, session, tiempoAverage, user.email, rank, updateUserRank, deleteTimerBySession, navigate]);
+  }, [tiemposGuardados, currentUser]);
+  
+  const addRank = async (calculatedRank, calculatedAverage) => {
+    try {
+      await addRankRequest(currentUser._id, calculatedRank, calculatedAverage);
+    } catch (error) {
+      console.error('Error al añadir el rango:', error);
+    }
+  };
 
   const handleDelete = handleSubmit(async () => {
-    const data = {
-      email: user.email,
-      rank: rank,
-    };
-    updateUserRank(data);
     deleteTimerBySession(session);
     navigate("/timerpvp");
   });
+
+  useEffect(() => {
+    function handleKeyPress(event) {
+      if (event.keyCode === 32) {
+        setActivo((prevActivo) => !prevActivo);
+        if (!activo) {
+          setTiempoInicial(performance.now());
+        } else {
+          registrarTiempo();
+          generarNuevoScramble();
+        }
+      }
+    }
+  
+    window.addEventListener("keydown", handleKeyPress);
+  
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [activo]);
 
   return (
     <div>

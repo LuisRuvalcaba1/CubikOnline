@@ -11,7 +11,6 @@ import {
   statusChange,
   changeToJugde,
   getUserByEmail,
-  updateUserRank,
   isPrivate,
   getUserPrivateStatus,
   getUser
@@ -32,7 +31,6 @@ router.put("/points/:id", authRequired, updateUserPoints);
 router.put("/account/password", authRequired, updateUserPassword);
 router.put("/torneo", authRequired, changeToJugde);
 router.get("/getUserByEmail", authRequired, getUserByEmail);
-router.put("/rankingusers", authRequired, updateUserRank);
 router.put("/isPrivate", authRequired, isPrivate);
 router.get('/user/private/:email', authRequired, getUserPrivateStatus);
 router.get('/users/:id', authRequired, getUser);

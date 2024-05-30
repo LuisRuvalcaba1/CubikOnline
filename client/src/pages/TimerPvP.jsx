@@ -8,6 +8,7 @@ import { verifyTokenRequest, getUserRequest } from "../api/auth";
 import { useObjetives } from "../context/ObjetivesContext";
 import Confirmation from "../components/Confirmation";
 const URL = import.meta.env.VITE_BACKEND_URL;
+import { getRankByUserRequest } from "../api/rank";
 
 function TimerPvP() {
   const navigate = useNavigate();
@@ -29,11 +30,26 @@ function TimerPvP() {
   const { getObjetivesContext, updateObjetive } = useObjetives();
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [revancha, setRevancha] = useState(false);
-  // useEffect(() => {
-  //   if (user.rank === 0) {
-  //     navigate('/rankingusers');
-  //   }
-  // }, [user, navigate]);
+  
+
+
+  useEffect(() => {
+    const checkUserRank = async () => {
+      try {
+        const { data } = await getRankByUserRequest(currentUser._id);
+        if (data.length === 0) {
+          // El usuario no tiene rango, redirigir a RankingUsers
+          navigate('/rankingusers');
+        }
+      } catch (error) {
+        console.error('Error fetching user rank:', error);
+      }
+    };
+  
+    if (currentUser) {
+      checkUserRank();
+    }
+  }, [currentUser, navigate]);
 
   useEffect(() => {
     const fetchUser = async () => {

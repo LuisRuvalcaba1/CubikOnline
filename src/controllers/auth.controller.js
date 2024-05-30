@@ -20,7 +20,6 @@ export const register = async (req, res) => {
       points: 0,
       role: "user",
       status: "active",
-      rank: 0,
       verificado: false,
       tokenVerificacion: null,
       isPrivate: false,
@@ -58,7 +57,6 @@ export const login = async (req, res) => {
       username: userFound.username,
       email: userFound.email,
       points: userFound.points,
-      rank: userFound.rank,
       status: userFound.status,
     });
   } catch (error) {
@@ -122,7 +120,6 @@ export const profile = async (req, res) => {
     username: userFound.username,
     email: userFound.email,
     points: userFound.points,
-    rank: userFound.rank,
     status: userFound.status,
   });
 };
@@ -147,25 +144,10 @@ export const verifyToken = async (req, res) => {
       username: userFound.username,
       email: userFound.email,
       points: userFound.points,
-      rank: userFound.rank,
       status: userFound.status,
       isPrivate: userFound.isPrivate,
     });
   });
-};
-
-export const updateUserRank = async (req, res) => {
-  try {
-    const { email, rank } = req.body;
-    const userFound = await User.findOne({ email });
-    if (!userFound) return res.status(400).json({ message: "User not found" });
-    userFound.rank = rank;
-    await userFound.save();
-    if (!userFound) return res.status(404).json({ message: "User not found" });
-    res.json(userFound);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
 };
 
 export const isPrivate = async (req, res) => {

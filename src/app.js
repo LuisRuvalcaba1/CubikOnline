@@ -13,6 +13,7 @@ import tokenRoutes from './routes/token.routes.js'
 import amigosRoutes from './routes/amigos.routes.js'
 import encuestaRoutes from './routes/encuesta.routes.js'
 import objetivesRoutes from './routes/objetives.routes.js'
+import rankRoutes from './routes/rank.routes.js'
 import cookieParser from "cookie-parser";
 const app = express();
 
@@ -39,6 +40,7 @@ app.use('/api', productRoutes);
 app.use('/api', storeRoutes);
 app.use('/api', timerPvPRoutes);
 app.use('/api', torneoRoutes);
+app.use('/api', rankRoutes);
 app.use('/api', tokenRoutes);
 
 export default app;

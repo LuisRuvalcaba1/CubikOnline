@@ -223,7 +223,6 @@ function ProfilePage() {
           <p>{currentUser.username}</p>
           <p>Email: {currentUser.lastName}</p>
           <p>ID: {currentUser._id}</p>
-          <p>Rango: {currentUser.rank}</p>
           <p>Points: {currentUser.points}</p>
           <div>
             <p>Perfil privado</p>
@@ -254,9 +253,8 @@ function ProfilePage() {
           {infoUsuario !== null && (
             <div>
               <p>Nombre de usuario: {infoUsuario.username}</p>
-              <p>Email: {infoUsuario.email}</p>
-              <p>Rango: {infoUsuario.rank}</p>
               <p>Points: {infoUsuario.points}</p>
+              <p>Cuenta privada: {infoUsuario.isPrivate}</p>
             </div>
           )}
         </div>

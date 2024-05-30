@@ -43,11 +43,6 @@ const userSchema = new mongoose.Schema({
         required: true,
         default: 'active'
     },
-    rank: {
-        type: Number,
-        required: true,
-        trim: true,
-    },
     verificado: {
         type: Boolean,
         default: false

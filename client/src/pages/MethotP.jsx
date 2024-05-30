@@ -11,7 +11,7 @@ import caso_cruz_armada from "../images/caso_cruz_armada.png";
 import caso_L from "../images/caso_l.png";
 import caso_linea from "../images/caso_linea.png";
 import { Link } from "react-router-dom";
-import orientar from "../images/orientar_3x3.png";
+
 function MetodoP() {
   return (
     <div className="contenedor" id="cont">
