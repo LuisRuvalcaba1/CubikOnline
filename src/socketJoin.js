@@ -106,12 +106,12 @@ export function handleJoinTournament(joinNS) {
 
     socket.on("marcarGanador", ({ grupo, ganador }) => {
       const grupoId = grupo.join("-");
-      const juezEnGrupo = juecesGrupo.find(
+      const juezEnGrupo = juecesViendoTiempos.find(
         (juez) => juez.userId === socket.userId
       );
 
       if (juezEnGrupo) {
-        const tiemposGrupo = tiemposPorGrupo[grupoId] || {};
+        const tiemposGrupo = tiemposGrupo[grupoId] || {};
         const usuarioGanador = Object.entries(tiemposGrupo).find(
           ([userId]) => userId === ganador
         );
@@ -181,10 +181,6 @@ export function handleJoinTournament(joinNS) {
           (juez) => juez.grupoId === grupoId && juez.juezId === socket.userId
         );
 
-        if (!juezViendoTiempos) {
-          console.log("El juez no ha visto los tiempos de este grupo");
-          return;
-        } else {
           tiemposPorGrupo[grupoId] = {
             user1: {
               userId: pair.user1.userId,
@@ -247,7 +243,6 @@ export function handleJoinTournament(joinNS) {
               usuariosData[pair.user2.userId] = [];
             }
           }
-        }
       });
 
       juezID.forEach((juez) => {

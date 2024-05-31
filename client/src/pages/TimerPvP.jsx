@@ -37,28 +37,6 @@ function TimerPvP() {
   const [revancha, setRevancha] = useState(false);
   const [userPvP, setUserPvP] = useState(null);
 
-  // useEffect(() => {
-  //   const fetchUserPvP = async () => {
-  //     try {
-  //       const { data } = await getUserPvPByUserRequest(currentUser._id);
-
-  //       setUserPvP(data);
-  //       console.log("UserPvP:", data)
-  //       if (!data) {
-  //         const updatedQtyPvP = data.qty_pvp + 1;
-  //         await updateUserPvPByIdRequest(data._id, {
-  //           qty_pvp: updatedQtyPvP,
-  //         });
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching userPvP:", error);
-  //     }
-  //   };
-
-  //   if (currentUser && contrincante) {
-  //     fetchUserPvP();
-  //   }
-  // }, [currentUser, contrincante]);
 
   useEffect(() => {
     const checkUserRank = async () => {
