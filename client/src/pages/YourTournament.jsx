@@ -26,6 +26,8 @@ function YourTournament() {
   const { user, logout, statusChangeAuth } = useAuth();
   const { deleteTorneoByJuez } = useAuthTorneo();
   const [currentUser, setCurrentUser] = useState(null);
+  const [tiemposUsuarios, setTiemposUsuarios] = useState({});
+  const [ganador, setGanador] = useState(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -69,10 +71,23 @@ function YourTournament() {
     if (currentUser) {
       socket.emit("juez", currentUser._id);
       socket.emit("n_participantes", participantes);
+      socket.emit("unirseGrupo", { juezId: currentUser._id, grupoIndex: 0 });
     }
 
     socket.on("grupos", (gruposFormados) => {
       setGrupos(gruposFormados);
+    });
+
+    socket.on("grupoActualizado", (nuevoGrupo) => {
+      setGrupoActual(nuevoGrupo);
+    });
+
+    socket.on("tiemposUsuarios", (tiemposPorGrupo) => {
+      setTiemposUsuarios(tiemposPorGrupo);
+    });
+
+    socket.on("ganadorRonda", (ganador) => {
+      setGanador(ganador);
     });
 
     return () => {
@@ -80,10 +95,15 @@ function YourTournament() {
     };
   }, [currentUser, participantes]);
 
-  const onSubmit = (data) => {
-    setGrupoSeleccionado(data);
-    setGrupoActual(data);
-    navigate("/resultroundusers", { state: { grupo: data, grupoActual: data, participantes } });
+  // const onSubmit = (data) => {
+  //   setGrupoSeleccionado(data);
+  //   setGrupoActual(data);
+  //   navigate("/resultroundusers", { state: { grupo: grupoActual, grupoActual: data, participantes } });
+  // };
+
+  const handleGrupoSeleccionado = (grupo) => {
+    setGrupoSeleccionado(grupo);
+    setGrupoActual(grupo);
   };
 
   useEffect(() => {
@@ -112,11 +132,39 @@ function YourTournament() {
       <div>
         <h2>Grupos formados:</h2>
         {grupos.map((grupo, index) => (
-          <button key={index} onClick={() => onSubmit(grupo)}>
+          <button
+            key={index}
+            onClick={() => handleGrupoSeleccionado(grupo)}
+            disabled={grupoActual && grupoActual.grupoId === index}
+          >
             Grupo {index + 1}
           </button>
         ))}
       </div>
+      {grupoActual && (
+        <div>
+          <h2>Grupo Actual:</h2>
+          <p>Juez: {grupoActual.juez}</p>
+          <p>Usuarios: {grupoActual.users.join(", ")}</p>
+          <div>
+            <h3>Tiempos de los usuarios:</h3>
+            {Object.entries(tiemposUsuarios).map(([userId, tiempos]) => (
+              <div key={userId}>
+                <h4>Usuario: {userId}</h4>
+                <p>Tiempos: {tiempos.join(", ")}</p>
+                <p>Promedio: {tiempos.reduce((a, b) => a + b, 0) / tiempos.length}</p>
+              </div>
+            ))}
+          </div>
+          {ganador && (
+            <div>
+              <h3>Ganador de la ronda:</h3>
+              <p>Usuario: {ganador.userId}</p>
+              <p>Promedio: {ganador.promedio}</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

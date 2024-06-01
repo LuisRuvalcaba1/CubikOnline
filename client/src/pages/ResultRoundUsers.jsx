@@ -10,7 +10,7 @@ const URL = import.meta.env.VITE_BACKEND_URL;
 function ResultRoundUsers() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { grupo, grupoActual, participantes } = useLocation().state;
+  const { grupo, participantes } = useLocation().state;
   const { getTorneoById } = useAuthTorneo();
   const [torneo, setTorneo] = useState([]);
   const [socket, setSocket] = useState(null);
@@ -20,6 +20,8 @@ function ResultRoundUsers() {
   const [tiemposVistos, setTiemposVistos] = useState(false);
   const [ganador, setGanador] = useState(null);
   const [participante, setParticipante] = useState([]);
+  const [grupoActual, setGrupoActual] = useState(null);
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -36,25 +38,31 @@ function ResultRoundUsers() {
   useEffect(() => {
     const fetchTorneo = async () => {
       try {
-        const torneo = await getTorneoById();
-        setTorneo(torneo);
-        setParticipante(torneo.qty_participantes);
-        console.log(torneo);
-        console.log("Participantes:", participantes);
+        const torneo2 = await getTorneoById();
+        setTorneo(torneo2);
+        setParticipante(torneo2.qty_participantes);
       } catch (error) {
         console.error("Error al obtener el torneo:", error);
       }
     };
 
     fetchTorneo();
-  });
+  }, [getTorneoById]);
 
   useEffect(() => {
     const socket = io(`${URL}/join`);
     setSocket(socket);
 
     socket.emit("grupo", grupo);
-    socket.emit("juez", juez2);
+    if (juez2) {
+      socket.emit("juez", juez2._id);
+      socket.on("grupo", (data) => {
+        setGrupoActual(data);
+      });
+      socket.on("grupoActualizado", (nuevoGrupo) => {
+        setGrupoActual(nuevoGrupo); // Actualizar estado local con el nuevo grupo
+      });
+    }
 
     socket.on("resultados", (resultados) => {
       setResultados(resultados);
@@ -69,7 +77,6 @@ function ResultRoundUsers() {
 
     socket.on("tiemposVistos", (tiemposGrupo) => {
       setTiemposUsuarios(tiemposGrupo);
-      // Aquí puedes agregar la lógica para permitir el registro de los tiempos
     });
 
     socket.on("ganadorRegistrado", (grupoId) => {
@@ -78,7 +85,9 @@ function ResultRoundUsers() {
 
       if (siguienteGrupo) {
         setGrupoActual(siguienteGrupo);
-        navigate("/resultroundusers", { state: { grupo: siguienteGrupo, grupoActual: siguienteGrupo } });
+        navigate("/resultroundusers", {
+          state: { grupo: siguienteGrupo, grupoActual: siguienteGrupo },
+        });
       } else {
         navigate("/yourtournament");
       }
@@ -98,30 +107,23 @@ function ResultRoundUsers() {
     setGanador(userId);
     socket.emit("marcarGanador", { grupo: grupoActual, ganador: userId });
   };
-
+  
   return (
-    <div>
-      <h1>ResultRoundUsers</h1>
-      <div>
+    <>
+     <div>
         <h2>Tiempos de los usuarios:</h2>
-        {Object.entries(tiemposUsuarios).map(([usuario, datosUsuario]) => (
-          <div key={usuario}>
-            <h3>{datosUsuario.userId}</h3>
-            <ul>
-              {datosUsuario.tiempos.map((tiempo, index) => (
-                <li key={index}>{tiempo}</li>
-              ))}
-            </ul>
-            <button onClick={() => handleMarcarGanador(datosUsuario.userId)} disabled={ganador !== null}>
-              {ganador === datosUsuario.userId ? "Ganador" : "Marcar como ganador"}
+        {Object.entries(tiemposUsuarios).map(([userId, tiempos]) => (
+          <div key={userId}>
+            <h3>Usuario: {userId}</h3>
+            <p>Tiempos: {tiempos.join(", ")}</p>
+            <p>Promedio: {tiempos.reduce((a, b) => a + b, 0) / tiempos.length}</p>
+            <button onClick={() => handleMarcarGanador(userId)} disabled={ganador}>
+              Marcar como ganador
             </button>
           </div>
         ))}
       </div>
-      <button onClick={handleTiemposVistos} disabled={tiemposVistos}>
-        {tiemposVistos ? "Tiempos vistos" : "Ver tiempos"}
-      </button>
-    </div>
+    </>
   );
 }
 export default ResultRoundUsers;

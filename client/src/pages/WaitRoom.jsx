@@ -62,6 +62,10 @@ function WaitRoom() {
     const socket = io(`${URL}/join`);
     setSocket(socket);
 
+    socket.on("gruposFormados", () => {
+      socket.emit("user", user2._id);
+    });
+
     socket.emit("user", user2._id);
     socket.on("user", (user) => {
       setUsuario(user);
