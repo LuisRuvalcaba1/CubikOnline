@@ -57,21 +57,17 @@ function TorneoPage() {
     }
   };
 
-  useEffect(() => {      
+  useEffect(() => {
     if (isJuez) {
       navigation("/yourtournament", { state: { participantes } });
     }
   }, [isJuez, navigation]);
 
   return (
-    <div
-    className="contenedor" id="cont">
-      <div className="contenedor">
+    <div className="contenedor" id="cont">
+      {/* <div className="contenedor"> */}
       <h1 className="texto font-bold text-center">Juez</h1>
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        
-      >
+      <form onSubmit={handleSubmit(onSubmit)}>
         <h2 className="texto text-center">Configuración de Torneo</h2>
         <label htmlFor="nombre">
           <input
@@ -83,44 +79,48 @@ function TorneoPage() {
           />
         </label>
 
-        <label htmlFor="qty_participantes">
-          <b>Participantes</b>
-          <input
-            type="range"
-            id="participants"
-            min="2"
-            max="4"
-            {...register("qty_participantes", { required: true })}
-          />
-        </label>
-        
-        <label htmlFor="rango">
-          <b>Rango</b>
-          <input
-            type="range"
-            id="rango"
-            min="1"
-            max="10"
-            {...register("rango", { required: true })}
-          />
-        </label>
+        <input
+          type="text"
+          id="premio"
+          placeholder="Premio"
+          className="w-full bg-zinc-700 text-white px-4 py-2 rounded-md"
+          {...register("premio", { required: true })}
+        />
 
-        <label htmlFor="premio">
-          {/* <b>Premio</b> */}
-          <input
-            type="text"
-            id="premio"
-            placeholder="Premio"
-            className="w-full bg-zinc-700 text-white px-4 py-2 rounded-md"
-            {...register("premio", { required: true })}
-          />
-        </label>
+        <br />
+        <br />
+
+        <b>Participantes</b>
+        <input
+          type="range"
+          id="participants"
+          min="2"
+          max="4"
+          {...register("qty_participantes", { required: true })}
+        />
+
+        <br />
+        <br />
+
+        <b>Rango</b>
+        <input
+          type="range"
+          id="rango"
+          min="1"
+          max="10"
+          {...register("rango", { required: true })}
+        />
+
         <div className="flex justify-center space-x-4">
-          <button type="submit" className="bg-slate-700 text-white py-2 px-4 rounded-md hover:bg-slate-900 transition-colors duration-300">Start</button>
+          <button
+            type="submit"
+            className="bg-slate-700 text-white py-2 px-4 rounded-md hover:bg-slate-900 transition-colors duration-300"
+          >
+            Start
+          </button>
         </div>
       </form>
-      </div>
-     
+      {/* </div> */}
     </div>
   );
 }
