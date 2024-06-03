@@ -15,7 +15,7 @@ Modal.setAppElement("#root");
 
 function YourTournament() {
   const navigate = useNavigate();
-  const { getTorneoById, deleteTorneo } = useAuthTorneo();
+  const { getTorneoById } = useAuthTorneo();
   const location = useLocation();
   const [participantes, setParticipantes] = useState(null);
   const [torneo, setTorneo] = useState([]);
@@ -28,6 +28,7 @@ function YourTournament() {
   const [currentUser, setCurrentUser] = useState(null);
   const [tiemposUsuarios, setTiemposUsuarios] = useState({});
   const [ganador, setGanador] = useState(null);
+  const [promedioGanador, setPromedioGanador] = useState(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -40,8 +41,6 @@ function YourTournament() {
     };
     fetchUser();
   }, [user]);
-
-  
 
   useEffect(() => {
     const eliminarToken = async () => {
@@ -83,11 +82,17 @@ function YourTournament() {
     });
 
     socket.on("tiemposUsuarios", (tiemposPorGrupo) => {
-      setTiemposUsuarios(tiemposPorGrupo);
+      console.log("Tiempos recibidos:", tiemposPorGrupo);
+      setTiemposUsuarios((prevTiempos) => ({
+        ...prevTiempos,
+        ...tiemposPorGrupo,
+      }));
     });
 
-    socket.on("ganadorRonda", (ganador) => {
-      setGanador(ganador);
+    socket.on("ganadorRonda", (data) => {
+      setGanador(data.userId);
+      setPromedioGanador(data.promedio);
+      console.log("Ganador de la ronda:", data.userId, data.promedio);
     });
 
     return () => {
@@ -95,36 +100,36 @@ function YourTournament() {
     };
   }, [currentUser, participantes]);
 
-  // const onSubmit = (data) => {
-  //   setGrupoSeleccionado(data);
-  //   setGrupoActual(data);
-  //   navigate("/resultroundusers", { state: { grupo: grupoActual, grupoActual: data, participantes } });
-  // };
-
-  const handleGrupoSeleccionado = (grupo) => {
-    setGrupoSeleccionado(grupo);
-    setGrupoActual(grupo);
-  };
-
   useEffect(() => {
-    const fetchTorneo = async () => {
-      try {
-        const torneo = await getTorneoById();
-        setTorneo(torneo);
-        console.log(torneo);
-      } catch (error) {
-        console.error("Error al obtener el torneo:", error);
-      }
-    };
+    console.log("tiemposUsuarios actualizado:", tiemposUsuarios);
+    console.log("grupoActual:", grupoActual);
+  }, [tiemposUsuarios, grupoActual]);
 
-    fetchTorneo();
-  }, [getTorneoById]);
+  const handleGrupoSeleccionado = (grupo, index) => {
+    setGrupoSeleccionado(grupo);
+    setGrupoActual({ ...grupo, grupoId: index });
+  };
 
   useEffect(() => {
     if (location.state && location.state.participantes) {
       setParticipantes(location.state.participantes);
     }
   }, [location.state]);
+
+  function formatTime(timeInMilliseconds) {
+    const minutes = Math.floor(timeInMilliseconds / 60000);
+    const seconds = Math.floor((timeInMilliseconds % 60000) / 1000);
+    const milliseconds = timeInMilliseconds % 1000;
+
+    return `${padZero(minutes)}:${padZero(seconds)}:${padZero(
+      milliseconds,
+      3
+    )}`;
+  }
+
+  function padZero(value, length = 2) {
+    return value.toString().padStart(length, "0");
+  }
 
   return (
     <div>
@@ -134,7 +139,7 @@ function YourTournament() {
         {grupos.map((grupo, index) => (
           <button
             key={index}
-            onClick={() => handleGrupoSeleccionado(grupo)}
+            onClick={() => handleGrupoSeleccionado(grupo, index)}
             disabled={grupoActual && grupoActual.grupoId === index}
           >
             Grupo {index + 1}
@@ -148,21 +153,20 @@ function YourTournament() {
           <p>Usuarios: {grupoActual.users.join(", ")}</p>
           <div>
             <h3>Tiempos de los usuarios:</h3>
-            {Object.entries(tiemposUsuarios).map(([userId, tiempos]) => (
-              <div key={userId}>
-                <h4>Usuario: {userId}</h4>
-                <p>Tiempos: {tiempos.join(", ")}</p>
-                <p>Promedio: {tiempos.reduce((a, b) => a + b, 0) / tiempos.length}</p>
-              </div>
-            ))}
+            {Object.entries(tiemposUsuarios[grupoActual.grupoId] || {}).map(
+              ([userId, datos]) => (
+                <div key={userId}>
+                  <h4>Usuario: {datos.userId}</h4>
+                  <ul>
+                    {datos.tiempos.map((tiempo, index) => (
+                      <li key={index}>{formatTime(tiempo)}</li>
+                    ))}
+                  </ul>
+                  <p>Promedio: {formatTime(datos.promedio)}</p>
+                </div>
+              )
+            )}
           </div>
-          {ganador && (
-            <div>
-              <h3>Ganador de la ronda:</h3>
-              <p>Usuario: {ganador.userId}</p>
-              <p>Promedio: {ganador.promedio}</p>
-            </div>
-          )}
         </div>
       )}
     </div>

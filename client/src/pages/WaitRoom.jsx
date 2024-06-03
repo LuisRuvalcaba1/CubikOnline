@@ -30,8 +30,9 @@ function WaitRoom() {
   const [tiempos, setTiempos] = useState({});
   const [currentUser, setCurrentUser] = useState(null);
   const [tiemposRegistrados, setTiemposRegistrados] = useState(0);
-  const[boton,setBoton] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [grupoActual, setGrupoActual] = useState(null);
+  const [grupoId, setGrupoId] = useState(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -71,8 +72,17 @@ function WaitRoom() {
       setUsuario(user);
     });
 
-    socket.on("paired", () => {
+    socket.emit("joinTorneo", torneo._id);
+
+    socket.on("paired", (data) => {
       setIsPaired(true);
+      setGrupoActual(data);
+      setGrupoId(data.grupoId);
+      console.log("Emparejado:", data);
+    });
+
+    socket.on("grupoId", (id) => {
+      setGrupoId(id);
     });
 
     socket.on("scramble", (nuevoScramble) => {
@@ -85,8 +95,8 @@ function WaitRoom() {
           data.promedio
         }. El promedio de tu oponente fue ${data.promedioOponente}.`
       );
-      if(data.ganador){
-        if(user2){
+      if (data.ganador) {
+        if (user2) {
           const actualizarObjetivo = async () => {
             try {
               const objetivosResponse = await getObjetivesContext();
@@ -121,9 +131,12 @@ function WaitRoom() {
           };
 
           actualizarObjetivo();
-
         }
       }
+    });
+
+    socket.on("redirigir", (ruta) => {
+      navigate(ruta);
     });
 
     return () => {
@@ -141,6 +154,7 @@ function WaitRoom() {
         setSegundos(0);
         setMinutos(0);
         setTiemposRegistrados(0);
+        setGrupoId(data.grupoId);
       });
     }
   }, [socket]);
@@ -156,7 +170,7 @@ function WaitRoom() {
       setGanador(false);
       navigate("/");
     }
-  }, [resultado]);  
+  }, [resultado]);
 
   useEffect(() => {
     let interval;
@@ -183,7 +197,6 @@ function WaitRoom() {
 
   function registrarTiempo() {
     if (tiemposRegistrados < 5) {
-      // Agregar esta condición
       if (tiempoInicial && isPaired) {
         const tiempoFinal = performance.now();
         const tiempoTranscurrido = tiempoFinal - tiempoInicial;
@@ -200,11 +213,11 @@ function WaitRoom() {
         }${tiempoMilisegundos}`;
 
         if (socket) {
-          const message = JSON.stringify(time);
+          const message = JSON.stringify({ time, grupoId });
           socket.emit("times", message);
           socket.emit("nextScramble");
           console.log("Enviado:", message);
-          setTiemposRegistrados(tiemposRegistrados + 1); // Incrementar el contador de tiempos registrados
+          setTiemposRegistrados(tiemposRegistrados + 1);
         }
       }
     }
@@ -247,6 +260,9 @@ function WaitRoom() {
             </p>
           </div>
           <p>{user2._id}</p>
+          <h1>Grupo {grupoId}</h1>
+          <p>Juez: {grupoActual.juez}</p>
+          <p>Usuarios: {grupoActual.users.join(", ")}</p>
           {/* {resultado.ganador && <p>{resultado.ganador}</p>} */}
           <Confirmation
             visible={showConfirmation}

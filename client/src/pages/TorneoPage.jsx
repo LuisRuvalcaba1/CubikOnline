@@ -29,11 +29,6 @@ function TorneoPage() {
     fetchUser();
   }, [user]);
 
-  // useEffect(() => {
-  //   const socket = io(`${URL}/join`);
-  //   setSocket(socket);
-  // }, []);
-
   const onSubmit = async (data, event) => {
     event.preventDefault();
     data.qty_participantes = parseInt(data.qty_participantes, 10);
@@ -50,8 +45,7 @@ function TorneoPage() {
         createTorneo(data),
       ]);
       console.log("Torneo creado y rol de usuario cambiado a juez");
-      // socket.emit("juez", currentUser._id);
-      // socket.emit("n_participantes", data.qty_participantes);
+
     } catch (error) {
       console.error("Error al crear el torneo y cambiar el rol:", error);
     }
