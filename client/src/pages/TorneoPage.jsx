@@ -11,11 +11,10 @@ import "./Profile.css";
 function TorneoPage() {
   const { register, handleSubmit } = useForm();
   const { user, changeToJugde, isJuez } = useAuth();
-  const { createTorneo } = useAuthTorneo();
+  const { createTorneo, getTorneoByJuez} = useAuthTorneo();
   const navigation = useNavigate();
   const [participantes, setParticipantes] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
-  //const [socket, setSocket] = useState(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -53,9 +52,33 @@ function TorneoPage() {
 
   useEffect(() => {
     if (isJuez) {
-      navigation("/yourtournament", { state: { participantes } });
+      const fetchTorneo = async () => {
+        try {
+          const torneos = await getTorneoByJuez(currentUser._id);
+          console.log(torneos);
+  
+          const torneoUsuario = torneos.find(
+            (torneo) => torneo.juez === currentUser._id
+          );
+  
+          if (torneoUsuario) {
+            console.log("Torneo del usuario:", torneoUsuario);
+            navigation("/yourtournament", {
+              state: {
+                participantes: participantes,
+                torneo: torneoUsuario._id,
+              },
+            });
+          } else {
+            console.log("No se encontró un torneo para el usuario actual");
+          }
+        } catch (error) {
+          console.error("Error al obtener los torneos:", error);
+        }
+      };
+      fetchTorneo();
     }
-  }, [isJuez, navigation]);
+  }, [isJuez, navigation, participantes, ]);
 
   return (
     <div className="contenedor" id="cont">

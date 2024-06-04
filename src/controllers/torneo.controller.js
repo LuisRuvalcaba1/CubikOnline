@@ -1,5 +1,4 @@
 import Torneo from "../models/torneo.model.js";
-import mongoose from "mongoose";
 
 export const createTorneo = async (req, res) => {
   try {
@@ -56,6 +55,15 @@ export const deleteTorneoByJuez = async (req, res) => {
 export const getTorneos = async (req, res) => {
   try {
     const torneos = await Torneo.find();
+    res.json(torneos);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getTorneoByJuez = async (req, res) => {
+  try {
+    const torneos = await Torneo.find({ juez: req.params.juez });
     res.json(torneos);
   } catch (error) {
     res.status(500).json({ message: error.message });

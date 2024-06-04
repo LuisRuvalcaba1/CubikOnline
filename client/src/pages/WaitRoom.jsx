@@ -64,16 +64,22 @@ function WaitRoom() {
     setSocket(socket);
 
     socket.on("gruposFormados", () => {
-      socket.emit("user", user2._id);
+      socket.emit("user", { userId: user2._id, torneoId: torneo });
     });
+  
+    socket.emit("joinTorneo", torneo);
+  
+    console.log("Torneo: ", torneo);
 
-    socket.emit("user", user2._id);
+    socket.emit("user", { userId: user2._id, torneoId: torneo });
+    //socket.emit("user", user2._id);
     socket.on("user", (user) => {
       setUsuario(user);
     });
 
-    socket.emit("joinTorneo", torneo._id);
+    socket.emit("joinTorneo", torneo);
 
+    console.log("Torneo: ", torneo);
     socket.on("paired", (data) => {
       setIsPaired(true);
       setGrupoActual(data);
@@ -274,6 +280,7 @@ function WaitRoom() {
           <h1>Wait Room</h1>
           <h2>{user2.username}</h2>
           <h2>{torneo}</h2>
+          <h2>{user2._id}</h2>
         </>
       )}
     </div>

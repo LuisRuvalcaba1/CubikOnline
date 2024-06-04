@@ -8,6 +8,7 @@ import { removeTokenRequest } from "../api/auth";
 import { useNavigate } from "react-router-dom";
 import Modal from "react-modal";
 import { verifyTokenRequest } from "../api/auth";
+import { set } from "mongoose";
 
 const URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -67,8 +68,27 @@ function YourTournament() {
     const socket = io(`${URL}/join`);
     setSocket(socket);
     console.log("Socket del juez creado:", socket);
-    if (currentUser) {
+
+    socket.on("juezRegistrado", ({ juezId, torneoId }) => {
+      console.log(`Juez ${juezId} registrado para el torneo ${torneoId}`);
+      // Obtener los datos del torneo y realizar las acciones necesarias
+      const fetchTorneo = async () => {
+        try {
+          const torneoData = await getTorneoById(torneoId);
+          setTorneo(torneoData);
+          console.log("Torneo obtenido:", torneoData);
+          // Realizar otras acciones necesarias con los datos del torneo
+        } catch (error) {
+          console.error("Error al obtener el torneo:", error);
+        }
+      };
+      fetchTorneo();
+    });
+
+    if (currentUser && torneo) {
+      //socket.emit("juez", { juezId: currentUser._id, torneoId: torneo });
       socket.emit("juez", currentUser._id);
+      console.log("Juez conectado:", currentUser._id, torneo);
       socket.emit("n_participantes", participantes);
       socket.emit("unirseGrupo", { juezId: currentUser._id, grupoIndex: 0 });
     }
@@ -113,6 +133,7 @@ function YourTournament() {
   useEffect(() => {
     if (location.state && location.state.participantes) {
       setParticipantes(location.state.participantes);
+      setTorneo(location.state.torneo);
     }
   }, [location.state]);
 

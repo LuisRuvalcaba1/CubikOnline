@@ -12,6 +12,7 @@ import {
   getTorneoByIdRequest,
   getTorneosRequest,
   deleteTorneoByJuezRequest,
+  getTorneoByJuezRequest,
 } from "../api/torneo.js";
 
 export const useAuthTorneo = () => {
@@ -46,6 +47,17 @@ export const TorneoProvider = ({ children }) => {
       console.error("Error al obtener torneo por id:", error);
     }
   };
+
+  const getTorneoByJuez = async (juez) => {
+    try {
+      
+        const torneos = await getTorneoByJuezRequest(juez);
+        return torneos.data;
+      
+    } catch (error) {
+      console.error("Error al obtener torneo por juez:", error);
+    }
+  }
 
   const createTorneo = async (user, torneo) => {
     try {
@@ -82,6 +94,7 @@ export const TorneoProvider = ({ children }) => {
     createTorneo,
     deleteTorneoByJuez,
     deleteTorneo,
+    getTorneoByJuez,
   };
 
   return (

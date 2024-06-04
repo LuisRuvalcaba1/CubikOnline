@@ -42,7 +42,7 @@ function TorneoGetPage() {
     data.torneo = data._id;
     data.user2 = currentUser;
     console.log(data);
-    navigate('/waitroom', { state: data });
+    navigate('/waitroom', { state: { torneo: data._id, user2: currentUser } });
   };
 
   return (

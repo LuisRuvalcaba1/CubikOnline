@@ -6,3 +6,4 @@ export const createTorneoRequest = (user, torneo) => axios.post(`/torneo`, user,
 export const updateTorneoByIdRequest = (id, torneo) => axios.put(`/yourtournament/${id}`, torneo)
 export const deleteTorneoByIdRequest = (id) => axios.delete(`/yourtournament/${id}`)
 export const deleteTorneoByJuezRequest = () => axios.delete(`/yourtournament`)
+export const getTorneoByJuezRequest = (juez) => axios.get(`/yourtournament/${juez}`)

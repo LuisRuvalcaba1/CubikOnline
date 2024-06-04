@@ -88,10 +88,6 @@ export default defineConfig({
             "./src/pages/LoginPage.jsx",
           ],
 
-          camera: [
-            "./src/components/Camara.jsx",
-          ],
-
           // Dividir los contextos en un chunk separado
           contexts: [
             "./src/context/ProductContext.jsx",
