@@ -1,7 +1,8 @@
 export function handleJoinTournament(joinNS) {
   let participantes = [];
-  let juezID = [];
-  let n_p;
+  let juezSocket = {};
+  let juezData = {};
+  let jueces = [];
   let ganadores = [];
   let roundParticipants = [];
   let participantesData = {};
@@ -11,6 +12,7 @@ export function handleJoinTournament(joinNS) {
   let tiemposPorGrupo = {};
   let groups = [];
   let participantSockets = {};
+  let torneoData = {};
 
   function reiniciarTorneo() {
     participantes = [];
@@ -64,98 +66,96 @@ export function handleJoinTournament(joinNS) {
       console.log("Torneo reiniciado");
     });
 
-    socket.on("ganadorRonda", ({ ganador, promedioGanador, grupoId }) => {
-      const grupo = (groups = groupParticipants(
-        participantes.filter((p) => p.torneoId === torneoId),
-        torneoId
-      ));
+    socket.on("ganadorRonda", ({ ganador, promedioGanador, grupoId, torneoId }) => {
+        const torneo = torneoData[torneoId];
 
-      if (grupo) {
-        const perdedores = grupo.users.filter((userId) => userId !== ganador);
-        perdedores.forEach((perdedor) => {
-          const perdedorSocket = participantSockets[perdedor];
-          if (perdedorSocket) {
-            perdedorSocket.emit("redirigir", "/");
-          }
-        });
+        if (!torneo) {
+          console.log(`Torneo ${torneoId} no encontrado`);
+          return;
+        }
 
-        ganadores.push({ userId: ganador, promedio: promedioGanador });
-        console.log(`Ganador de la ronda (Grupo ${grupoId}):`, ganador);
+        const grupo = torneo.groups.find((g) => g.grupoId === grupoId);
 
-        if (ganadores.length === groups.length) {
-          reiniciarTiempos();
+        if (grupo) {
+          ganadores.push({ userId: ganador, promedio: promedioGanador });
+          console.log(`Ganador de la ronda (Grupo ${grupoId}):`, ganador);
 
-          if (ganadores.length > 1) {
-            const nuevosGrupos = groupParticipants(
-              ganadores.map((g) => ({ userId: g.userId })),
-              juezID[0]
-            );
-            groups = nuevosGrupos;
-            reiniciarRonda(nuevosGrupos);
+          if (ganadores.length === torneo.groups.length) {
+            reiniciarTiempos(torneo);
 
-            nuevosGrupos.forEach((grupo, index) => {
-              const scramble = generarNuevoScramble();
-              grupo.users.forEach((userId) => {
-                const participante = participantSockets[userId];
-                if (participante) {
-                  participante.emit("nuevaRonda", {
-                    oponentes: grupo.users,
-                    scramble,
-                    grupoId: index,
-                  });
-                }
+            if (ganadores.length > 1) {
+              const nuevosGrupos = groupParticipants(
+                ganadores.map((g) => ({ userId: g.userId })),
+                torneo.juezId,
+                torneoId
+              );
+              torneo.groups = nuevosGrupos;
+              reiniciarRonda(nuevosGrupos, torneo);
+
+              nuevosGrupos.forEach((grupo, index) => {
+                const scramble = generarNuevoScramble();
+                grupo.users.forEach((userId) => {
+                  const participante = participantSockets[userId];
+                  if (participante) {
+                    participante.emit("nuevaRonda", {
+                      oponentes: grupo.users,
+                      scramble,
+                      grupoId: index,
+                    });
+                  }
+                });
               });
-            });
 
-            ganadores = [];
-          } else {
-            const ganadorAbsoluto = ganadores[0];
-            console.log("Ganador absoluto:", ganadorAbsoluto.userId);
-            joinNS.emit("torneoTerminado", ganadorAbsoluto.userId);
-            reiniciarTorneo();
+              ganadores = [];
+            } else {
+              const ganadorAbsoluto = ganadores[0];
+              console.log("Ganador absoluto:", ganadorAbsoluto.userId);
+
+              const juezSocketObj = juezSocket[torneo.juezId];
+              if (juezSocketObj) {
+                juezSocketObj.emit("torneoTerminado", ganadorAbsoluto.userId);
+              }
+
+              socket.emit("torneoTerminado", ganadorAbsoluto.userId);
+              reiniciarTorneo(torneoId);
+            }
           }
         }
       }
-    });
+    );
 
-    socket.on("n_participantes", (n) => {
-      socket.n_p = n;
-      n_p = n;
-      socket.emit("n_participantes", n);
-      console.log(`n_participantes: ${socket.n_p}`);
+    socket.on("juez", (data) => {
+      const { juezId, torneoId, n_p, puntos } = data;
 
-      const torneoId = socket.torneoId;
-      if (torneoId) {
-        const juezSocket = juezID.find((j) => j.torneoId === torneoId);
-        if (juezSocket) {
-          console.log(
-            `Torneo ${torneoId} asignado al juez ${juezSocket.juezId}`
-          );
-        } else {
-          console.log(`No se encontró un juez para el torneo ${torneoId}`);
-        }
-      }
-    });
+      torneoData[torneoId] = {
+        juezId,
+        n_p,
+        puntos,
+        participantes: [],
+        roundParticipants: [],
+      };
+      //juezID.push(torneoData[torneoId].juezId);
+      juezSocket[juezId] = socket;
+      juezData[juezId] = [];
+      socket.juezId = juezId;
+      jueces.push(socket);
 
-    socket.on("juez", (juez) => {
-      socket.juezId = juez;
-      juezID.push(socket); // Almacenar el objeto de socket del juez en juezID
-      console.log(juezID.length);
-      console.log(`Juez connected: ${socket.juezId}`);
+      console.log("TorneoData:", torneoData);
       console.log(
-        "Jueces:",
-        juezID.map((j) => j.juezId)
+        "JuezSocket:",
+        jueces.map((j) => j)
       );
+      console.log(`Juez connected: ${torneoData[torneoId].juezId}`);
     });
 
     socket.on("unirseGrupo", ({ juezId, grupoIndex }) => {
-      const juezSocket = joinNS.sockets.get(juezId); // Obtener el objeto de socket del juez utilizando el ID
-      if (juezSocket) {
+      const juezSocketObj = juezSocket[juezId];
+      if (juezSocketObj) {
         const grupo = groups[grupoIndex];
         if (grupo) {
           grupo.juez = juezId;
           console.log(`Juez ${juezId} unido al grupo ${grupoIndex}`);
-          juezSocket.emit("grupo", {
+          juezSocketObj.emit("grupo", {
             juez: juezId,
             users: grupo.users,
             grupoId: grupoIndex,
@@ -168,43 +168,60 @@ export function handleJoinTournament(joinNS) {
       }
     });
 
-    socket.on("user", ({ userId, torneoId }) => {
-      if (participantes.filter((p) => p.torneoId === torneoId).length >= n_p) {
+    socket.on("user", (data) => {
+      const { userId, torneoId } = data;
+
+      // Buscar el torneo correspondiente en torneoData
+      const torneo = torneoData[torneoId];
+
+      if (!torneo) {
+        console.log(`Torneo ${torneoId} no encontrado`);
+        socket.emit("torneo_no_encontrado");
+        return;
+      }
+
+      if (torneo.participantes.length >= torneo.n_p) {
         console.log(
-          `El torneo ${torneoId} ya tiene ${n_p} participantes. No se permiten más conexiones.`
+          `El torneo ${torneoId} ya tiene ${torneo.n_p} participantes. No se permiten más conexiones.`
         );
         socket.emit("torneo_lleno");
         return;
       }
-      participantSockets[userId] = { socket, torneoId };
+
+      participantSockets[userId] = socket;
       usuariosData[userId] = [];
-    
+
       socket.userId = userId;
       socket.torneoId = torneoId;
-      socket.emit("user", userId);
-      participantes.push(socket);
+      socket.emit("user", { userId, torneoId });
+      torneo.participantes.push(socket);
       console.log(`User connected: ${socket.userId}`);
       console.log(
         "Participantes:",
-        participantes.map((s) => s.userId)
+        torneo.participantes.map((s) => s.userId)
       );
-    
-      if (participantes.filter((p) => p.torneoId === torneoId).length === n_p) {
-        groups = groupParticipants(participantes.filter((p) => p.torneoId === torneoId), juezID[0]);
-        grupoActual = groups[0];
-        socket.emit("grupoActualizado", grupoActual);
-    
-        juezID.forEach((juezSocket) => {
-          if (juezSocket) {
-            juezSocket.emit("grupos", groups);
-            console.log(`Grupos enviados al juez ${juezSocket.juezId}`);
-          }
-        });
+
+      if (torneo.participantes.length === torneo.n_p) {
+        const groups = groupParticipants(
+          torneo.participantes,
+          torneo.juezId,
+          torneoId
+        );
+        torneo.groups = groups;
+        torneo.grupoActual = groups[0];
+        socket.emit("grupoActualizado", torneo.grupoActual);
+
+        const juezSocketObj = juezSocket[torneo.juezId];
+        if (juezSocketObj) {
+          juezSocketObj.emit("grupos", groups);
+          console.log(`Grupos enviados al juez ${torneo.juezId}`);
+        }
+
         groups.forEach((group, index) => {
           const { juez, users } = group;
           const scramble = generarNuevoScramble();
           users.forEach((participantId) => {
-            const participantSocket = participantSockets[participantId].socket;
+            const participantSocket = participantSockets[participantId];
             if (participantSocket) {
               console.log("Enviando scramble a", participantId);
               participantSocket.emit("paired", {
@@ -218,28 +235,26 @@ export function handleJoinTournament(joinNS) {
               console.log("Participante no encontrado");
             }
           });
-          if (juez) {
-            const juezSocket = joinNS.sockets.get(juez);
-            if (juezSocket) {
-              juezSocket.emit("grupo", {
-                juez: juez,
-                users: users,
-                grupoId: index,
-              });
-            }
+
+          const juezSocketObj = jueces.find((j) => j.juezId === juez);
+          if (juezSocketObj) {
+            juezSocketObj.emit("grupo", {
+              juez: juez,
+              users: users,
+              grupoId: index,
+            });
           }
         });
       }
     });
-    
+
     socket.on("finalRound", () => {
-      const torneoId = socket.torneoId;
-      if (ganadores.filter((g) => g.torneoId === torneoId).length > 1) {
-        const nuevosGrupos = groupParticipants(ganadores.filter((g) => g.torneoId === torneoId), juezID[0]);
+      if (ganadores.length > 1) {
+        const nuevosGrupos = groupParticipants(ganadores, juezID[0]);
         nuevosGrupos.forEach((grupo, index) => {
           const scramble = generarNuevoScramble();
           grupo.users.forEach((userId) => {
-            const participante = participantSockets[userId].socket;
+            const participante = participantSockets[userId];
             if (participante) {
               participante.emit("nuevaRonda", {
                 oponentes: grupo.users,
@@ -251,7 +266,7 @@ export function handleJoinTournament(joinNS) {
           });
         });
         reiniciarRonda(nuevosGrupos);
-        ganadores = ganadores.filter((g) => g.torneoId !== torneoId);
+        ganadores = [];
       }
     });
 
@@ -266,9 +281,8 @@ export function handleJoinTournament(joinNS) {
           juezId: juezID[0].juezID,
           grupoIndex: grupoActualIndex + 1,
         });
-        socket.emit("grupoActualizado", siguienteGrupo); // Emitir evento con el nuevo grupo actual
+        socket.emit("grupoActualizado", siguienteGrupo);
       } else {
-        // Todos los grupos han terminado, pasamos a la siguiente ronda
         const ganadores = roundParticipants.map((grupo) => {
           const indiceGanador = grupo.promedios.indexOf(
             Math.min(...grupo.promedios)
@@ -291,10 +305,6 @@ export function handleJoinTournament(joinNS) {
               });
             });
           });
-        } else {
-          // Solo queda un ganador, el torneo ha terminado
-          socket.emit("torneoTerminado", ganadores[0].userId);
-          navigate("/", { state: { ganador: ganadores[0].userId } });
         }
       }
     });
@@ -305,19 +315,21 @@ export function handleJoinTournament(joinNS) {
       participantes = participantes.filter(
         (client) => client.userId !== socket.userId
       );
-      juezID = juezID.filter((client) => client.juezID !== socket.juezID);
+      //juezID = juezID.filter((client) => client.juezID !== socket.juezID);
     });
 
     socket.on("times", (message) => {
-      const { time, grupoId } = JSON.parse(message);
+      const { time, grupoId, torneoId } = JSON.parse(message);
       const userId = socket.userId;
 
-      if (grupoId === undefined) {
-        console.log("El usuario no está en ningún grupo");
+      const torneo = torneoData[torneoId];
+
+      if (!torneo) {
+        console.log(`Torneo ${torneoId} no encontrado`);
         return;
       }
 
-      const grupo = roundParticipants.find((g) => g.grupoId === grupoId);
+      const grupo = torneo.roundParticipants.find((g) => g.grupoId === grupoId);
 
       if (!grupo) {
         console.error("Grupo no encontrado");
@@ -333,7 +345,6 @@ export function handleJoinTournament(joinNS) {
 
       const tiemposKey = `tiempos${userIndex + 1}`;
       const promedioKey = `promedio${userIndex + 1}`;
-
       if (!grupo[tiemposKey]) {
         grupo[tiemposKey] = [];
       }
@@ -358,41 +369,61 @@ export function handleJoinTournament(joinNS) {
       };
 
       const juezId = grupo.juez;
-      const juezSocket = juezID.find((j) => j.juezId === juezId);
-      if (juezSocket) {
-        juezSocket.emit("tiemposUsuarios", tiemposPorGrupo);
+      const juezSocketObj = juezSocket[juezId];
+      if (juezSocketObj) {
+        juezSocketObj.emit("tiemposUsuarios", tiemposPorGrupo);
+        console.log(`Tiempos enviados al juez ${juezId}:`, tiemposPorGrupo);
       }
 
-      if (grupo.users.every((_, index) => grupo[`tiempos${index + 1}`]?.length === 5)) {
-        const promedios = grupo.users.map((_, index) => grupo[`promedio${index + 1}`]);
+      if (
+        grupo.users.every(
+          (_, index) => grupo[`tiempos${index + 1}`]?.length === 5
+        )
+      ) {
+        const promedios = grupo.users.map(
+          (_, index) => grupo[`promedio${index + 1}`]
+        );
         const ganadorIndex = promedios.indexOf(Math.min(...promedios));
+        const perdedorIndex = promedios.indexOf(Math.max(...promedios));
         const ganador = grupo.users[ganadorIndex];
+        const perdedor = grupo.users[perdedorIndex];
         const promedioGanador = promedios[ganadorIndex];
-    
+
+        if (ganador === userId) {
+          socket.emit("resultado", "Ganaste");
+        } else if (perdedor === userId) {
+          socket.emit("resultado", "Perdiste");
+        }
+
         socket.emit("ganadorRonda", {
           ganador,
           promedioGanador,
           grupoId,
         });
-    
-        ganadores.push({ userId: ganador, promedio: promedioGanador, torneoId: socket.torneoId });
+
+        ganadores.push({ userId: ganador, promedio: promedioGanador });
         console.log(`Ganador de la ronda (Grupo ${grupoId}):`, ganador);
-    
-        if (ganadores.filter((g) => g.torneoId === socket.torneoId).length === groups.filter((g) => g.juez === juezID[0].juezId).length) {
+        console.log(`Perdedor de la ronda (Grupo ${grupoId}):`, perdedor);
+
+        // Enviar evento "redirigir" al perdedor
+        const perdedorSocket = participantSockets[perdedor];
+        if (perdedorSocket) {
+          perdedorSocket.emit("redirigir", "/");
+        }
+        if (ganadores.length === groups.length) {
           reiniciarTiempos();
-    
-          if (ganadores.filter((g) => g.torneoId === socket.torneoId).length > 1) {
+
+          if (ganadores.length > 1) {
             const nuevosGrupos = groupParticipants(
-              ganadores.filter((g) => g.torneoId === socket.torneoId).map((g) => ({ userId: g.userId })),
-              juezID ? juezID[0] : null
+              ganadores.map((g) => ({ userId: g.userId }))
             );
             groups = nuevosGrupos;
             reiniciarRonda(nuevosGrupos);
-    
+
             nuevosGrupos.forEach((grupo, index) => {
               const scramble = generarNuevoScramble();
               grupo.users.forEach((userId) => {
-                const participante = participantSockets[userId].socket;
+                const participante = participantSockets[userId];
                 if (participante) {
                   participante.emit("nuevaRonda", {
                     oponentes: grupo.users,
@@ -402,12 +433,17 @@ export function handleJoinTournament(joinNS) {
                 }
               });
             });
-    
-            ganadores = ganadores.filter((g) => g.torneoId !== socket.torneoId);
+
+            ganadores = [];
           } else {
-            const ganadorAbsoluto = ganadores.find((g) => g.torneoId === socket.torneoId);
+            const ganadorAbsoluto = ganadores[0];
             console.log("Ganador absoluto:", ganadorAbsoluto.userId);
-            joinNS.emit("torneoTerminado", ganadorAbsoluto.userId);
+
+            const juezSocketObj = juezSocket[torneo.juezId];
+            if (juezSocketObj) {
+              juezSocketObj.emit("torneoTerminado", ganadorAbsoluto.userId);
+            }
+
             reiniciarTorneo();
           }
         }
@@ -428,40 +464,39 @@ export function handleJoinTournament(joinNS) {
     });
   });
 
-  function groupParticipants(participantes, juezID) {
+  function groupParticipants(participantes, juezId, torneoId) {
     const groups = [];
     const numParticipants = participantes.length;
     const numGroups = Math.floor(numParticipants / 2);
-  
+
     for (let i = 0; i < numGroups; i++) {
       const user1 = participantes[i * 2];
       const user2 = participantes[i * 2 + 1];
-      const juezId = juezID ? juezID.juezId : null;
       const group = {
         juez: juezId,
         users: [user1.userId, user2.userId],
         grupoId: i,
       };
       groups.push(group);
-  
+
       console.log(`Grupo ${i}:`, {
         juez: juezId || "Sin juez",
         users: [user1.userId, user2.userId],
       });
-  
-      roundParticipants.push({
+
+      torneoData[torneoId].roundParticipants.push({
         juez: juezId,
         users: [user1.userId, user2.userId],
         promedios: [0, 0],
         grupoId: i,
       });
     }
-  
+
     console.log(
       "Grupos formados:",
       groups.map((g) => ({ juez: g.juez || "Sin juez", users: g.users }))
     );
-  
+
     return groups;
   }
 

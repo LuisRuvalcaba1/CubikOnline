@@ -33,6 +33,7 @@ function WaitRoom() {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [grupoActual, setGrupoActual] = useState(null);
   const [grupoId, setGrupoId] = useState(null);
+  const [ganadorAbsoluto, setGanadorAbsoluto] = useState(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -65,6 +66,7 @@ function WaitRoom() {
 
     socket.on("gruposFormados", () => {
       socket.emit("user", { userId: user2._id, torneoId: torneo });
+      //socket.emit("user", user2._id)
     });
   
     socket.emit("joinTorneo", torneo);
@@ -101,7 +103,8 @@ function WaitRoom() {
           data.promedio
         }. El promedio de tu oponente fue ${data.promedioOponente}.`
       );
-      if (data.ganador) {
+      console.log("Resultado:", data);
+      if (data === "Ganaste") {
         if (user2) {
           const actualizarObjetivo = async () => {
             try {
@@ -166,19 +169,6 @@ function WaitRoom() {
   }, [socket]);
 
   useEffect(() => {
-    if (resultado && resultado.includes("Ganaste")) {
-      setGanador(true);
-
-      if (socket) {
-        socket.emit("finalRound");
-      }
-    } else if (resultado && resultado.includes("Perdiste")) {
-      setGanador(false);
-      navigate("/");
-    }
-  }, [resultado]);
-
-  useEffect(() => {
     let interval;
     if (activo) {
       interval = setInterval(() => {
@@ -219,7 +209,7 @@ function WaitRoom() {
         }${tiempoMilisegundos}`;
 
         if (socket) {
-          const message = JSON.stringify({ time, grupoId });
+          const message = JSON.stringify({ time, grupoId, torneoId: torneo });
           socket.emit("times", message);
           socket.emit("nextScramble");
           console.log("Enviado:", message);

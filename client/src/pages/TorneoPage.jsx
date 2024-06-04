@@ -5,8 +5,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { verifyTokenRequest } from "../api/auth";
 import "./Profile.css";
-// import io from "socket.io-client";
-// const URL = import.meta.env.VITE_BACKEND_URL;
 
 function TorneoPage() {
   const { register, handleSubmit } = useForm();
@@ -66,7 +64,7 @@ function TorneoPage() {
             navigation("/yourtournament", {
               state: {
                 participantes: participantes,
-                torneo: torneoUsuario._id,
+                torneo: torneoUsuario,
               },
             });
           } else {
