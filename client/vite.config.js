@@ -22,12 +22,17 @@ export default defineConfig({
 
           api: [
             "./src/api/auth.js",
+            "./src/api/encuesta.js",
+            "./src/api/objetives.js",
+            "./src/api/amigos.js",
+            "./src/api/rank.js",
+            "./src/api/userpvp.js",
             "./src/api/product.js",
             "./src/api/torneo.js",
             "./src/api/axios.js",
             "./src/api/store.js",
             "./src/api/timer.js",
-            "./src/api/timerPvP.js",
+            "./src/api/timerpvp.js",
           ],
 
           // Dividir los módulos de React en un chunk separado
@@ -40,6 +45,8 @@ export default defineConfig({
           components: [
             "./src/components/Navbar.jsx",
             "./src/components/Navbar.css",
+            "./src/components/Confirmation.jsx",
+
           ],
 
           images: [
@@ -62,11 +69,14 @@ export default defineConfig({
           // Dividir las páginas en chunks separados
           pages: [
             "./src/pages/Account.jsx",
-            "./src/pages/ActiveTorneos.jsx",
             "./src/pages/Aprendizaje.css",
             "./src/pages/AprendizajePage.jsx",
             "./src/pages/MethotP.jsx",
-            "./src/pages/MyTorneo.jsx",
+            "./src/pages/Metodo2x2Page.jsx",
+            "./src/pages/Metodo3x3Page.jsx",
+            "./src/pages/Metodo4x4Page.jsx",
+            "./src/pages/Metodo5x5Page.jsx",
+            "/src/pages/Objetivos.jsx",
             "./src/pages/ProductPage.jsx",
             "./src/pages/ProfilePage.jsx",
             "./src/pages/RegisterPage.jsx",
@@ -83,7 +93,6 @@ export default defineConfig({
             "./src/pages/TorneoPage.jsx",
             "./src/pages/WaitRoom.jsx",
             "./src/pages/YourTournament.jsx",
-            "./src/pages/Confirmation.jsx",
             "./src/pages/HomePage.jsx",
             "./src/pages/LoginPage.jsx",
           ],
@@ -95,10 +104,11 @@ export default defineConfig({
             "./src/context/TimerContext.jsx",
             "./src/context/TimerPvPContext.jsx",
             "./src/context/TorneoContext.jsx",
-          ],
-
-          context2: [
+            "./src/context/AmigosContext.jsx",
+            "./src/context/EncuestaContext.jsx",
+            "./src/context/ObjetivesContext.jsx",
             "./src/context/AuthContext.jsx",
+
           ],
 
           // Resto del código en el chunk principal
