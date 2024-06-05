@@ -26,7 +26,6 @@ import {
   TorneoGetPage,
   YourTournament,
   WaitRoom,
-  ResultRoundUsers,
   RankingUsers,
   MetodoFriedrich,
   CategoryPage,
@@ -99,10 +98,7 @@ function App() {
                             element={<YourTournament />}
                           />
                           <Route path="/waitroom" element={<WaitRoom />} />
-                          <Route
-                            path="/resultroundusers"
-                            element={<ResultRoundUsers />}
-                          />
+                          
                         </Route>
                       </Routes>
                     </BrowserRouter>

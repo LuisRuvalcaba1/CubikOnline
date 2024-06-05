@@ -23,7 +23,6 @@ import { TorneoProvider } from "./context/TorneoContext.jsx";
 import TorneoGetPage from "./pages/TorneoGetPage.jsx";
 import YourTournament from "./pages/YourTournament.jsx";
 import WaitRoom from "./pages/WaitRoom.jsx";
-import ResultRoundUsers from "./pages/ResultRoundUsers.jsx";
 import RankingUsers from "./pages/RankingUsers.jsx";
 import MetodoFriedrich from "./pages/Metodo3x3Page.jsx";
 import CategoryPage from "./pages/CategoryPage.jsx";
@@ -64,7 +63,6 @@ export {
   TorneoGetPage,
   YourTournament,
   WaitRoom,
-  ResultRoundUsers,
   RankingUsers,
   MetodoFriedrich,
   CategoryPage,

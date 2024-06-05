@@ -144,6 +144,14 @@ function WaitRoom() {
       }
     });
 
+    // socket.on("ganadorAbsoluto", (data) => {
+    //   if(currentUser){
+    //     setGanadorAbsoluto(data);
+    //   console.log("Ganador absoluto:", data);
+    //   }
+      
+    // });
+
     socket.on("redirigir", (ruta) => {
       navigate(ruta);
     });
@@ -163,7 +171,9 @@ function WaitRoom() {
         setSegundos(0);
         setMinutos(0);
         setTiemposRegistrados(0);
+        //setGanadorAbsoluto(null);
         setGrupoId(data.grupoId);
+        console.log("Nueva ronda:", data.grupoId);
       });
     }
   }, [socket]);
@@ -260,10 +270,10 @@ function WaitRoom() {
           <p>Juez: {grupoActual.juez}</p>
           <p>Usuarios: {grupoActual.users.join(", ")}</p>
           {/* {resultado.ganador && <p>{resultado.ganador}</p>} */}
-          <Confirmation
-            visible={showConfirmation}
-            onClose={() => setShowConfirmation(false)}
-          />
+          {/* {ganadorAbsoluto}
+           <p>{ganadorAbsoluto}, Eres el ganador absoluto Te puedes retirar</p> */}
+         
+          
         </>
       ) : (
         <>

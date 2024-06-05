@@ -8,8 +8,7 @@ import { removeTokenRequest } from "../api/auth";
 import { useNavigate } from "react-router-dom";
 import Modal from "react-modal";
 import { verifyTokenRequest } from "../api/auth";
-import { set } from "mongoose";
-
+import "./Aprendizaje.css"
 const URL = import.meta.env.VITE_BACKEND_URL;
 
 Modal.setAppElement("#root");
@@ -88,9 +87,7 @@ function YourTournament() {
     if (currentUser && torneo) {
       console.log("Torneo:", torneo);
       socket.emit("juez", { juezId: currentUser._id, torneoId: torneo._id, n_p: torneo.qty_participantes, puntos: torneo.premio });
-      //socket.emit("juez", currentUser._id);
       console.log("Juez conectado:", currentUser._id, torneo._id, torneo.qty_participantes, torneo.premio);
-      //socket.emit("n_participantes", participantes);
       socket.emit("unirseGrupo", { juezId: currentUser._id, grupoIndex: 0 });
     }
 
@@ -173,21 +170,24 @@ function YourTournament() {
           <h2>Grupo Actual:</h2>
           <p>Juez: {grupoActual.juez}</p>
           <p>Usuarios: {grupoActual.users.join(", ")}</p>
-          <div>
-            <h3>Tiempos de los usuarios:</h3>
+          <div className="contenedor" id="cont">
+            <div className="contenedor">
+              <h3 className="titulo ">Tiempos de los usuarios:</h3>
             {Object.entries(tiemposUsuarios[grupoActual.grupoId] || {}).map(
               ([userId, datos]) => (
                 <div key={userId}>
-                  <h4>Usuario: {datos.userId}</h4>
-                  <ul>
+                  <h4 className="texto font-bold">Usuario: {datos.userId}</h4>
+                  <ul className="texto font-semibold list-disc pl-6">
                     {datos.tiempos.map((tiempo, index) => (
                       <li key={index}>{formatTime(tiempo)}</li>
                     ))}
                   </ul>
-                  <p>Promedio: {formatTime(datos.promedio)}</p>
+                  <p className="texto font-bold"> Promedio: {formatTime(datos.promedio)}</p>
                 </div>
               )
             )}
+            </div>
+            
           </div>
         </div>
       )}

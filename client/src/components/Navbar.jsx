@@ -24,7 +24,7 @@ const torneoMenu = [
 export const Navbar = () => {
 
   const refreshPage = () => {
-    window.reload().location();
+    window.reload()
   };
 
   const { user, logout, statusChangeAuth, isAuthenticated, isJuez } = useAuth();
@@ -142,12 +142,7 @@ export const Navbar = () => {
                 >
                   Salir
                 </Link>
-                <Link
-                  to="/yourtournament"
-                  className="text-white hover:bg-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Tu Torneo
-                </Link>
+                
               </>
             ) : isAuthenticated ? (
               <>
@@ -286,12 +281,12 @@ export const Navbar = () => {
                   Timer
                 </Link>
 
-                {/* <Link
+                <Link
                   to="/product"
                   className="text-white hover:bg-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Producto
-                </Link> */}
+                </Link>
 
                 <Link
                   to="/category"
