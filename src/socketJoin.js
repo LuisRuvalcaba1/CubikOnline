@@ -85,7 +85,7 @@ export function handleJoinTournament(joinNS) {
 
             if (ganadores.length > 1) {
               const nuevosGrupos = groupParticipants(
-                ganadores.map((g) => ({ userId: g.userId })),
+              ganadores.map((g) => ({ userId: g.userId })),
                 torneo.juezId,
                 torneoId
               );

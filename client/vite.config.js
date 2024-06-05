@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-          target: 'https://4pnxfmnr-4000.usw3.devtunnels.ms',
+          target: 'https://cubikonline.onrender.com',
           changeOrigin: true,
           secure: false,
       },
