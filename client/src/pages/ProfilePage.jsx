@@ -199,6 +199,7 @@ function ProfilePage() {
         const fetchAmigo = async () => {
           try {
             const { data } = await getUserRequest(friend._id);
+            console.log("ID del usuario:", friend._id)
             console.log("Usuario completo:", data);
             setInfoUsuario(data);
           } catch (error) {

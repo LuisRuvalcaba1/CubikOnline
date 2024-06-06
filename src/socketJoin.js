@@ -5,7 +5,6 @@ export function handleJoinTournament(joinNS) {
   let jueces = [];
   let ganadores = [];
   let roundParticipants = [];
-  let participantesData = {};
   let usuariosData = {};
   let juecesViendoTiempos = [];
   let grupoActual = null;
@@ -19,7 +18,6 @@ export function handleJoinTournament(joinNS) {
     //juezID = [];
     ganadores = [];
     roundParticipants = [];
-    participantesData = {};
     usuariosData = {};
     juecesViendoTiempos = [];
     grupoActual = null;
@@ -87,7 +85,7 @@ export function handleJoinTournament(joinNS) {
 
           if (ganadores.length === torneo.groups.length) {
             reiniciarTiempos();
-        
+
             if (ganadores.length > 1) {
               const nuevosGrupos = groupParticipants(
                 ganadores.map((g) => ({ userId: g.userId })),
@@ -115,6 +113,11 @@ export function handleJoinTournament(joinNS) {
               const ganadorAbsoluto = ganadores[0];
               console.log("Ganador absoluto:", ganadorAbsoluto.userId);
 
+              const ganadorSocket = participantSockets[ganadorAbsoluto.userId];
+              if (ganadorSocket) {
+                ganadorSocket.emit("ganadorAbsoluto");
+              }
+
               const juezSocketObj = juezSocket[torneo.juezId];
               if (juezSocketObj) {
                 juezSocketObj.emit("torneoTerminado", ganadorAbsoluto.userId);
@@ -138,10 +141,10 @@ export function handleJoinTournament(joinNS) {
         participantes: [],
         roundParticipants: [],
       };
-      //juezID.push(torneoData[torneoId].juezId);
       juezSocket[juezId] = socket;
-      juezData[juezId] = [];
+      juezData[juezId] = { torneoId }; // Almacenar el torneoId asociado al juez
       socket.juezId = juezId;
+      socket.torneoId = torneoId; // Almacenar el torneoId en el socket del juez
       jueces.push(socket);
 
       console.log("TorneoData:", torneoData);
@@ -317,25 +320,44 @@ export function handleJoinTournament(joinNS) {
     });
 
     socket.on("disconnect", () => {
-      console.log(`User disconnected: ${socket.userId}`);
-      delete participantSockets[socket.userId];
-      participantes = participantes.filter(
-        (client) => client.userId !== socket.userId
-      );
-      //juezID = juezID.filter((client) => client.juezID !== socket.juezID);
+      if (socket.juezId) {
+        const torneoId = socket.torneoId;
+        console.log("TorneoId:", torneoId);
+        const torneo = torneoData[torneoId];
+        if (torneo) {
+          console.log(`Juez desconectado: ${socket.juezId}`);
+          // Emitir evento a los participantes para que se desconecten
+          torneo.participantes.forEach((participante) => {
+            const participanteSocket = participantSockets[participante.userId];
+            if (participanteSocket) {
+              participanteSocket.emit("redirigir", "/profile");
+            }
+          });
+          delete juezSocket[socket.juezId];
+          jueces = jueces.filter((j) => j.juezId !== socket.juezId);
+          reiniciarTorneo(torneoId); // Reiniciar el torneo cuando el juez se desconecta
+        }
+      } else {
+        console.log(`User disconnected: ${socket.userId}`);
+    
+        delete participantSockets[socket.userId];
+        participantes = participantes.filter(
+          (client) => client.userId !== socket.userId
+        );
+      }
     });
 
     socket.on("times", (message) => {
       const { time, grupoId, torneoId } = JSON.parse(message);
       const userId = socket.userId;
-    
+
       const torneo = torneoData[torneoId];
-    
+
       if (!torneo) {
         console.log(`Torneo ${torneoId} no encontrado`);
         return;
       }
-    
+
       const grupo = torneo.groups.find((g) => g.grupoId === grupoId);
       console.log("Torneo:", grupo);
       if (!grupo) {
@@ -465,7 +487,12 @@ export function handleJoinTournament(joinNS) {
           } else {
             const ganadorAbsoluto = ganadores[0];
             console.log("Ganador absoluto:", ganadorAbsoluto.userId);
-            //socket.emit("ganadorAbsoluto", ganadorAbsoluto.userId);
+            const ganadorSocket = participantSockets[ganadorAbsoluto.userId];
+
+            if (ganadorSocket) {
+              ganadorSocket.emit("ganadorAbsoluto");
+            }
+
             const juezSocketObj = juezSocket[torneo.juezId];
             if (juezSocketObj) {
               juezSocketObj.emit("torneoTerminado", ganadorAbsoluto.userId);
@@ -497,9 +524,12 @@ export function handleJoinTournament(joinNS) {
     const numGroups = Math.floor(numParticipants / 2);
     torneoData[torneoId].roundParticipants = [];
     torneoData[torneoId].groups = [];
-  
+
     for (let i = 0; i < numGroups; i++) {
-      console.log("Participantes:", participantes.map((p) => p.userId));
+      console.log(
+        "Participantes:",
+        participantes.map((p) => p.userId)
+      );
       const user1 = participantes[i * 2];
       const user2 = participantes[i * 2 + 1];
       const group = {
@@ -509,14 +539,14 @@ export function handleJoinTournament(joinNS) {
       };
       groups.push(group);
       torneoData[torneoId].groups.push(group); // Agrega el grupo al array groups del torneo
-  
+
       console.log("Grupo", i, ":", group);
-  
+
       console.log(`Grupo ${i}:`, {
         juez: juezId || "Sin juez",
         users: [user1.userId, user2.userId],
       });
-  
+
       torneoData[torneoId].roundParticipants.push({
         juez: juezId,
         users: [user1.userId, user2.userId],
@@ -526,13 +556,13 @@ export function handleJoinTournament(joinNS) {
       console.log("participantesData:", torneoData[torneoId].roundParticipants);
       console.log("Groups del torneo:", torneoData[torneoId].groups);
     }
-  
+
     console.log(
       "Grupos formados:",
       groups.map((g) => ({ juez: g.juez || "Sin juez", users: g.users }))
     );
     console.log(groups.length);
-  
+
     return groups;
   }
 
@@ -544,7 +574,7 @@ export function handleJoinTournament(joinNS) {
   function reiniciarRonda(nuevosGrupos, torneoId) {
     torneoData[torneoId].roundParticipants = [];
     torneoData[torneoId].groups = nuevosGrupos; // Asigna los nuevos grupos al torneo
-  
+
     nuevosGrupos.forEach((grupo, index) => {
       const { juez, users } = grupo;
       users.forEach((userId) => {
@@ -560,14 +590,14 @@ export function handleJoinTournament(joinNS) {
         promedios: [0, 0],
         grupoId: grupo.grupoId,
       });
-  
+
       console.log(`Grupo ${index}:`, {
         juez: juez || "Sin juez",
         users,
         grupoId: grupo.grupoId,
       });
     });
-  
+
     console.log(
       "roundParticipants:",
       torneoData[torneoId].roundParticipants.map((p) => ({

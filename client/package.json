@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@headlessui/react": "^2.0.3",
+    "@headlessui/react": "^2.0.4",
     "@tensorflow-models/coco-ssd": "^2.2.3",
     "@tensorflow/tfjs": "^4.19.0",
     "axios": "^1.6.7",

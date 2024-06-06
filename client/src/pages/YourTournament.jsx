@@ -8,13 +8,13 @@ import { removeTokenRequest } from "../api/auth";
 import { useNavigate } from "react-router-dom";
 import Modal from "react-modal";
 import { verifyTokenRequest } from "../api/auth";
-import "./Aprendizaje.css"
+import "./Aprendizaje.css";
+import { getUserRequest } from "../api/auth";
 const URL = import.meta.env.VITE_BACKEND_URL;
 
 Modal.setAppElement("#root");
 
 function YourTournament() {
-  const navigate = useNavigate();
   const { getTorneoById } = useAuthTorneo();
   const location = useLocation();
   const [participantes, setParticipantes] = useState(null);
@@ -29,6 +29,8 @@ function YourTournament() {
   const [tiemposUsuarios, setTiemposUsuarios] = useState({});
   const [ganador, setGanador] = useState(null);
   const [promedioGanador, setPromedioGanador] = useState(null);
+  const [participantUsernames, setParticipantUsernames] = useState({});
+
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -68,31 +70,43 @@ function YourTournament() {
     setSocket(socket);
     console.log("Socket del juez creado:", socket);
 
-    // socket.on("juezRegistrado", ({ juezId, torneoId }) => {
-    //   console.log(`Juez ${juezId} registrado para el torneo ${torneoId}`);
-    //   // Obtener los datos del torneo y realizar las acciones necesarias
-    //   const fetchTorneo = async () => {
-    //     try {
-    //       const torneoData = await getTorneoById(torneoId);
-    //       setTorneo(torneoData);
-    //       console.log("Torneo obtenido:", torneoData);
-    //       // Realizar otras acciones necesarias con los datos del torneo
-    //     } catch (error) {
-    //       console.error("Error al obtener el torneo:", error);
-    //     }
-    //   };
-    //   fetchTorneo();
-    // });
-
     if (currentUser && torneo) {
       console.log("Torneo:", torneo);
-      socket.emit("juez", { juezId: currentUser._id, torneoId: torneo._id, n_p: torneo.qty_participantes, puntos: torneo.premio });
-      console.log("Juez conectado:", currentUser._id, torneo._id, torneo.qty_participantes, torneo.premio);
+      socket.emit("juez", {
+        juezId: currentUser._id,
+        torneoId: torneo._id,
+        n_p: torneo.qty_participantes,
+        puntos: torneo.premio,
+      });
+      console.log(
+        "Juez conectado:",
+        currentUser._id,
+        torneo._id,
+        torneo.qty_participantes,
+        torneo.premio
+      );
       socket.emit("unirseGrupo", { juezId: currentUser._id, grupoIndex: 0 });
     }
 
-    socket.on("grupos", (gruposFormados) => {
+    socket.on("grupos", async (gruposFormados) => {
       setGrupos(gruposFormados);
+
+      const usernames = {};
+      for (const grupo of gruposFormados) {
+        const grupoUsernames = {};
+        if (grupo.users.length >= 2) {
+          try {
+            const { data: user1 } = await getUserRequest(grupo.users[0]);
+            const { data: user2 } = await getUserRequest(grupo.users[1]);
+            grupoUsernames.usuario1 = user1.username;
+            grupoUsernames.usuario2 = user2.username;
+          } catch (error) {
+            console.error("Error al obtener los usuarios:", error);
+          }
+        }
+        usernames[grupo.grupoId] = grupoUsernames;
+      }
+      setParticipantUsernames(usernames);
     });
 
     socket.on("grupoActualizado", (nuevoGrupo) => {
@@ -151,47 +165,63 @@ function YourTournament() {
   }
 
   return (
+    <div className="p-4 items-center flex flex-col justify-center max-h-screen mt-4">
+    <h1 className="titulo font-bold text-5xl mb-4">Your Tournament</h1>
     <div>
-      <h1>Your Tournament</h1>
-      <div>
-        <h2>Grupos formados:</h2>
+      
+      <div className="flex flex-wrap titulo">
         {grupos.map((grupo, index) => (
           <button
             key={index}
             onClick={() => handleGrupoSeleccionado(grupo, index)}
             disabled={grupoActual && grupoActual.grupoId === index}
+            className={`${
+              grupoActual && grupoActual.grupoId === index
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-800"
+            } px-4 py-2 rounded-md font-semibold focus:outline-none focus:ring focus:ring-blue-500 focus:ring-opacity-50 m-2`}
           >
             Grupo {index + 1}
           </button>
         ))}
       </div>
-      {grupoActual && (
-        <div>
-          <h2>Grupo Actual:</h2>
-          <p>Juez: {grupoActual.juez}</p>
-          <p>Usuarios: {grupoActual.users.join(", ")}</p>
-          <div className="contenedor" id="cont">
-            <div className="contenedor">
-              <h3 className="titulo ">Tiempos de los usuarios:</h3>
-            {Object.entries(tiemposUsuarios[grupoActual.grupoId] || {}).map(
-              ([userId, datos]) => (
-                <div key={userId}>
-                  <h4 className="texto font-bold">Usuario: {datos.userId}</h4>
-                  <ul className="texto font-semibold list-disc pl-6">
+    </div>
+    {grupoActual && (
+      <div className="contenedor items-center flex flex-col justify-center max-h-screen mt-4" id="cont">
+        <div className="contenedor items-center flex flex-col font-bold">
+          <h2 className="titulo">Grupo {grupoActual.grupoId + 1}</h2>
+          <p className="text-3xl">Juez: {currentUser.username}</p>
+          <h3 className="titulo mt-4">Tiempos de los usuarios:</h3>
+          <div className="text items-center titulo mb-4">
+            <p>
+              Usuario 1: {participantUsernames[grupoActual.grupoId]?.usuario1}
+              <br />
+              Usuario 2: {participantUsernames[grupoActual.grupoId]?.usuario2}
+            </p>
+          </div>
+          <div className="flex flex-wrap justify-center gap-4 mb-4">
+            {Object.entries(tiemposUsuarios[grupoActual.grupoId] || {}).map(([userId, datos], index) => (
+              <div key={userId} className="bg-gray-400 shadow-md rounded-lg p-4 w-60">
+                <h4 className="texto font-bold">Usuario {index + 1}</h4>
+                <div className="text-lg mt-4 mb-4">
+                  <ul className="list-disc pl-6 font-bold">
                     {datos.tiempos.map((tiempo, index) => (
                       <li key={index}>{formatTime(tiempo)}</li>
                     ))}
                   </ul>
-                  <p className="texto font-bold"> Promedio: {formatTime(datos.promedio)}</p>
                 </div>
-              )
-            )}
-            </div>
+                <p className="texto font-bold mt-2">
+                  Promedio: {formatTime(datos.promedio)}
+                </p>
+              </div>
+              
+            ))}
             
           </div>
         </div>
-      )}
-    </div>
+      </div>
+    )}
+  </div>
   );
 }
 

@@ -7,7 +7,7 @@ const URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function Confirmation({ visible, onClose }) {
   const { resultadoTimerPvP } = useAuthTimerPvP();
-  const [solicitarRevancha, setSolicitarRevancha] = useState(false);
+  //const [solicitarRevancha, setSolicitarRevancha] = useState(false);
   const [socket, setSocket] = useState("");
   //
   useEffect(() => {
@@ -20,14 +20,14 @@ export default function Confirmation({ visible, onClose }) {
     window.location.reload();
   };
 
-  const handleRevancha = () => {
-  setSolicitarRevancha(true);
-  // Emitir el evento "resetTiempos" al servidor
-  socket.emit("resetTiempos");
-  // Emitir el evento "revancha" al servidor
-  socket.emit("revancha");
-  onClose();
-};
+//   const handleRevancha = () => {
+//   setSolicitarRevancha(true);
+//   // Emitir el evento "resetTiempos" al servidor
+//   socket.emit("resetTiempos");
+//   // Emitir el evento "revancha" al servidor
+//   socket.emit("revancha");
+//   onClose();
+// };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50">
@@ -51,12 +51,12 @@ export default function Confirmation({ visible, onClose }) {
             >
               Sí
             </button>
-            <button
+            {/* <button
               onClick={handleRevancha}
               className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors duration-300"
             >
               Revancha
-            </button>
+            </button> */}
             <Link
               to="/"
               className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition-colors duration-300"

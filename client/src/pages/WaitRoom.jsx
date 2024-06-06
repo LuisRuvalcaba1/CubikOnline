@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 const URL = import.meta.env.VITE_BACKEND_URL;
 import { verifyTokenRequest } from "../api/auth";
 import { useObjetives } from "../context/ObjetivesContext";
-import Confirmation from "../components/Confirmation";
+import WinModal from "../components/WinModal.jsx";
 
 function WaitRoom() {
   const { user, updateUserPoints } = useAuth();
@@ -30,9 +30,9 @@ function WaitRoom() {
   const [tiempos, setTiempos] = useState({});
   const [currentUser, setCurrentUser] = useState(null);
   const [tiemposRegistrados, setTiemposRegistrados] = useState(0);
-  const [showConfirmation, setShowConfirmation] = useState(false);
   const [grupoActual, setGrupoActual] = useState(null);
   const [grupoId, setGrupoId] = useState(null);
+  const [showWinModal, setShowWinModal] = useState(false);
   const [ganadorAbsoluto, setGanadorAbsoluto] = useState(null);
 
   useEffect(() => {
@@ -144,13 +144,9 @@ function WaitRoom() {
       }
     });
 
-    // socket.on("ganadorAbsoluto", (data) => {
-    //   if(currentUser){
-    //     setGanadorAbsoluto(data);
-    //   console.log("Ganador absoluto:", data);
-    //   }
-      
-    // });
+    socket.on("ganadorAbsoluto", () => {
+      setShowWinModal(true);
+    });
 
     socket.on("redirigir", (ruta) => {
       navigate(ruta);
@@ -269,10 +265,7 @@ function WaitRoom() {
           <h1>Grupo {grupoId}</h1>
           <p>Juez: {grupoActual.juez}</p>
           <p>Usuarios: {grupoActual.users.join(", ")}</p>
-          {/* {resultado.ganador && <p>{resultado.ganador}</p>} */}
-          {/* {ganadorAbsoluto}
-           <p>{ganadorAbsoluto}, Eres el ganador absoluto Te puedes retirar</p> */}
-         
+          {showWinModal && <WinModal />}
           
         </>
       ) : (
